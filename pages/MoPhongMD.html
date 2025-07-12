@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mô Phỏng Mạch Điện Tương Tác</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        }
+        
+        .circuit-canvas {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border: 3px solid #3b82f6;
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            cursor: crosshair;
+        }
+        
+        .component {
+            position: absolute;
+            cursor: move;
+            user-select: none;
+            transition: all 0.2s ease;
+        }
+        
+        .component:hover {
+            transform: scale(1.05);
+            z-index: 100;
+        }
+        
+        .component.selected {
+            box-shadow: 0 0 20px #3b82f6;
+            transform: scale(1.1);
+        }
+        
+        .battery {
+            width: 60px;
+            height: 30px;
+            background: linear-gradient(90deg, #dc2626, #ef4444);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            position: relative;
+        }
+        
+        .battery::before,
+        .battery::after {
+            position: absolute;
+            font-size: 10px;
+            font-weight: bold;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.3);
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .battery::before { 
+            content: '-';
+            left: -20px; 
+        }
+        .battery::after { 
+            content: '+';
+            right: -20px; 
+        }
+        
+        .resistor {
+            width: 50px;
+            height: 20px;
+            background: linear-gradient(90deg, #f59e0b, #fbbf24);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 10px;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .resistor::before,
+        .resistor::after {
+            position: absolute;
+            width: 10px;
+            height: 2px;
+            background: #374151;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 8px;
+            font-weight: bold;
+            color: #dc2626;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 12px;
+            width: 12px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.9);
+        }
+        
+        .resistor::before { 
+            content: '-';
+            left: -15px; 
+        }
+        .resistor::after { 
+            content: '+';
+            right: -15px; 
+        }
+        
+        .capacitor {
+            width: 30px;
+            height: 40px;
+            background: linear-gradient(180deg, #10b981, #34d399);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 10px;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .capacitor::before,
+        .capacitor::after {
+            content: '';
+            position: absolute;
+            width: 2px;
+            height: 10px;
+            background: #374151;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .capacitor::before { top: -10px; }
+        .capacitor::after { bottom: -10px; }
+        
+        .bulb {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 10px;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border: 3px solid #d97706;
+        }
+        
+        .bulb.on {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            box-shadow: 0 0 20px #fbbf24, 0 4px 8px rgba(0,0,0,0.2);
+            animation: glow 1s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { box-shadow: 0 0 20px #fbbf24, 0 4px 8px rgba(0,0,0,0.2); }
+            to { box-shadow: 0 0 30px #fbbf24, 0 0 40px #fbbf24, 0 4px 8px rgba(0,0,0,0.2); }
+        }
+        
+        .bulb::before,
+        .bulb::after {
+            content: '';
+            position: absolute;
+            width: 2px;
+            height: 10px;
+            background: #374151;
+        }
+        
+        .bulb::before { 
+            left: -12px; 
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .bulb::after { 
+            right: -12px; 
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .switch {
+            width: 50px;
+            height: 25px;
+            background: linear-gradient(135deg, #6b7280, #9ca3af);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 10px;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            cursor: pointer;
+            border: 2px solid #374151;
+        }
+        
+        .switch.on {
+            background: linear-gradient(135deg, #10b981, #34d399);
+            border-color: #059669;
+        }
+        
+        .switch::before,
+        .switch::after {
+            content: '';
+            position: absolute;
+            width: 2px;
+            height: 10px;
+            background: #374151;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .switch::before { left: -12px; }
+        .switch::after { right: -12px; }
+        
+        .wire {
+            position: absolute;
+            background: #374151;
+            z-index: 1;
+        }
+        
+        .wire.horizontal {
+            height: 3px;
+        }
+        
+        .wire.vertical {
+            width: 3px;
+        }
+        
+        .connection-point {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #dc2626;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .connection-point:hover {
+            background: #ef4444;
+            transform: translate(-50%, -50%) scale(1.3);
+            box-shadow: 0 4px 8px rgba(239, 68, 68, 0.4);
+        }
+        
+        .wire-preview {
+            position: absolute;
+            height: 3px;
+            background: #6b7280;
+            opacity: 0.6;
+            z-index: 2;
+            pointer-events: none;
+            border-radius: 2px;
+        }
+        
+        .toolbox {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .tool-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            margin: 8px 0;
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            border: 2px solid #cbd5e1;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .tool-item:hover {
+            background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .tool-item.active {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border-color: #1d4ed8;
+        }
+        
+        .measurement-panel {
+            background: linear-gradient(135deg, #1f2937, #374151);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.9);
+            color: #4b5563;
+            padding: 12px 24px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            background: white;
+            transform: translateY(-2px);
+        }
+        
+        .info-card {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border: 2px solid #0ea5e9;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        
+        .current-flow {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #ef4444;
+            border-radius: 50%;
+            animation: flow 2s linear infinite;
+            z-index: 5;
+        }
+        
+        @keyframes flow {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+        
+        .voltage-label {
+            position: absolute;
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 20;
+        }
+        
+        .grid-pattern {
+            background-image: 
+                linear-gradient(rgba(0,0,0,.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,0,0,.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        
+        .component-properties {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            min-width: 200px;
+            z-index: 1000;
+        }
+        
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: linear-gradient(90deg, #e2e8f0, #cbd5e1);
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #4b5563;
+            padding: 10px 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+        }
+
+        .back-button:hover {
+            background: white;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="p-6">
+    <!-- Back Button -->
+    <button onclick="goBack()" class="back-button">
+        <i class="fas fa-arrow-left mr-2"></i>Quay lại
+    </button>
+
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-white mb-4">
+                <i class="fas fa-bolt mr-4"></i>
+                Mô Phỏng Mạch Điện Tương Tác
+            </h1>
+            <p class="text-xl text-white opacity-90">Xây dựng và kiểm tra các mạch điện với điện trở, tụ điện</p>
+        </div>
+
+        <div class="grid lg:grid-cols-4 gap-6">
+            <!-- Main Circuit Area -->
+            <div class="lg:col-span-3">
+                <div class="glass-card p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-2xl font-bold text-white">
+                            <i class="fas fa-microchip mr-3"></i>Khu Vực Thiết Kế Mạch
+                        </h2>
+                        <div class="flex gap-3">
+                            <button onclick="simulateCircuit()" class="btn-primary">
+                                <i class="fas fa-play mr-2"></i>Mô Phỏng
+                            </button>
+                            <button onclick="clearCircuit()" class="btn-secondary">
+                                <i class="fas fa-trash mr-2"></i>Xóa Mạch
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Circuit Canvas -->
+                    <div class="circuit-canvas grid-pattern" style="width: 100%; height: 500px;" id="circuitCanvas">
+                        <!-- Components will be added here dynamically -->
+                    </div>
+                    
+                    <!-- Circuit Analysis -->
+                    <div class="info-card mt-6">
+                        <h4 class="font-bold text-blue-800 mb-3 flex items-center">
+                            <i class="fas fa-calculator mr-3"></i>Phân Tích Mạch Điện
+                        </h4>
+                        <div class="grid md:grid-cols-3 gap-4 text-blue-700 text-sm">
+                            <div class="flex items-center justify-between">
+                                <span>Điện áp nguồn:</span>
+                                <span class="font-bold text-red-600" id="sourceVoltage">12V</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span>Dòng điện tổng:</span>
+                                <span class="font-bold text-green-600" id="totalCurrent">0A</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span>Công suất tiêu thụ:</span>
+                                <span class="font-bold text-purple-600" id="totalPower">0W</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Usage Instructions -->
+                    <div class="info-card mt-6">
+                        <h4 class="font-bold text-blue-800 mb-3 flex items-center">
+                            <i class="fas fa-info-circle mr-3"></i>Hướng Dẫn Sử Dụng
+                        </h4>
+                        <div class="grid md:grid-cols-2 gap-4 text-blue-700 text-sm">
+                            <div class="space-y-2">
+                                <div class="flex items-center">
+                                    <i class="fas fa-mouse-pointer mr-2 text-blue-600"></i>
+                                    <span><strong>Chọn linh kiện</strong> từ hộp công cụ</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-hand-pointer mr-2 text-green-600"></i>
+                                    <span><strong>Click vào canvas</strong> để thêm linh kiện</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-grip-lines mr-2 text-gray-600"></i>
+                                    <span><strong>Chọn "Dây Dẫn"</strong> để nối các linh kiện</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-toggle-on mr-2 text-purple-600"></i>
+                                    <span><strong>Click công tắc</strong> để bật/tắt</span>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="flex items-center">
+                                    <i class="fas fa-edit mr-2 text-purple-600"></i>
+                                    <span><strong>Double-click</strong> để chỉnh sửa thuộc tính</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-play mr-2 text-red-600"></i>
+                                    <span><strong>Nhấn "Mô Phỏng"</strong> để xem bóng đèn sáng</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-lightbulb mr-2 text-yellow-600"></i>
+                                    <span><strong>Bóng đèn sáng</strong> khi mạch đóng</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-flask mr-2 text-green-600"></i>
+                                    <span><strong>Thử thí nghiệm mẫu</strong> bên phải</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Experiment Results -->
+                    <div class="info-card mt-6">
+                        <h4 class="font-bold text-blue-800 mb-3 flex items-center">
+                            <i class="fas fa-flask mr-3"></i>Kết Quả Thí Nghiệm
+                        </h4>
+                        <div class="grid md:grid-cols-2 gap-4 text-blue-700 text-sm">
+                            <div class="space-y-2">
+                                <div class="p-3 bg-blue-50 rounded-lg">
+                                    <div class="font-semibold text-blue-800">🔵 Công Tắc Cơ Bản</div>
+                                    <div class="text-xs">Bóng đèn chỉ sáng khi công tắc BẬT</div>
+                                </div>
+                                <div class="p-3 bg-green-50 rounded-lg">
+                                    <div class="font-semibold text-green-800">🟢 Hai Công Tắc</div>
+                                    <div class="text-xs">Mỗi công tắc điều khiển 1 bóng đèn riêng</div>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="p-3 bg-purple-50 rounded-lg">
+                                    <div class="font-semibold text-purple-800">🟣 Công Tắc Nối Tiếp</div>
+                                    <div class="text-xs">Cả 2 công tắc phải BẬT thì đèn mới sáng</div>
+                                </div>
+                                <div class="p-3 bg-yellow-50 rounded-lg">
+                                    <div class="font-semibold text-yellow-800">🟡 Điều Chỉnh Độ Sáng</div>
+                                    <div class="text-xs">Điện trở cao → đèn mờ, điện trở thấp → đèn sáng</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Toolbox -->
+            <div class="lg:col-span-1">
+                <div class="toolbox">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                        <i class="fas fa-toolbox mr-3 text-blue-600"></i>Hộp Công Cụ
+                    </h3>
+                    
+                    <!-- Component Tools -->
+                    <div class="space-y-3">
+                        <div class="tool-item" onclick="selectTool('battery')" id="tool-battery">
+                            <i class="fas fa-battery-full mr-3 text-red-600"></i>
+                            <div>
+                                <div class="font-semibold">Nguồn Điện</div>
+                                <div class="text-xs text-gray-500">Pin/Acquy</div>
+                            </div>
+                        </div>
+                        
+                        <div class="tool-item" onclick="selectTool('resistor')" id="tool-resistor">
+                            <i class="fas fa-minus mr-3 text-yellow-600"></i>
+                            <div>
+                                <div class="font-semibold">Điện Trở</div>
+                                <div class="text-xs text-gray-500">Resistor</div>
+                            </div>
+                        </div>
+                        
+                        <div class="tool-item" onclick="selectTool('capacitor')" id="tool-capacitor">
+                            <i class="fas fa-equals mr-3 text-green-600"></i>
+                            <div>
+                                <div class="font-semibold">Tụ Điện</div>
+                                <div class="text-xs text-gray-500">Capacitor</div>
+                            </div>
+                        </div>
+                        
+                        <div class="tool-item" onclick="selectTool('bulb')" id="tool-bulb">
+                            <i class="fas fa-lightbulb mr-3 text-yellow-600"></i>
+                            <div>
+                                <div class="font-semibold">Bóng Đèn</div>
+                                <div class="text-xs text-gray-500">Light Bulb</div>
+                            </div>
+                        </div>
+                        
+                        <div class="tool-item" onclick="selectTool('switch')" id="tool-switch">
+                            <i class="fas fa-toggle-off mr-3 text-purple-600"></i>
+                            <div>
+                                <div class="font-semibold">Công Tắc</div>
+                                <div class="text-xs text-gray-500">Switch</div>
+                            </div>
+                        </div>
+                        
+                        <div class="tool-item" onclick="selectTool('wire')" id="tool-wire">
+                            <i class="fas fa-grip-lines mr-3 text-gray-600"></i>
+                            <div>
+                                <div class="font-semibold">Dây Dẫn</div>
+                                <div class="text-xs text-gray-500">Wire</div>
+                            </div>
+                        </div>
+                        
+                        <div class="tool-item" onclick="selectTool('select')" id="tool-select">
+                            <i class="fas fa-mouse-pointer mr-3 text-blue-600"></i>
+                            <div>
+                                <div class="font-semibold">Chọn/Di Chuyển</div>
+                                <div class="text-xs text-gray-500">Select</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Measurement Panel -->
+                    <div class="measurement-panel mt-6">
+                        <h4 class="text-white font-bold mb-4 flex items-center">
+                            <i class="fas fa-tachometer-alt mr-2"></i>Đo Lường
+                        </h4>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between">
+                                <span>Điện trở tổng:</span>
+                                <span class="text-yellow-400 font-bold" id="totalResistance">0Ω</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Điện dung tổng:</span>
+                                <span class="text-green-400 font-bold" id="totalCapacitance">0μF</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Tần số cắt:</span>
+                                <span class="text-blue-400 font-bold" id="cutoffFreq">0Hz</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Hằng số thời gian:</span>
+                                <span class="text-purple-400 font-bold" id="timeConstant">0s</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Circuit Presets -->
+                    <div class="mt-6">
+                        <h4 class="font-bold text-gray-800 mb-3">Thí Nghiệm Mẫu</h4>
+                        <div class="space-y-2">
+                            <button onclick="loadPreset('basic_switch')" class="w-full text-left p-3 bg-gradient-to-r from-blue-100 to-blue-200 hover:from-blue-200 hover:to-blue-300 rounded-lg text-sm">
+                                <i class="fas fa-toggle-on mr-2 text-blue-600"></i>
+                                <div>
+                                    <div class="font-semibold">Công Tắc Cơ Bản</div>
+                                    <div class="text-xs text-gray-600">Pin + Công tắc + Bóng đèn</div>
+                                </div>
+                            </button>
+                            <button onclick="loadPreset('two_switches')" class="w-full text-left p-3 bg-gradient-to-r from-green-100 to-green-200 hover:from-green-200 hover:to-green-300 rounded-lg text-sm">
+                                <i class="fas fa-code-branch mr-2 text-green-600"></i>
+                                <div>
+                                    <div class="font-semibold">Hai Công Tắc</div>
+                                    <div class="text-xs text-gray-600">Điều khiển 2 bóng đèn riêng</div>
+                                </div>
+                            </button>
+                            <button onclick="loadPreset('series_switch')" class="w-full text-left p-3 bg-gradient-to-r from-purple-100 to-purple-200 hover:from-purple-200 hover:to-purple-300 rounded-lg text-sm">
+                                <i class="fas fa-link mr-2 text-purple-600"></i>
+                                <div>
+                                    <div class="font-semibold">Công Tắc Nối Tiếp</div>
+                                    <div class="text-xs text-gray-600">Cả 2 công tắc phải BẬT</div>
+                                </div>
+                            </button>
+                            <button onclick="loadPreset('dimmer')" class="w-full text-left p-3 bg-gradient-to-r from-yellow-100 to-yellow-200 hover:from-yellow-200 hover:to-yellow-300 rounded-lg text-sm">
+                                <i class="fas fa-adjust mr-2 text-yellow-600"></i>
+                                <div>
+                                    <div class="font-semibold">Điều Chỉnh Độ Sáng</div>
+                                    <div class="text-xs text-gray-600">Điện trở thay đổi độ sáng</div>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Theory Section -->
+        <div class="glass-card p-6 mt-6">
+            <h3 class="text-2xl font-bold text-white mb-6 flex items-center">
+                <i class="fas fa-book mr-3"></i>Lý Thuyết Mạch Điện
+            </h3>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="info-card">
+                    <h4 class="font-bold text-blue-800 mb-3">Định Luật Ohm</h4>
+                    <div class="text-blue-700 font-mono text-sm space-y-2">
+                        <div>V = I × R</div>
+                        <div>I = V / R</div>
+                        <div>P = V × I</div>
+                        <div class="text-xs mt-2">V: Điện áp (V)<br>I: Dòng điện (A)<br>R: Điện trở (Ω)</div>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <h4 class="font-bold text-blue-800 mb-3">Mạch Nối Tiếp</h4>
+                    <div class="text-blue-700 font-mono text-sm space-y-2">
+                        <div>R_total = R₁ + R₂ + R₃</div>
+                        <div>I_total = I₁ = I₂ = I₃</div>
+                        <div>V_total = V₁ + V₂ + V₃</div>
+                        <div class="text-xs mt-2">Dòng điện giống nhau<br>Điện áp phân chia</div>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <h4 class="font-bold text-blue-800 mb-3">Mạch Song Song</h4>
+                    <div class="text-blue-700 font-mono text-sm space-y-2">
+                        <div>1/R_total = 1/R₁ + 1/R₂ + 1/R₃</div>
+                        <div>I_total = I₁ + I₂ + I₃</div>
+                        <div>V_total = V₁ = V₂ = V₃</div>
+                        <div class="text-xs mt-2">Điện áp giống nhau<br>Dòng điện phân chia</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Component Properties Panel (Hidden by default) -->
+    <div id="propertiesPanel" class="component-properties" style="display: none;">
+        <h4 class="font-bold text-gray-800 mb-3">Thuộc Tính Linh Kiện</h4>
+        <div id="propertyControls">
+            <!-- Dynamic content based on selected component -->
+        </div>
+        <button onclick="closeProperties()" class="mt-3 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+            Đóng
+        </button>
+    </div>
+
+    <script>
+        // Circuit simulation state
+        let circuit = {
+            components: [],
+            wires: [],
+            selectedTool: 'select',
+            selectedComponent: null,
+            isSimulating: false,
+            nextId: 1,
+            wireStart: null,
+            connectionPoints: []
+        };
+        
+        // Component templates
+        const componentTemplates = {
+            battery: { type: 'battery', voltage: 12, resistance: 0 },
+            resistor: { type: 'resistor', resistance: 1000, power: 0.25 },
+            capacitor: { type: 'capacitor', capacitance: 100, voltage: 25 },
+            bulb: { type: 'bulb', resistance: 100, power: 5, brightness: 0 },
+            switch: { type: 'switch', isOn: false, resistance: 0 }
+        };
+        
+        // Tool selection
+        function selectTool(tool) {
+            circuit.selectedTool = tool;
+            
+            // Update UI
+            document.querySelectorAll('.tool-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.getElementById(`tool-${tool}`).classList.add('active');
+            
+            // Change cursor
+            const canvas = document.getElementById('circuitCanvas');
+            if (tool === 'select') {
+                canvas.style.cursor = 'default';
+            } else {
+                canvas.style.cursor = 'crosshair';
+            }
+        }
+        
+        // Canvas click handler
+        document.getElementById('circuitCanvas').addEventListener('click', function(e) {
+            const rect = this.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            if (circuit.selectedTool === 'wire') {
+                handleWireClick(x, y);
+            } else if (circuit.selectedTool !== 'select') {
+                addComponent(circuit.selectedTool, x, y);
+            }
+        });
+        
+        // Wire preview on mouse move
+        document.getElementById('circuitCanvas').addEventListener('mousemove', function(e) {
+            if (circuit.selectedTool === 'wire' && circuit.wireStart) {
+                const rect = this.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                updateWirePreview(circuit.wireStart.x, circuit.wireStart.y, x, y);
+            }
+        });
+        
+        // Update wire preview
+        function updateWirePreview(startX, startY, endX, endY) {
+            // Remove existing preview
+            const existingPreview = document.querySelector('.wire-preview');
+            if (existingPreview) {
+                existingPreview.remove();
+            }
+            
+            // Create new preview
+            const preview = document.createElement('div');
+            preview.className = 'wire-preview';
+            
+            const dx = endX - startX;
+            const dy = endY - startY;
+            const length = Math.sqrt(dx * dx + dy * dy);
+            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+            
+            preview.style.width = length + 'px';
+            preview.style.left = startX + 'px';
+            preview.style.top = startY + 'px';
+            preview.style.transformOrigin = '0 50%';
+            preview.style.transform = `rotate(${angle}deg)`;
+            
+            document.getElementById('circuitCanvas').appendChild(preview);
+        }
+        
+        // Handle wire tool clicks
+        function handleWireClick(x, y) {
+            if (!circuit.wireStart) {
+                // Start wire
+                circuit.wireStart = { x, y };
+                addConnectionPoint(x, y);
+            } else {
+                // End wire
+                const wire = {
+                    id: circuit.nextId++,
+                    start: circuit.wireStart,
+                    end: { x, y },
+                    type: 'wire'
+                };
+                
+                circuit.wires.push(wire);
+                renderWire(wire);
+                addConnectionPoint(x, y);
+                
+                circuit.wireStart = null;
+                updateCircuitAnalysis();
+            }
+        }
+        
+        // Add connection point
+        function addConnectionPoint(x, y) {
+            const point = document.createElement('div');
+            point.className = 'connection-point';
+            point.style.left = x + 'px';
+            point.style.top = y + 'px';
+            
+            point.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (circuit.selectedTool === 'wire') {
+                    handleWireClick(x, y);
+                }
+            });
+            
+            document.getElementById('circuitCanvas').appendChild(point);
+            circuit.connectionPoints.push({ x, y, element: point });
+        }
+        
+        // Render wire
+        function renderWire(wire) {
+            const canvas = document.getElementById('circuitCanvas');
+            const wireElement = document.createElement('div');
+            wireElement.className = 'wire';
+            wireElement.id = `wire-${wire.id}`;
+            
+            // Calculate wire dimensions and position
+            const dx = wire.end.x - wire.start.x;
+            const dy = wire.end.y - wire.start.y;
+            const length = Math.sqrt(dx * dx + dy * dy);
+            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+            
+            wireElement.style.width = length + 'px';
+            wireElement.style.height = '3px';
+            wireElement.style.left = wire.start.x + 'px';
+            wireElement.style.top = wire.start.y + 'px';
+            wireElement.style.transformOrigin = '0 50%';
+            wireElement.style.transform = `rotate(${angle}deg)`;
+            wireElement.style.background = '#374151';
+            wireElement.style.position = 'absolute';
+            wireElement.style.zIndex = '1';
+            
+            canvas.appendChild(wireElement);
+        }
+        
+        // Add component to circuit
+        function addComponent(type, x, y) {
+            const template = componentTemplates[type];
+            if (!template) return;
+            
+            const component = {
+                id: circuit.nextId++,
+                ...template,
+                x: x - 30, // Center the component
+                y: y - 15,
+                connections: []
+            };
+            
+            circuit.components.push(component);
+            renderComponent(component);
+            
+            // Add connection points for the component
+            addComponentConnectionPoints(component);
+            updateCircuitAnalysis();
+        }
+        
+        // Render component on canvas
+        function renderComponent(component) {
+            const canvas = document.getElementById('circuitCanvas');
+            const element = document.createElement('div');
+            element.className = `component ${component.type}`;
+            element.id = `component-${component.id}`;
+            element.style.left = component.x + 'px';
+            element.style.top = component.y + 'px';
+            
+            // Component-specific rendering
+            switch (component.type) {
+                case 'battery':
+                    element.innerHTML = `${component.voltage}V`;
+                    break;
+                case 'resistor':
+                    element.innerHTML = `${formatValue(component.resistance)}Ω`;
+                    break;
+                case 'capacitor':
+                    element.innerHTML = `${formatValue(component.capacitance)}μF`;
+                    break;
+                case 'bulb':
+                    element.innerHTML = `💡`;
+                    break;
+                case 'switch':
+                    element.innerHTML = component.isOn ? 'ON' : 'OFF';
+                    if (component.isOn) {
+                        element.classList.add('on');
+                    }
+                    // Add click handler for switch
+                    element.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        toggleSwitch(component);
+                    });
+                    break;
+            }
+            
+            // Add event listeners
+            element.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (circuit.selectedTool === 'select') {
+                    selectComponent(component);
+                }
+            });
+            
+            element.addEventListener('dblclick', (e) => {
+                e.stopPropagation();
+                showComponentProperties(component);
+            });
+            
+            // Make draggable
+            makeDraggable(element, component);
+            
+            canvas.appendChild(element);
+        }
+        
+        // Add connection points for components
+        function addComponentConnectionPoints(component) {
+            let leftX, rightX, centerY;
+            
+            switch (component.type) {
+                case 'capacitor':
+                    leftX = component.x - 5;
+                    rightX = component.x + 35;
+                    centerY = component.y + 20;
+                    break;
+                case 'bulb':
+                    leftX = component.x - 12;
+                    rightX = component.x + 52;
+                    centerY = component.y + 20;
+                    break;
+                default: // battery, resistor
+                    leftX = component.x - 20;
+                    rightX = component.x + 80;
+                    centerY = component.y + 15;
+                    break;
+            }
+            
+            // Left connection point
+            addConnectionPoint(leftX, centerY);
+            
+            // Right connection point  
+            addConnectionPoint(rightX, centerY);
+        }
+        
+        // Make component draggable
+        function makeDraggable(element, component) {
+            let isDragging = false;
+            let startX, startY;
+            
+            element.addEventListener('mousedown', (e) => {
+                if (circuit.selectedTool === 'select') {
+                    isDragging = true;
+                    startX = e.clientX - component.x;
+                    startY = e.clientY - component.y;
+                    element.style.zIndex = '1000';
+                }
+            });
+            
+            document.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    component.x = e.clientX - startX;
+                    component.y = e.clientY - startY;
+                    element.style.left = component.x + 'px';
+                    element.style.top = component.y + 'px';
+                }
+            });
+            
+            document.addEventListener('mouseup', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    element.style.zIndex = '';
+                    updateCircuitAnalysis();
+                }
+            });
+        }
+        
+        // Select component
+        function selectComponent(component) {
+            // Clear previous selection
+            document.querySelectorAll('.component').forEach(el => {
+                el.classList.remove('selected');
+            });
+            
+            // Select new component
+            circuit.selectedComponent = component;
+            document.getElementById(`component-${component.id}`).classList.add('selected');
+        }
+        
+        // Show component properties
+        function showComponentProperties(component) {
+            const panel = document.getElementById('propertiesPanel');
+            const controls = document.getElementById('propertyControls');
+            
+            let html = `<h5 class="font-semibold mb-2">${getComponentName(component.type)}</h5>`;
+            
+            switch (component.type) {
+                case 'battery':
+                    html += `
+                        <div class="mb-3">
+                            <label class="block text-sm font-medium mb-1">Điện áp (V)</label>
+                            <input type="range" min="1" max="24" value="${component.voltage}" 
+                                   class="slider" onchange="updateComponentProperty(${component.id}, 'voltage', this.value)">
+                            <div class="text-center text-sm mt-1">${component.voltage}V</div>
+                        </div>
+                    `;
+                    break;
+                case 'resistor':
+                    html += `
+                        <div class="mb-3">
+                            <label class="block text-sm font-medium mb-1">Điện trở (Ω)</label>
+                            <input type="range" min="100" max="10000" value="${component.resistance}" 
+                                   class="slider" onchange="updateComponentProperty(${component.id}, 'resistance', this.value)">
+                            <div class="text-center text-sm mt-1">${formatValue(component.resistance)}Ω</div>
+                        </div>
+                    `;
+                    break;
+                case 'capacitor':
+                    html += `
+                        <div class="mb-3">
+                            <label class="block text-sm font-medium mb-1">Điện dung (μF)</label>
+                            <input type="range" min="1" max="1000" value="${component.capacitance}" 
+                                   class="slider" onchange="updateComponentProperty(${component.id}, 'capacitance', this.value)">
+                            <div class="text-center text-sm mt-1">${formatValue(component.capacitance)}μF</div>
+                        </div>
+                    `;
+                    break;
+                case 'bulb':
+                    html += `
+                        <div class="mb-3">
+                            <label class="block text-sm font-medium mb-1">Điện trở (Ω)</label>
+                            <input type="range" min="50" max="500" value="${component.resistance}" 
+                                   class="slider" onchange="updateComponentProperty(${component.id}, 'resistance', this.value)">
+                            <div class="text-center text-sm mt-1">${formatValue(component.resistance)}Ω</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="block text-sm font-medium mb-1">Công suất định mức (W)</label>
+                            <input type="range" min="1" max="25" value="${component.power}" 
+                                   class="slider" onchange="updateComponentProperty(${component.id}, 'power', this.value)">
+                            <div class="text-center text-sm mt-1">${component.power}W</div>
+                        </div>
+                    `;
+                    break;
+                case 'switch':
+                    html += `
+                        <div class="mb-3">
+                            <label class="block text-sm font-medium mb-1">Trạng thái</label>
+                            <button onclick="toggleSwitch(circuit.components.find(c => c.id === ${component.id}))" 
+                                    class="w-full py-2 px-4 rounded ${component.isOn ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-700'}">
+                                ${component.isOn ? 'BẬT (ON)' : 'TẮT (OFF)'}
+                            </button>
+                        </div>
+                        <div class="text-sm text-gray-600">
+                            <p>Click vào công tắc trên mạch để bật/tắt</p>
+                        </div>
+                    `;
+                    break;
+            }
+            
+            controls.innerHTML = html;
+            panel.style.display = 'block';
+        }
+        
+        // Update component property
+        function updateComponentProperty(id, property, value) {
+            const component = circuit.components.find(c => c.id === id);
+            if (component) {
+                component[property] = parseFloat(value);
+                
+                // Update display
+                const element = document.getElementById(`component-${id}`);
+                switch (component.type) {
+                    case 'battery':
+                        element.innerHTML = `${component.voltage}V`;
+                        break;
+                    case 'resistor':
+                        element.innerHTML = `${formatValue(component.resistance)}Ω`;
+                        break;
+                    case 'capacitor':
+                        element.innerHTML = `${formatValue(component.capacitance)}μF`;
+                        break;
+                    case 'bulb':
+                        element.innerHTML = `💡`;
+                        break;
+                }
+                
+                // Update property panel
+                showComponentProperties(component);
+                updateCircuitAnalysis();
+            }
+        }
+        
+        // Close properties panel
+        function closeProperties() {
+            document.getElementById('propertiesPanel').style.display = 'none';
+        }
+        
+        // Format values for display
+        function formatValue(value) {
+            if (value >= 1000000) {
+                return (value / 1000000).toFixed(1) + 'M';
+            } else if (value >= 1000) {
+                return (value / 1000).toFixed(1) + 'k';
+            } else {
+                return value.toString();
+            }
+        }
+        
+        // Toggle switch
+        function toggleSwitch(component) {
+            component.isOn = !component.isOn;
+            const element = document.getElementById(`component-${component.id}`);
+            
+            element.innerHTML = component.isOn ? 'ON' : 'OFF';
+            if (component.isOn) {
+                element.classList.add('on');
+            } else {
+                element.classList.remove('on');
+            }
+            
+            updateCircuitAnalysis();
+        }
+        
+        // Get component name
+        function getComponentName(type) {
+            const names = {
+                battery: 'Nguồn Điện',
+                resistor: 'Điện Trở',
+                capacitor: 'Tụ Điện',
+                bulb: 'Bóng Đèn',
+                switch: 'Công Tắc'
+            };
+            return names[type] || type;
+        }
+        
+        // Simulate circuit
+        function simulateCircuit() {
+            circuit.isSimulating = !circuit.isSimulating;
+            
+            if (circuit.isSimulating) {
+                // Start simulation
+                document.querySelector('button[onclick="simulateCircuit()"]').innerHTML = 
+                    '<i class="fas fa-stop mr-2"></i>Dừng';
+                
+                // Add current flow animation
+                addCurrentFlowAnimation();
+                
+                // Update measurements
+                updateCircuitAnalysis();
+            } else {
+                // Stop simulation
+                document.querySelector('button[onclick="simulateCircuit()"]').innerHTML = 
+                    '<i class="fas fa-play mr-2"></i>Mô Phỏng';
+                
+                // Remove animations
+                document.querySelectorAll('.current-flow').forEach(el => el.remove());
+            }
+        }
+        
+        // Add current flow animation
+        function addCurrentFlowAnimation() {
+            // Simple animation for demonstration
+            circuit.components.forEach(component => {
+                if (component.type === 'battery') {
+                    const flow = document.createElement('div');
+                    flow.className = 'current-flow';
+                    flow.style.left = (component.x + 60) + 'px';
+                    flow.style.top = (component.y + 15) + 'px';
+                    document.getElementById('circuitCanvas').appendChild(flow);
+                }
+            });
+        }
+        
+        // Update circuit analysis
+        function updateCircuitAnalysis() {
+            const batteries = circuit.components.filter(c => c.type === 'battery');
+            const resistors = circuit.components.filter(c => c.type === 'resistor');
+            const capacitors = circuit.components.filter(c => c.type === 'capacitor');
+            const bulbs = circuit.components.filter(c => c.type === 'bulb');
+            const switches = circuit.components.filter(c => c.type === 'switch');
+            
+            // Check if circuit is closed (all switches are on)
+            const circuitClosed = switches.length === 0 || switches.every(s => s.isOn);
+            
+            // Calculate total values (simplified for series connection)
+            const totalVoltage = batteries.reduce((sum, b) => sum + b.voltage, 0);
+            const resistorResistance = resistors.reduce((sum, r) => sum + r.resistance, 0);
+            const bulbResistance = bulbs.reduce((sum, b) => sum + b.resistance, 0);
+            const totalResistance = resistorResistance + bulbResistance;
+            const totalCapacitance = capacitors.reduce((sum, c) => sum + c.capacitance, 0);
+            
+            // Calculate current (Ohm's law) - only if circuit is closed
+            const totalCurrent = (totalResistance > 0 && circuitClosed) ? totalVoltage / totalResistance : 0;
+            const totalPower = totalVoltage * totalCurrent;
+            
+            // Update bulb brightness based on current
+            bulbs.forEach(bulb => {
+                const element = document.getElementById(`component-${bulb.id}`);
+                const voltage = totalCurrent * bulb.resistance;
+                const power = voltage * totalCurrent;
+                
+                // Turn on bulb if sufficient power
+                if (power > 0.1 && totalCurrent > 0.001) {
+                    element.classList.add('on');
+                    bulb.brightness = Math.min(100, (power / bulb.power) * 100);
+                } else {
+                    element.classList.remove('on');
+                    bulb.brightness = 0;
+                }
+            });
+            
+            // Calculate RC circuit parameters
+            const cutoffFreq = totalResistance > 0 && totalCapacitance > 0 ? 
+                1 / (2 * Math.PI * totalResistance * totalCapacitance * 1e-6) : 0;
+            const timeConstant = totalResistance * totalCapacitance * 1e-6;
+            
+            // Update display
+            document.getElementById('sourceVoltage').textContent = totalVoltage.toFixed(1) + 'V';
+            document.getElementById('totalCurrent').textContent = (totalCurrent * 1000).toFixed(1) + 'mA';
+            document.getElementById('totalPower').textContent = (totalPower * 1000).toFixed(1) + 'mW';
+            document.getElementById('totalResistance').textContent = formatValue(totalResistance) + 'Ω';
+            document.getElementById('totalCapacitance').textContent = formatValue(totalCapacitance) + 'μF';
+            document.getElementById('cutoffFreq').textContent = cutoffFreq.toFixed(1) + 'Hz';
+            document.getElementById('timeConstant').textContent = (timeConstant * 1000).toFixed(1) + 'ms';
+        }
+        
+        // Load preset circuits
+        function loadPreset(type) {
+            clearCircuit();
+            
+            switch (type) {
+                case 'basic_switch':
+                    // Basic switch circuit: Battery + Switch + Bulb
+                    addComponent('battery', 100, 200);
+                    addComponent('switch', 250, 200);
+                    addComponent('bulb', 400, 200);
+                    break;
+                case 'two_switches':
+                    // Two independent switches controlling two bulbs
+                    addComponent('battery', 100, 200);
+                    addComponent('switch', 250, 150);
+                    addComponent('bulb', 400, 150);
+                    addComponent('switch', 250, 250);
+                    addComponent('bulb', 400, 250);
+                    break;
+                case 'series_switch':
+                    // Two switches in series - both must be ON
+                    addComponent('battery', 80, 200);
+                    addComponent('switch', 200, 200);
+                    addComponent('switch', 320, 200);
+                    addComponent('bulb', 440, 200);
+                    break;
+                case 'dimmer':
+                    // Dimmer circuit with variable resistor
+                    addComponent('battery', 100, 200);
+                    addComponent('switch', 220, 200);
+                    addComponent('resistor', 340, 200);
+                    addComponent('bulb', 460, 200);
+                    break;
+            }
+        }
+        
+        // Clear circuit
+        function clearCircuit() {
+            circuit.components = [];
+            circuit.wires = [];
+            circuit.selectedComponent = null;
+            circuit.isSimulating = false;
+            circuit.nextId = 1;
+            circuit.wireStart = null;
+            circuit.connectionPoints = [];
+            
+            document.getElementById('circuitCanvas').innerHTML = '';
+            closeProperties();
+            updateCircuitAnalysis();
+            
+            // Reset simulation button
+            document.querySelector('button[onclick="simulateCircuit()"]').innerHTML = 
+                '<i class="fas fa-play mr-2"></i>Mô Phỏng';
+        }
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            switch(e.key) {
+                case 'Delete':
+                case 'Backspace':
+                    if (circuit.selectedComponent) {
+                        deleteComponent(circuit.selectedComponent.id);
+                    }
+                    break;
+                case 'Escape':
+                    closeProperties();
+                    break;
+            }
+        });
+        
+        // Delete component
+        function deleteComponent(id) {
+            circuit.components = circuit.components.filter(c => c.id !== id);
+            const element = document.getElementById(`component-${id}`);
+            if (element) {
+                element.remove();
+            }
+            circuit.selectedComponent = null;
+            updateCircuitAnalysis();
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            selectTool('select');
+            updateCircuitAnalysis();
+        });
+
+        // Go back to homecourse.html
+        function goBack() {
+            window.location.href = 'homecourse.html';
+        }
+    </script>
+</body>
+</html>

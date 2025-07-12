@@ -1,0 +1,250 @@
+:root {
+  --primary: #3b82f6;
+  --secondary: #8b5cf6;
+  --accent: #06b6d4;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg, #f0f4ff, #e0e7ff);
+  animation: fadeInPage 1s ease-in-out;
+}
+
+@keyframes fadeInPage { from { opacity: 0; } to { opacity: 1; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes nucleusPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+@keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+@keyframes gradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+@keyframes morphFloat { 0%, 100% { transform: translateY(0) scale(1); border-radius: 30%; } 25% { transform: translateY(-20px) scale(1.1); border-radius: 40%; } 50% { transform: translateY(20px) scale(0.9); border-radius: 50%; } 75% { transform: translateY(-10px) scale(1.05); border-radius: 35%; } }
+@keyframes particleMove { 0% { transform: translate(0, 0); opacity: 1; } 100% { transform: translate(var(--x), var(--y)); opacity: 0; } }
+@keyframes pendulumSwing { 0%, 100% { transform: rotate(-30deg); } 50% { transform: rotate(30deg); } }
+@keyframes waveMove { 0% { transform: translateX(0); } 100% { transform: translateX(-50%) translateZ(20px); } }
+@keyframes lightRay {
+  0%, 100% { opacity: 1; transform: translateZ(0) rotateX(10deg); }
+  50% { opacity: 0.7; transform: translateZ(15px) rotateX(15deg); }
+}
+@keyframes dustParticle {
+  0%, 100% { transform: translate(0, 0) rotateY(0deg); }
+  25% { transform: translate(4px, -4px) translateZ(8px) rotateY(10deg); }
+  50% { transform: translate(-4px, 4px) translateZ(12px) rotateY(20deg); }
+  75% { transform: translate(4px, 4px) translateZ(8px) rotateY(10deg); }
+}
+@keyframes orbit { 0% { transform: rotateX(65deg) rotateY(0deg); } 100% { transform: rotateX(65deg) rotateY(360deg); } }
+@keyframes electronMove { 0% { transform: translateZ(50px) rotate(0deg); } 100% { transform: translateZ(50px) rotate(360deg); } }
+@keyframes magneticField { 0% { opacity: 0.6; transform: translateZ(0) rotateX(15deg); } 50% { opacity: 1; transform: translateZ(30px) rotateX(25deg); } 100% { opacity: 0.6; transform: translateZ(0) rotateX(15deg); } }
+@keyframes waterWave { 0% { transform: translateY(0) translateZ(0) rotateY(0deg); } 50% { transform: translateY(-10px) translateZ(40px) rotateY(20deg); } 100% { transform: translateY(0) translateZ(0) rotateY(0deg); } }
+@keyframes ripple { to { transform: translate(-50%, -50%) scale(2); opacity: 0; } }
+
+.hero-bg {
+  background: linear-gradient(45deg, #667eea, #764ba2, #f093fb, #f5576c, #4facfe);
+  background-size: 400% 400%;
+  animation: gradientShift 20s ease infinite;
+}
+
+.btn-liquid {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn-liquid::after {
+  content: '';
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  background: rgba(255, 255, 255, 0.3);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  border-radius: 50%;
+  animation: ripple 0.6s linear;
+  pointer-events: none;
+}
+
+.btn-liquid:active::after { animation: ripple 0.6s linear; }
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+  transform-style: preserve-3d;
+}
+
+.glass-card:hover {
+  transform: translateY(-15px) rotateX(10deg) rotateY(10deg) translateZ(20px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+}
+
+.perspective-800 { perspective: 800px; }
+.transform-style-3d { transform-style: preserve-3d; }
+.translate-z-0 { transform: translateZ(0); }
+.translate-z-50 { transform: translateZ(50px); }
+.translate-z-70 { transform: translateZ(70px); }
+.translate-z-80 { transform: translateZ(80px); }
+.translate-z-100 { transform: translateZ(100px); }
+.rotate-x-10 { transform: rotateX(10deg); }
+.rotate-x-15 { transform: rotateX(15deg); }
+.rotate-x-20 { transform: rotateX(20deg); }
+.rotate-x-30 { transform: rotateX(30deg); }
+.rotate-y-20 { transform: rotateY(20deg); }
+.rotate-y-30 { transform: rotateY(30deg); }
+.rotate-x-45 { transform: rotateX(45deg); }
+
+#lab svg path,
+#lab svg circle,
+#lab svg text {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+#pendulumContainer1 {
+  border-left: 4px solid #ef4444; /* border-red-500 */
+}
+
+#pendulumString1 {
+  animation: pendulumSwing 2s ease-in-out infinite;
+  transform-style: preserve-3d;
+  transform-origin: top center;
+}
+
+#pendulumBob1 {
+  transform: translateZ(50px);
+  box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
+}
+
+#waveContainer2 {
+  border-left: 4px solid #3b82f6; /* border-blue-500 */
+}
+
+#waveContainer2 .animate-[waveMove_2s_infinite_linear] {
+  transition: transform 0.3s ease;
+}
+
+#scatterContainer3 {
+  border-left: 4px solid #facc15; /* border-yellow-500 */
+  background: linear-gradient(to bottom, #fff3b0, #bfdbfe); /* Gradient nhẹ nhàng hơn */
+  padding: 8px; /* Tăng padding để không gian rõ ràng */
+}
+
+#scatterContainer3 #lightRayPath3 {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  box-shadow: 0 0 25px rgba(255, 215, 0, 0.6); /* Tăng độ sáng và tương phản */
+  stroke: #ffd700; /* Màu vàng sáng hơn */
+}
+
+#scatterContainer3 #scatterRay31,
+#scatterContainer3 #scatterRay32 {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+  stroke: #ffd700;
+}
+
+#scatterContainer3 #dustParticle31,
+#scatterContainer3 #dustParticle32,
+#scatterContainer3 #dustParticle33 {
+  transition: transform 0.3s ease;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
+  fill: #ffd700;
+}
+
+#magnetContainer4 {
+  border-left: 4px solid #a855f7; /* border-purple-500 */
+}
+
+#magnetContainer4 #fieldPath41,
+#magnetContainer4 #fieldPath42 {
+  transition: opacity 0.3s ease;
+  box-shadow: 0 0 15px rgba(128, 0, 128, 0.4);
+}
+
+#magnetContainer4 #north4,
+#magnetContainer4 #south4 {
+  text-shadow: 0 0 5px rgba(0, 0, 255, 0.5), 0 0 10px rgba(255, 0, 0, 0.5);
+}
+
+#magnetContainer4 #arrow41,
+#magnetContainer4 #arrow42 {
+  transition: transform 0.3s ease;
+}
+
+#waveContainer5 {
+  border-left: 4px solid #22c55e; /* border-green-500 */
+}
+
+#waveContainer5 #sourcePoint5 {
+  box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+}
+
+#waveContainer5 #wavePath51,
+#waveContainer5 #wavePath52,
+#waveContainer5 #wavePath53 {
+  transition: transform 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0, 128, 0, 0.3);
+}
+
+.atom-orbit {
+    animation: orbit 4s linear infinite;
+    transform-origin: center;
+  }
+  .atom-orbit:nth-child(2) { animation-delay: -1.3s; transform: rotateY(60deg); }
+  .atom-orbit:nth-child(3) { animation-delay: -2.6s; transform: rotateY(120deg); }
+
+  .electron {
+    position: absolute;
+    width: 0.5rem; height: 0.5rem;
+    border-radius: 9999px;
+    animation: electronMove 2s ease-in-out infinite alternate;
+  }
+
+  .nucleus {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 1rem; height: 1rem;
+    background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+    border-radius: 9999px;
+    transform: translate(-50%, -50%);
+    animation: pulse 3s ease-in-out infinite;
+  }
+
+  .physics-text {
+    background: linear-gradient(45deg, #3b82f6, #8b5cf6, #06b6d4);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientShift 3s ease-in-out infinite;
+  }
+
+  .pro-badge {
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    color: white;
+    animation: float 3s ease-in-out infinite;
+    box-shadow: 0 2px 10px rgba(245,158,11,0.3);
+  }
+
+  .tagline-text {
+    color: #64748b;
+    font-weight: 500;
+  }
+
+  @keyframes orbit {
+    0%   { transform: rotateX(0deg) rotateY(0deg); }
+    100% { transform: rotateX(360deg) rotateY(360deg); }
+  }
+  @keyframes electronMove {
+    0%   { transform: translateX(-8px) scale(0.8); opacity:0.7; }
+    100% { transform: translateX(8px)  scale(1.2); opacity:1;   }
+  }
+  @keyframes pulse {
+    0%,100% { transform: translate(-50%,-50%) scale(1); box-shadow:0 0 10px rgba(59,130,246,0.5); }
+    50%     { transform: translate(-50%,-50%) scale(1.1); box-shadow:0 0 20px rgba(59,130,246,0.8); }
+  }
+  @keyframes gradientShift {
+    0%,100% { background-position: 0% 50%; }
+    50%     { background-position: 100% 50%; }
+  }
+  @keyframes float {
+    0%,100% { transform: translateY(0); }
+    50%     { transform: translateY(-2px); }
+  } 

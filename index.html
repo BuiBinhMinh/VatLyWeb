@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PhysicsLab Pro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="shortcut icon" href="https://cdn-icons-png.flaticon.com/512/8270/8270064.png" type="image/x-icon">
+  <script src="https://kit.fontawesome.com/6b0b2d6a48.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="./css/style.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+</head>
+<body class="text-gray-900">
+  <!-- Loading Screen -->
+  <div id="loading" class="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] transition-opacity duration-700">
+    <div class="text-center">
+      <div class="w-16 h-16 mx-auto border-4 border-white border-t-transparent rounded-full animate-spin mb-4 sm:w-20 sm:h-20 sm:mb-6"></div>
+      <h1 class="text-2xl font-bold text-white animate-[breathe_2s_infinite] sm:text-3xl">PhysicsLab Pro</h1>
+      <p class="text-base text-white sm:text-lg">Khám phá vũ trụ...</p>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+<nav class="fixed top-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-xl shadow-lg py-4 transition-all duration-300">
+  <div class="container mx-auto flex items-center justify-between px-4 sm:px-6">
+    <!-- Logo -->
+    <div class="logo-container flex items-center space-x-4 cursor-pointer select-none">
+      <!-- Atom Icon Wrapper -->
+      <div class="relative w-12 h-12 sm:w-14 sm:h-14">
+        <div class="atom-orbit absolute inset-0 border border-blue-400/40 rounded-full"></div>
+        <div class="atom-orbit absolute inset-1 border border-purple-400/40 rounded-full"></div>
+        <div class="atom-orbit absolute inset-2 border border-cyan-400/40 rounded-full"></div>
+        <div class="electron bg-blue-500" style="top:1rem; left:50%; animation-delay:0s;"></div>
+        <div class="electron bg-purple-500" style="bottom:1rem; left:50%; animation-delay:-0.7s;"></div>
+        <div class="electron bg-cyan-500" style="left:1rem; top:50%; animation-delay:-1.4s;"></div>
+        <div class="nucleus"></div>
+      </div>
+      <!-- Text Content -->
+      <div class="flex flex-col">
+        <div class="flex items-center space-x-2">
+          <h1 class="physics-text text-xl sm:text-2xl font-extrabold"><a href="#home">PhysicsLab</a></h1>
+          <span class="pro-badge inline-block text-xs sm:text-sm font-bold px-2 py-1 rounded-full"><a href="#home">Pro</a></span>
+        </div>
+        <p class="tagline-text text-xs sm:text-sm mt-1">Nền tảng học tập tương lai</p>
+      </div>
+    </div>
+
+    <!-- Menu -->
+    <div class="flex items-center space-x-4 sm:space-x-8">
+      <button id="menu-toggle" class="sm:hidden text-gray-700 focus:outline-none">
+        <i class="fas fa-bars text-2xl"></i>
+      </button>
+      <div id="menu" class="hidden sm:flex sm:items-center sm:space-x-8 flex-col sm:flex-row 
+                         absolute sm:static top-16 left-0 right-0 bg-white/90 sm:bg-transparent 
+                         shadow-lg sm:shadow-none p-4 sm:p-0">
+        <a href="#home"      class="text-gray-700 hover:text-[var(--accent)] font-medium py-2 sm:py-0">Trang chủ</a>
+        <a href="#lab"     class="text-gray-700 hover:text-[var(--accent)] font-medium py-2 sm:py-0">Thí nghiệm</a>
+        <a href="#courses" class="text-gray-700 hover:text-[var(--accent)] font-medium py-2 sm:py-0">Khóa học</a>
+        <a href="#about"       class="text-gray-700 hover:text-[var(--accent)] font-medium py-2 sm:py-0">Về chúng tôi</a>
+         <a href="pages/login.html"
+    class="btn-liquid bg-[var(--primary)] text-white px-4 py-2 rounded-full
+           hover:bg-[var(--secondary)] font-semibold w-full sm:w-auto mt-2 sm:mt-0 text-center">
+   Đăng nhập
+ </a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+  <!-- Hero Section -->
+  <section id="home" class="hero-bg min-h-screen flex items-center relative overflow-hidden pt-20 sm:pt-24">
+    <div class="absolute inset-0 pointer-events-none">
+      <div class="w-[200px] h-[200px] bg-[var(--primary)]/15 absolute top-0 left-0 animate-[morphFloat_25s_infinite] sm:w-[400px] sm:h-[400px]"></div>
+      <div class="w-[150px] h-[150px] bg-[var(--secondary)]/15 absolute bottom-0 right-0 animate-[morphFloat_25s_infinite_3s] sm:w-[300px] sm:h-[300px]"></div>
+      <div class="w-[100px] h-[100px] bg-[var(--accent)]/15 absolute top-1/3 left-1/2 animate-[morphFloat_25s_infinite_6s] sm:w-[200px] sm:h-[200px]"></div>
+      <div id="particles" class="absolute inset-0"></div>
+    </div>
+    <div class="container mx-auto grid grid-cols-1 gap-8 px-4 sm:px-6 sm:grid-cols-2 sm:gap-12 items-center">
+      <div class="text-white z-10">
+        <span class="inline-block bg-[var(--accent)]/30 text-[var(--accent)] px-3 py-1 rounded-full text-xs mb-4 shadow-lg font-semibold sm:px-4 sm:py-2 sm:text-sm">✨ Cùng học những kiến thức thú vị</span>
+        <h1 class="text-4xl font-extrabold mb-4 leading-tight sm:text-6xl sm:mb-6">Khám phá <span class="bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] bg-clip-text text-transparent">Vũ trụ Vật lý</span></h1>
+        <p class="text-base text-gray-100 mb-6 leading-relaxed sm:text-xl sm:mb-8">Trải nghiệm học tập đỉnh cao với mô phỏng 3D, thí nghiệm tương tác và công nghệ AI cá nhân hóa.</p>
+        <div class="grid grid-cols-3 gap-4 mb-6 sm:gap-6 sm:mb-8">
+          <div><p class="text-2xl font-bold sm:text-3xl">50K+</p><p class="text-xs sm:text-sm">Học viên</p></div>
+          <div><p class="text-2xl font-bold sm:text-3xl">150+</p><p class="text-xs sm:text-sm">Khóa học</p></div>
+          <div><p class="text-2xl font-bold sm:text-3xl">98%</p><p class="text-xs sm:text-sm">Hài lòng</p></div>
+        </div>
+        <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6">
+          <button class="btn-liquid bg-[var(--primary)] text-white px-6 py-3 rounded-full hover:bg-[var(--secondary)] transition-colors text-base font-semibold sm:px-8 sm:py-4 sm:text-lg"><a href="pages/login.html">Tham gia ngay</a></button>
+          <button class="border-2 border-white text-white px-6 py-3 rounded-full hover:bg-white hover:text-[var(--primary)] transition-colors text-base font-semibold sm:px-8 sm:py-4 sm:text-lg"><a href="#courses">Xem Demo</a></button>
+        </div>
+      </div>
+      <div id="atom-3d" class="relative w-[250px] h-[250px] mx-auto sm:w-[400px] sm:h-[400px]"></div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="py-16 sm:py-24 bg-gradient-to-b from-white to-blue-50">
+    <div class="container mx-auto text-center px-4 sm:px-6">
+      <h2 class="text-3xl font-extrabold mb-4 sm:text-5xl sm:mb-6">Điểm nổi bật của PhysicsLab Pro</h2>
+      <p class="text-base text-gray-600 mb-12 max-w-2xl mx-auto sm:text-xl sm:mb-16">Nền tảng học vật lý tiên tiến kết hợp công nghệ AI và mô phỏng 3D sống động</p>
+      <div class="grid grid-cols-1 gap-8 sm:grid-cols-3 sm:gap-12">
+        <div class="glass-card p-6 rounded-2xl shadow-xl sm:p-8">
+          <div class="w-16 h-16 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full flex items-center justify-center mx-auto mb-4 shadow-md sm:w-20 sm:h-20 sm:mb-6">
+            <i class="fas fa-vr-cardboard text-white text-2xl sm:text-3xl"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-3 sm:text-2xl sm:mb-4">Thực tế ảo 3D</h3>
+          <p class="text-gray-600 leading-relaxed text-sm sm:text-base">Trải nghiệm thí nghiệm vật lý trong không gian 3D chân thực với khả năng tương tác mượt mà.</p>
+        </div>
+        <div class="glass-card p-6 rounded-2xl shadow-xl sm:p-8">
+          <div class="w-16 h-16 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center mx-auto mb-4 shadow-md sm:w-20 sm:h-20 sm:mb-6">
+            <i class="fas fa-brain text-white text-2xl sm:text-3xl"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-3 sm:text-2xl sm:mb-4">AI Cá nhân hóa</h3>
+          <p class="text-gray-600 leading-relaxed text-sm sm:text-base">AI thông minh phân tích và tạo lộ trình học tập tối ưu cho từng cá nhân.</p>
+        </div>
+        <div class="glass-card p-6 rounded-2xl shadow-xl sm:p-8">
+          <div class="w-16 h-16 bg-gradient-to-r from-green-400 to-teal-400 rounded-full flex items-center justify-center mx-auto mb-4 shadow-md sm:w-20 sm:h-20 sm:mb-6">
+            <i class="fas fa-chart-line text-white text-2xl sm:text-3xl"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-3 sm:text-2xl sm:mb-4">Phân tích nâng cao</h3>
+          <p class="text-gray-600 leading-relaxed text-sm sm:text-base">Trực quan hóa dữ liệu vật lý với công cụ phân tích chuyên sâu.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Lab Section -->
+  <section id="lab" class="py-16 sm:py-20 bg-gradient-to-br from-white to-gray-50">
+    <div class="container mx-auto text-center px-4 sm:px-6 lg:px-8">
+      <h2 class="text-3xl font-extrabold mb-4 text-gray-800 sm:text-4xl sm:mb-6 md:text-5xl">Phòng thí nghiệm 3D</h2>
+      <p class="text-base text-gray-600 mb-8 max-w-3xl mx-auto sm:text-lg sm:mb-12 md:text-xl">Tương tác với các mô phỏng vật lý sống động và khám phá thế giới khoa học</p>
+      <div class="grid grid-cols-1 gap-6 sm:gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        <!-- Card 1: Con lắc Newton -->
+        <div class="glass-card p-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-red-500 sm:p-5">
+          <h3 class="text-base font-semibold mb-3 flex items-center justify-center text-gray-900 sm:text-lg">
+            <span class="relative inline-block">
+              <i class="fas fa-circle mr-2 text-red-200"></i>
+              <span class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-red-500 text-xs">o</span>
+            </span>
+            Con lắc Newton
+          </h3>
+          <div id="pendulumContainer1" class="relative w-full h-48 mx-auto perspective-800 transform-style-3d bg-gradient-to-br from-gray-300 to-gray-500 rounded-lg overflow-hidden sm:h-56">
+            <div id="pendulumString1" class="absolute top-0 left-1/2 w-1 h-40 bg-gray-700 origin-top animate-[pendulumSwing_2s_ease-in-out_infinite] transform rotate-x-30 translate-z-50 sm:h-48"></div>
+            <div id="pendulumBob1" class="absolute bottom-4 left-1/2 -ml-4 w-8 h-8 bg-gradient-to-r from-red-600 to-red-800 rounded-full shadow-md transform translate-z-100 scale-110 animate-[breathe_3s_ease-in-out_infinite] sm:-ml-5 sm:w-10 sm:h-10"></div>
+          </div>
+          <div class="mt-3">
+            <p class="text-xs text-gray-700 mb-2 font-medium bg-white border-2 border-red-500 p-1 rounded inline-block sm:text-sm">Công thức: <span class="text-[var(--primary)]">T = 2π√(L/g)</span></p>
+            <p class="text-xs text-gray-500 sm:text-sm">Chú giải: T (chu kỳ), L (chiều dài), g (gia tốc trọng trường)</p>
+          </div>
+          <div class="mt-4 flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-3">
+            <button onclick="togglePendulum(1)" class="btn-liquid bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition-colors w-full sm:w-auto">Tạm dừng</button>
+            <button onclick="resetPendulum(1)" class="btn-liquid border-2 border-red-500 text-red-500 px-3 py-2 rounded-lg hover:bg-red-500 hover:text-white transition-colors w-full sm:w-auto">Đặt lại</button>
+          </div>
+        </div>
+
+        <!-- Card 2: Sóng điện từ -->
+        <div class="glass-card p-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-blue-500 sm:p-5">
+          <h3 class="text-base font-semibold mb-3 flex items-center justify-center text-gray-900 sm:text-lg"><i class="fas fa-wave-square mr-2 text-[var(--primary)]"></i>Sóng điện từ</h3>
+          <div id="waveContainer2" class="relative w-full h-48 mx-auto perspective-800 transform-style-3d bg-gradient-to-r from-blue-200 to-purple-200 rounded-lg overflow-hidden sm:h-56">
+            <svg class="absolute inset-0" viewBox="0 0 300 200">
+              <path d="M0 100 Q50 120 100 100 T200 100 T300 100" fill="none" stroke="url(#waveGradient)" stroke-width="2" class="animate-[waveMove_2s_infinite_linear] transform translate-z-80 rotate-x-20"/>
+              <path d="M0 100 Q50 80 100 100 T200 100 T300 100" fill="none" stroke="url(#waveGradient)" stroke-width="2" class="animate-[waveMove_2s_infinite_linear] delay-500ms transform translate-z-80 rotate-x-20"/>
+              <defs>
+                <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" style="stop-color:#60a5fa;"/>
+                  <stop offset="100%" style="stop-color:#a855f7;"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <div class="mt-3">
+            <p class="text-xs text-gray-700 mb-2 font-medium sm:text-sm">Công thức: <span class="text-[var(--primary)]">λ = c/f</span></p>
+            <p class="text-xs text-gray-500 sm:text-sm">Chú giải: λ (bước sóng), c (tốc độ ánh sáng), f (tần số)</p>
+          </div>
+          <div class="mt-4 flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-3">
+            <button onclick="adjustFrequency(2, 0.5)" class="btn-liquid bg-[var(--primary)] text-white px-3 py-2 rounded-lg hover:bg-[var(--secondary)] transition-colors w-full sm:w-auto">Tăng tần số</button>
+            <button onclick="adjustFrequency(2, -0.5)" class="btn-liquid border-2 border-[var(--primary)] text-[var(--primary)] px-3 py-2 rounded-lg hover:bg-[var(--primary)] hover:text-white transition-colors w-full sm:w-auto">Giảm tần số</button>
+          </div>
+        </div>
+
+        <!-- Card 3: Sự tán xạ ánh sáng -->
+        <div class="glass-card p-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-yellow-500 sm:p-5">
+          <h3 class="text-base font-semibold mb-3 flex items-center justify-center text-gray-900 sm:text-lg"><i class="fas fa-lightbulb mr-2 text-[var(--primary)]"></i>Sự tán xạ ánh sáng</h3>
+          <div id="scatterContainer3" class="relative w-full h-48 mx-auto perspective-800 transform-style-3d bg-gradient-to-b from-yellow-50 to-blue-50 rounded-lg overflow-hidden p-2 sm:h-56">
+            <svg viewBox="0 0 300 200" class="absolute inset-0">
+              <defs>
+                <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                  <feMerge>
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+              </defs>
+              <g filter="url(#glow)">
+                <path d="M150 0 L150 200" stroke="#ffd700" stroke-width="2.5" class="animate-[lightRay_2s_ease-in-out_infinite] transform translate-z-80 rotate-x-15" id="lightRayPath3"/>
+                <path d="M140 60 L160 60" stroke="#ffd700" stroke-width="1.5" class="animate-[lightRay_2.2s_ease-in-out_infinite] transform translate-z-70 rotate-x-10" id="scatterRay31"/>
+                <path d="M145 90 L155 90" stroke="#ffd700" stroke-width="1.5" class="animate-[lightRay_2.4s_ease-in-out_infinite] transform translate-z-70 rotate-x-10" id="scatterRay32"/>
+                <circle cx="150" cy="120" r="4" fill="#ffd700" class="animate-[dustParticle_2.5s_ease-in-out_infinite] transform translate-z-100 rotate-y-20" id="dustParticle31"/>
+                <circle cx="160" cy="110" r="3" fill="#ffd700" class="animate-[dustParticle_3s_ease-in-out_infinite] transform translate-z-100 rotate-y-20" id="dustParticle32"/>
+                <circle cx="140" cy="130" r="3.5" fill="#ffd700" class="animate-[dustParticle_3.5s_ease-in-out_infinite] transform translate-z-100 rotate-y-20" id="dustParticle33"/>
+              </g>
+            </svg>
+          </div>
+          <div class="mt-3">
+            <p class="text-xs text-gray-700 mb-2 font-medium sm:text-sm">Công thức: <span class="text-[var(--primary)]">I ∝ 1/λ⁴</span></p>
+            <p class="text-xs text-gray-500 sm:text-sm">Chú giải: I (cường độ tán xạ), λ (bước sóng)</p>
+          </div>
+          <div class="mt-4 flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-3">
+            <button onclick="toggleScatter(3)" class="btn-liquid bg-[var(--primary)] text-white px-3 py-2 rounded-lg hover:bg-[var(--secondary)] transition-colors w-full sm:w-auto">Bật/Tắt</button>
+            <button onclick="adjustIntensity(3)" class="btn-liquid border-2 border-[var(--primary)] text-[var(--primary)] px-3 py-2 rounded-lg hover:bg-[var(--primary)] hover:text-white transition-colors w-full sm:w-auto">Cường độ</button>
+          </div>
+        </div>
+
+        <!-- Card 4: Từ trường -->
+        <div class="glass-card p-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-purple-500 sm:p-5">
+          <h3 class="text-base font-semibold mb-3 flex items-center justify-center text-gray-900 sm:text-lg"><i class="fas fa-magnet mr-2 text-[var(--primary)]"></i>Từ trường</h3>
+          <div id="magnetContainer4" class="relative w-full h-48 mx-auto perspective-800 transform-style-3d bg-gradient-to-br from-purple-200 to-indigo-200 rounded-lg overflow-hidden sm:h-56">
+            <svg class="absolute inset-0" viewBox="0 0 300 200">
+              <text x="100" y="30" fill="blue" class="font-bold text-base sm:text-lg transform translate-z-50 rotate-x-15" id="north4">N</text>
+              <text x="200" y="30" fill="red" class="font-bold text-base sm:text-lg transform translate-z-50 rotate-x-15" id="south4">S</text>
+              <path d="M50 100 Q100 50 150 100 T250 100" stroke="purple" stroke-width="2" fill="none" class="animate-[magneticField_3s_infinite_ease-in-out] transform translate-z-80 rotate-y-30" id="fieldPath41"/>
+              <path d="M50 100 Q100 150 150 100 T250 100" stroke="purple" stroke-width="2" fill="none" class="animate-[magneticField_3s_infinite_ease-in-out] delay-1000ms transform translate-z-80 rotate-y-30" id="fieldPath42"/>
+              <polygon points="100,100 90,96 90,104" fill="purple" class="transform translate-z-50 rotate-x-15" id="arrow41"/>
+              <polygon points="200,100 210,96 210,104" fill="purple" class="transform translate-z-50 rotate-x-15" id="arrow42"/>
+            </svg>
+          </div>
+          <div class="mt-3">
+            <p class="text-xs text-gray-700 mb-2 font-medium sm:text-sm">Công thức: <span class="text-[var(--primary)]">B = μ₀I/2πr</span></p>
+            <p class="text-xs text-gray-500 sm:text-sm">Chú giải: B (cường độ từ trường), μ₀, I (dòng điện), r (khoảng cách)</p>
+          </div>
+          <div class="mt-4 flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-3">
+            <button onclick="toggleMagnet(4)" class="btn-liquid bg-[var(--primary)] text-white px-3 py-2 rounded-lg hover:bg-[var(--secondary)] transition-colors w-full sm:w-auto">Bật/Tắt</button>
+            <button onclick="flipMagnet(4)" class="btn-liquid border-2 border-[var(--primary)] text-[var(--primary)] px-3 py-2 rounded-lg hover:bg-[var(--primary)] hover:text-white transition-colors w-full sm:w-auto">Đảo cực</button>
+          </div>
+        </div>
+
+        <!-- Card 5: Dao động sóng -->
+        <div class="glass-card p-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-green-500 sm:p-5">
+          <h3 class="text-base font-semibold mb-3 flex items-center justify-center text-gray-900 sm:text-lg"><i class="fas fa-water mr-2 text-[var(--primary)]"></i>Dao động sóng</h3>
+          <div id="waveContainer5" class="relative w-full h-48 mx-auto perspective-800 transform-style-3d bg-gradient-to-br from-green-200 to-teal-200 rounded-lg overflow-hidden sm:h-56">
+            <svg class="absolute inset-0" viewBox="0 0 300 200">
+              <circle cx="150" cy="100" r="5" fill="red" class="animate-[ripple_2s_infinite] transform translate-z-100 rotate-x-20" id="sourcePoint5"/>
+              <path d="M0 100 Q50 120 100 100 T200 100 T300 100" fill="none" stroke="green" stroke-width="2" class="animate-[waterWave_2.5s_infinite_ease-in-out] transform translate-z-80 rotate-y-30" id="wavePath51"/>
+              <path d="M0 100 Q50 80 100 100 T200 100 T300 100" fill="none" stroke="green" stroke-width="2" class="animate-[waterWave_2.5s_infinite_ease-in-out] delay-500ms transform translate-z-80 rotate-y-30" id="wavePath52"/>
+              <path d="M0 100 Q50 110 100 100 T200 100 T300 100" fill="none" stroke="green" stroke-width="2" class="animate-[waterWave_2.5s_infinite_ease-in-out] delay-1000ms transform translate-z-80 rotate-y-30" id="wavePath53"/>
+            </svg>
+          </div>
+          <div class="mt-3">
+            <p class="text-xs text-gray-700 mb-2 font-medium sm:text-sm">Công thức: <span class="text-[var(--primary)]">v = fλ</span></p>
+            <p class="text-xs text-gray-500 sm:text-sm">Chú giải: v (tốc độ), f (tần số), λ (bước sóng)</p>
+          </div>
+          <div class="mt-4 flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-3">
+            <button onclick="increaseAmplitude(5)" class="btn-liquid bg-[var(--primary)] text-white px-3 py-2 rounded-lg hover:bg-[var(--secondary)] transition-colors w-full sm:w-auto">Tăng biên độ</button>
+            <button onclick="decreaseAmplitude(5)" class="btn-liquid border-2 border-[var(--primary)] text-[var(--primary)] px-3 py-2 rounded-lg hover:bg-[var(--primary)] hover:text-white transition-colors w-full sm:w-auto">Giảm biên độ</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Courses Section -->
+  <section id="courses" class="py-16 sm:py-24 bg-gradient-to-r from-blue-50 to-purple-50">
+    <div class="container mx-auto px-4 sm:px-6 text-center">
+      <h2 class="text-3xl sm:text-5xl font-extrabold mb-4 sm:mb-6">Các bài học Vật lý</h2>
+      <p class="text-base sm:text-xl text-gray-600 mb-12 sm:mb-16 max-w-2xl mx-auto">
+        Hành trình khám phá vật lý qua các chủ đề hấp dẫn, lý thuyết – thực hành kết hợp.
+      </p>
+
+      <!-- Bọc overflow-hidden để ẩn slide tràn -->
+      <div class="relative overflow-hidden">
+        <div class="swiper-container">
+          <div class="swiper-wrapper">
+            <!-- Card 1: Con lắc đơn -->
+            <div class="swiper-slide px-2">
+              <div class="group perspective-1000">
+                <div
+                  class="bg-white rounded-2xl shadow-xl overflow-hidden transform transition-transform duration-500
+                       group-hover:rotate-y-6 group-hover:rotate-x-3 group-hover:scale-105"
+                >
+                  <div class="h-24 flex items-center justify-center sm:h-28 bg-gradient-to-br from-gray-200 to-gray-400">
+                    <svg class="w-12 h-12 text-blue-600 animate-[pendulumSwing_2s_ease-in-out_infinite]"
+                         fill="currentColor" viewBox="0 0 24 24">
+                      <circle cx="12" cy="4" r="2"/>
+                      <rect x="11.5" y="6" width="1" height="10"/>
+                    </svg>
+                  </div>
+                  <div class="p-4 sm:p-6 space-y-3">
+                    <h3 class="text-xl font-semibold sm:text-2xl">Con lắc đơn</h3>
+                    <p class="text-gray-600 text-sm sm:text-base">
+                      Tìm hiểu dao động điều hòa đơn giản và tính chu kỳ <strong>T = 2π√(L/g)</strong>.
+                    </p>
+                    <button class="mt-4 w-full py-2 rounded-lg bg-[var(--primary)] text-white
+                                   hover:bg-[var(--secondary)] transition">
+                       <a href="pages/login.html">Xem chi tiết</a>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 2: Sóng âm -->
+            <div class="swiper-slide px-2">
+              <div class="group perspective-1000">
+                <div
+                  class="bg-white rounded-2xl shadow-xl overflow-hidden transform transition-transform duration-500
+                       group-hover:rotate-y-6 group-hover:rotate-x-3 group-hover:scale-105"
+                >
+                  <div class="h-24 flex items-center justify-center sm:h-28 bg-gradient-to-br from-blue-100 to-blue-300">
+                    <svg class="w-12 h-12 text-blue-800 animate-[waveMove_2s_infinite_linear]"
+                         fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path d="M2,12 C6,8 10,16 14,12 18,8 22,16 26,12"></path>
+                    </svg>
+                  </div>
+                  <div class="p-4 sm:p-6 space-y-3">
+                    <h3 class="text-xl font-semibold sm:text-2xl">Sóng âm</h3>
+                    <p class="text-gray-600 text-sm sm:text-base">
+                      Khám phá tính chất lan truyền, phản xạ và cộng hưởng của sóng âm.
+                    </p>
+                    <button class="mt-4 w-full py-2 rounded-lg bg-[var(--primary)] text-white
+                                   hover:bg-[var(--secondary)] transition">
+                     <a href="pages/login.html">Xem chi tiết</a>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 3: Điện trường -->
+            <div class="swiper-slide px-2">
+              <div class="group perspective-1000">
+                <div
+                  class="bg-white rounded-2xl shadow-xl overflow-hidden transform transition-transform duration-500
+                       group-hover:rotate-y-6 group-hover:rotate-x-3 group-hover:scale-105"
+                >
+                  <div class="h-24 flex items-center justify-center sm:h-28 bg-gradient-to-br from-yellow-100 to-yellow-300">
+                    <svg class="w-12 h-12 text-yellow-700 animate-[magneticField_3s_infinite_ease-in-out]"
+                         fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="3"/>
+                      <path d="M12 3 L12 9 M12 15 L12 21 M3 12 L9 12 M15 12 L21 12"/>
+                    </svg>
+                  </div>
+                  <div class="p-4 sm:p-6 space-y-3">
+                    <h3 class="text-xl font-semibold sm:text-2xl">Điện trường</h3>
+                    <p class="text-gray-600 text-sm sm:text-base">
+                      Hiểu lực Coulomb, trường tĩnh điện & công thức <strong>E = kq/r²</strong>.
+                    </p>
+                    <button class="mt-4 w-full py-2 rounded-lg bg-[var(--primary)] text-white
+                                   hover:bg-[var(--secondary)] transition">
+                      <a href="pages/login.html">Xem chi tiết</a>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 4: Quang học -->
+            <div class="swiper-slide px-2">
+              <div class="group perspective-1000">
+                <div
+                  class="bg-white rounded-2xl shadow-xl overflow-hidden transform transition-transform duration-500
+                       group-hover:rotate-y-6 group-hover:rotate-x-3 group-hover:scale-105"
+                >
+                  <div class="h-24 flex items-center justify-center sm:h-28 bg-gradient-to-br from-indigo-100 to-indigo-300">
+                    <svg class="w-12 h-12 text-indigo-700 animate-[lightRay_1.5s_infinite]"
+                         fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path d="M2,12 L22,12 M12,2 L12,22"/>
+                    </svg>
+                  </div>
+                  <div class="p-4 sm:p-6 space-y-3">
+                    <h3 class="text-xl font-semibold sm:text-2xl">Quang học</h3>
+                    <p class="text-gray-600 text-sm sm:text-base">
+                      Tính khúc xạ, phản xạ và thiết kế kính.
+                    </p>
+                    <button class="mt-4 w-full py-2 rounded-lg bg-[var(--primary)] text-white
+                                   hover:bg-[var(--secondary)] transition">
+                      <a href="pages/login.html">Xem chi tiết</a>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 5: Nhiệt động lực học -->
+            <div class="swiper-slide px-2">
+              <div class="group perspective-1000">
+                <div
+                  class="bg-white rounded-2xl shadow-xl overflow-hidden transform transition-transform duration-500
+                       group-hover:rotate-y-6 group-hover:rotate-x-3 group-hover:scale-105"
+                >
+                  <div class="h-24 flex items-center justify-center sm:h-28 bg-gradient-to-br from-red-100 to-red-300">
+                    <svg class="w-12 h-12 text-red-700 animate-[ripple_2s_infinite]"
+                         fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="6"/>
+                      <circle cx="12" cy="12" r="10" opacity="0.3"/>
+                    </svg>
+                  </div>
+                  <div class="p-4 sm:p-6 space-y-3">
+                    <h3 class="text-xl font-semibold sm:text-2xl">Nhiệt động lực học</h3>
+                    <p class="text-gray-600 text-sm sm:text-base">
+                      Khái niệm entropy, công – nhiệt và định luật thứ hai.
+                    </p>
+                    <button class="mt-4 w-full py-2 rounded-lg bg-[var(--primary)] text-white
+                                   hover:bg-[var(--secondary)] transition">
+                      <a href="pages/login.html">Xem chi tiết</a>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pagination & Nav -->
+          <div class="swiper-pagination mt-6 sm:mt-8"></div>
+          <div class="swiper-button-next text-[var(--primary)]"></div>
+          <div class="swiper-button-prev text-[var(--primary)]"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Us Section -->
+<section id="about" class="py-24 bg-gradient-to-b from-white to-blue-50">
+  <div class="container mx-auto px-6 lg:px-8">  
+    <!-- Header -->
+    <div class="text-center mb-16">
+      <h2 class="text-5xl font-extrabold text-gray-900 mb-4">Về Chúng Tôi</h2>
+      <p class="text-lg text-gray-600 mx-auto max-w-2xl">
+        PhysicsLab Pro – Nơi biến lý thuyết khô khan thành trải nghiệm 3D sống động, đưa bạn vào hành trình chinh phục khoa học.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <!-- Glass Card Text -->
+      <div class="bg-white/70 backdrop-blur-lg rounded-3xl p-10 shadow-2xl space-y-8">
+        <p class="text-gray-800 text-base leading-relaxed">
+          Chúng tôi là tập hợp các nhà vật lý, lập trình viên và designer đam mê công nghệ 3D & AI. Sứ mệnh của chúng tôi là mang đến nền tảng học tập tương tác, cá nhân hóa, giúp bạn vững bước từ cơ bản đến nâng cao.
+        </p>
+        <ul class="space-y-6">
+  <!-- Item 1 -->
+  <li class="flex items-center space-x-4">
+    <div class="flex-shrink-0">
+      <i class="fas fa-atom text-3xl text-blue-600 animate-pulse"></i>
+    </div>
+    <p class="text-gray-800">
+      <strong class="border-b-2 border-blue-600">Mô phỏng 3D chính xác cao</strong>, tái hiện mọi thí nghiệm trong tầm tay.
+    </p>
+  </li>
+
+  <!-- Item 2 -->
+  <li class="flex items-center space-x-4">
+    <div class="flex-shrink-0">
+      <i class="fas fa-brain text-3xl text-purple-600 hover:animate-wiggle"></i>
+    </div>
+    <p class="text-gray-800">
+      <strong class="border-b-2 border-purple-600">AI cá nhân hóa lộ trình</strong>, theo dõi tiến độ real-time.
+    </p>
+  </li>
+
+  <!-- Item 3 -->
+  <li class="flex items-center space-x-4">
+    <div class="flex-shrink-0">
+      <i class="fas fa-vr-cardboard text-3xl text-cyan-600 hover:animate-wiggle"></i>
+    </div>
+    <p class="text-gray-800">
+      <strong class="border-b-2 border-cyan-600">VR/AR tích hợp</strong> cho trải nghiệm chân thực như đang ở phòng lab.
+    </p>
+  </li>
+</ul>
+
+
+        <a href="#footer"
+           class="inline-block mt-4 px-8 py-3 bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)]
+                  text-white font-semibold rounded-full shadow-md hover:shadow-xl transition-all">
+          Liên hệ với chúng tôi
+        </a>
+      </div>
+
+      <!-- Enhanced 3D Atom Illustration -->
+      <div class="relative w-full h-96 perspective-1000">
+        <!-- Soft shadow under nucleus -->
+        <div class="absolute inset-0 flex items-center justify-center">
+          <div class="w-24 h-2 bg-black/5 rounded-full blur-xl"></div>
+        </div>
+        <!-- Orbits -->
+        <div class="absolute inset-0 rounded-full border-4 border-blue-300/40 animate-[orbit_10s_linear_infinite]"></div>
+        <div class="absolute inset-8 rounded-full border-4 border-purple-300/40 animate-[orbit_10s_linear_infinite] [animation-delay:3.3s]"></div>
+        <div class="absolute inset-16 rounded-full border-4 border-cyan-300/40 animate-[orbit_10s_linear_infinite] [animation-delay:6.6s]"></div>
+        <!-- Electrons -->
+        <div class="absolute w-4 h-4 bg-blue-500 rounded-full top-4 left-1/2 -translate-x-1/2 animate-[electron_2s_ease-in-out_infinite_alternate]"></div>
+        <div class="absolute w-4 h-4 bg-purple-500 rounded-full bottom-4 left-1/2 -translate-x-1/2 animate-[electron_2s_ease-in-out_infinite_alternate] [animation-delay:-0.7s]"></div>
+        <div class="absolute w-4 h-4 bg-cyan-500 rounded-full left-4 top-1/2 -translate-y-1/2 animate-[electron_2s_ease-in-out_infinite_alternate] [animation-delay:-1.4s]"></div>
+        <!-- Nucleus -->
+        <div class="absolute w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full
+                    top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-[pulse_3s_ease-in-out_infinite]"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+  <!-- Stats Section -->
+  <section id="stats" class="py-16 sm:py-24 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white relative overflow-hidden">
+    <div class="absolute inset-0 pointer-events-none">
+      <div class="w-[300px] h-[300px] bg-white/10 absolute top-0 left-0 animate-[morphFloat_30s_infinite] sm:w-[500px] sm:h-[500px]"></div>
+      <div class="w-[250px] h-[250px] bg-white/10 absolute bottom-0 right-0 animate-[morphFloat_30s_infinite_5s] sm:w-[400px] sm:h-[400px]"></div>
+    </div>
+    <div class="container mx-auto grid grid-cols-2 gap-8 text-center px-4 sm:px-6 sm:grid-cols-4 sm:gap-12 z-10">
+      <div><p class="text-4xl font-extrabold sm:text-5xl"><span class="counter" data-target="50000">0</span>+</p><p class="text-base sm:text-lg">Học viên</p></div>
+      <div><p class="text-4xl font-extrabold sm:text-5xl"><span class="counter" data-target="150">0</span>+</p><p class="text-base sm:text-lg">Khóa học</p></div>
+      <div><p class="text-4xl font-extrabold sm:text-5xl"><span class="counter" data-target="500">0</span>+</p><p class="text-base sm:text-lg">Thí nghiệm</p></div>
+      <div><p class="text-4xl font-extrabold sm:text-5xl"><span class="counter" data-target="98">0</span>%</p><p class="text-base sm:text-lg">Hài lòng</p></div>
+    </div>
+  </section>
+
+<!-- Footer -->
+<footer id="footer" class="bg-gray-900 text-white py-12 sm:py-16">
+  <div class="container mx-auto grid grid-cols-1 gap-8 px-4 sm:px-6 sm:grid-cols-4 sm:gap-12">
+    <div>
+      <!-- Kéo toàn bộ logo-container từ Nav xuống đây -->
+      <div id="footer-logo-container" class="logo-container flex items-center space-x-4 cursor-pointer perspective-1000 transform-style-3d mb-4 sm:mb-6">
+        <!-- Atom icon -->
+        <div class="relative w-16 h-16 flex-shrink-0">
+          <!-- 3 quỹ đạo -->
+          <div class="atom-orbit absolute inset-2 border-2 border-blue-400/40 rounded-full"></div>
+          <div class="atom-orbit absolute inset-2 border-2 border-purple-400/40 rounded-full"></div>
+          <div class="atom-orbit absolute inset-2 border-2 border-cyan-400/40 rounded-full"></div>
+          <!-- Các electron -->
+          <div class="electron absolute top-3 left-1/2 w-2 h-2 bg-blue-500 rounded-full" style="animation-delay:-0.7s;"></div>
+          <div class="electron absolute bottom-3 left-1/2 w-2 h-2 bg-purple-500 rounded-full" style="animation-delay:-1.4s;"></div>
+          <div class="electron absolute left-3 top-1/2 w-2 h-2 bg-cyan-500 rounded-full"></div>
+          <!-- Nucleus -->
+          <div class="nucleus absolute top-1/2 left-1/2 w-4 h-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+        </div>
+        <!-- Text content -->
+        <div class="flex flex-col">
+          <div class="flex items-center space-x-2">
+            <h1 class="physics-text text-3xl leading-tight">PhysicsLab</h1>
+            <span class="pro-badge px-2 py-1 rounded text-white font-bold text-xs">PRO</span>
+          </div>
+          <p class="tagline-text text-sm mt-1">Nền tảng học tập tương lai</p>
+        </div>
+      </div>
+
+      <p class="text-gray-400 mb-4 leading-relaxed text-sm sm:text-base sm:mb-6">
+        Đưa bạn đến gần hơn với những bí ẩn của vũ trụ qua công nghệ học tập tiên tiến.
+      </p>
+      <div class="flex space-x-4 sm:space-x-6">
+        <a href="#" class="text-gray-400 hover:text-[var(--accent)] text-lg sm:text-xl"><i class="fab fa-facebook-f"></i></a>
+        <a href="#" class="text-gray-400 hover:text-[var(--accent)] text-lg sm:text-xl"><i class="fab fa-youtube"></i></a>
+        <a href="#" class="text-gray-400 hover:text-[var(--accent)] text-lg sm:text-xl"><i class="fab fa-instagram"></i></a>
+      </div>
+    </div>
+    <!-- Các cột còn lại giữ nguyên như trước -->
+    <div>
+      <h3 class="text-lg font-bold mb-4 sm:text-xl sm:mb-6">Khóa học</h3>
+      <ul class="space-y-3 text-gray-400 text-sm sm:text-base sm:space-y-4">
+        <li><a href="#" class="hover:text-[var(--accent)]">Cơ học cổ điển</a></li>
+        <li><a href="#" class="hover:text-[var(--accent)]">Điện từ học</a></li>
+        <li><a href="#" class="hover:text-[var(--accent)]">Quang học</a></li>
+        <li><a href="#" class="hover:text-[var(--accent)]">Vật lý hiện đại</a></li>
+      </ul>
+    </div>
+    <div>
+      <h3 class="text-lg font-bold mb-4 sm:text-xl sm:mb-6">Hỗ trợ</h3>
+      <ul class="space-y-3 text-gray-400 text-sm sm:text-base sm:space-y-4">
+        <li><a href="#" class="hover:text-[var(--accent)]">Trung tâm trợ giúp</a></li>
+        <li><a href="#" class="hover:text-[var(--accent)]">Liên hệ</a></li>
+        <li><a href="#" class="hover:text-[var(--accent)]">FAQ</a></li>
+        <li><a href="#" class="hover:text-[var(--accent)]">Cộng đồng</a></li>
+      </ul>
+    </div>
+    <div>
+      <h3 class="text-lg font-bold mb-4 sm:text-xl sm:mb-6">Liên hệ</h3>
+      <ul class="space-y-3 text-gray-400 text-sm sm:text-base sm:space-y-4">
+        <li>Email: support@physicslabpro.com</li>
+        <li>Phone: +84 123 456 789</li>
+        <li>Address: 123 Đường Khoa Học, TP.HCM</li>
+      </ul>
+    </div>
+  </div>
+  <p class="text-center text-gray-400 mt-8 text-sm sm:mt-12 sm:text-base">
+    © 2024 PhysicsLab Pro. Tất cả quyền được bảo lưu.
+  </p>
+</footer>
+
+  <script src="./js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,1577 @@
+<html lang="vi"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dao động điều hòa | Bài học Vật lý</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5',
+                        secondary: '#06B6D4',
+                        accent: '#F97316',
+                        success: '#10B981',
+                        warning: '#F59E0B',
+                        danger: '#EF4444',
+                        dark: '#1F2937',
+                        light: '#F9FAFB'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Montserrat', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@500;600;700;800&display=swap');
+        
+        :root {
+            --primary: #4F46E5;
+            --primary-light: #818CF8;
+            --primary-dark: #4338CA;
+            --secondary: #06B6D4;
+            --accent: #F97316;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --dark: #1F2937;
+            --light: #F9FAFB;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F9FAFB;
+            color: #1F2937;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transform: translateY(-2px);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            border-radius: 4px;
+            background: #E5E7EB;
+            overflow: hidden;
+        }
+        
+        .progress-value {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        .tab {
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .tab.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 3px;
+        }
+        
+        .tab:not(.active):hover {
+            color: var(--primary-light);
+        }
+        
+        .btn {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%, -50%);
+            transform-origin: 50% 50%;
+        }
+        
+        .btn:hover::after {
+            animation: ripple 1s ease-out;
+        }
+        
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(20, 20);
+                opacity: 0;
+            }
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .formula {
+            font-family: 'Times New Roman', serif;
+            padding: 0.75rem 1.25rem;
+            background: #F3F4F6;
+            border-left: 4px solid var(--primary);
+            border-radius: 0.25rem;
+            overflow-x: auto;
+            transition: all 0.3s ease;
+        }
+        
+        .formula:hover {
+            background: #F9FAFB;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .timer-circle {
+            position: relative;
+            width: 80px;
+            height: 80px;
+        }
+        
+        .timer-circle svg {
+            transform: rotate(-90deg);
+        }
+        
+        .timer-circle circle {
+            fill: none;
+            stroke-width: 8;
+            stroke-linecap: round;
+        }
+        
+        .timer-bg {
+            stroke: #E5E7EB;
+        }
+        
+        .timer-progress {
+            stroke: var(--primary);
+            transition: stroke-dashoffset 1s linear;
+        }
+        
+        .timer-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .oscillator {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            background: #F3F4F6;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        
+        .oscillator-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+            background-size: 20px 20px;
+            z-index: 1;
+        }
+        
+        .oscillator-axis {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.2);
+            z-index: 2;
+        }
+        
+        .oscillator-x-axis {
+            left: 0;
+            top: 50%;
+            width: 100%;
+            height: 1px;
+        }
+        
+        .oscillator-y-axis {
+            left: 50%;
+            top: 0;
+            width: 1px;
+            height: 100%;
+        }
+        
+        .oscillator-mass {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            box-shadow: 0 0 10px rgba(79, 70, 229, 0.5);
+            z-index: 3;
+            transform: translate(-50%, -50%);
+        }
+        
+        .oscillator-spring {
+            position: absolute;
+            height: 4px;
+            background: repeating-linear-gradient(
+                90deg,
+                var(--dark),
+                var(--dark) 3px,
+                transparent 3px,
+                transparent 10px
+            );
+            z-index: 2;
+        }
+        
+        .oscillator-path {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            z-index: 1;
+        }
+        
+        .oscillator-trace {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+        }
+        
+        .oscillator-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .slider-container {
+            position: relative;
+            width: 100%;
+            padding: 0.5rem 0;
+        }
+        
+        .slider-track {
+            height: 4px;
+            background: #E5E7EB;
+            width: 100%;
+            position: relative;
+            border-radius: 4px;
+        }
+        
+        .slider-track-highlight {
+            position: absolute;
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+            border-radius: 4px;
+            transition: width 0.2s ease;
+        }
+        
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 4px;
+            background: transparent;
+            outline: none;
+            position: relative;
+            z-index: 2;
+            cursor: pointer;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: white;
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 0 5px rgba(79, 70, 229, 0.2);
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: white;
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+        }
+        
+        input[type="range"]::-moz-range-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 0 5px rgba(79, 70, 229, 0.2);
+        }
+        
+        .tooltip {
+            visibility: hidden;
+            position: absolute;
+            background-color: rgba(31, 41, 55, 0.95);
+            color: white;
+            text-align: center;
+            padding: 6px 10px;
+            border-radius: 6px;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            width: max-content;
+            max-width: 200px;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            font-size: 0.75rem;
+        }
+        
+        .tooltip::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: rgba(31, 41, 55, 0.95) transparent transparent transparent;
+        }
+        
+        .has-tooltip:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .quiz-option {
+            transition: all 0.3s ease;
+            border: 2px solid #E5E7EB;
+        }
+        
+        .quiz-option:hover {
+            border-color: var(--primary-light);
+        }
+        
+        .quiz-option.selected {
+            border-color: var(--primary);
+            background-color: rgba(79, 70, 229, 0.05);
+        }
+        
+        .quiz-option.correct {
+            border-color: var(--success);
+            background-color: rgba(16, 185, 129, 0.05);
+        }
+        
+        .quiz-option.incorrect {
+            border-color: var(--danger);
+            background-color: rgba(239, 68, 68, 0.05);
+        }
+        
+        .quiz-feedback {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .quiz-feedback.show {
+            max-height: 200px;
+        }
+        
+        .graph-container {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            background: #F3F4F6;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        
+        .graph-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+            background-size: 20px 20px;
+            z-index: 1;
+        }
+        
+        .graph-axis {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.2);
+            z-index: 2;
+        }
+        
+        .graph-x-axis {
+            left: 0;
+            top: 50%;
+            width: 100%;
+            height: 1px;
+        }
+        
+        .graph-y-axis {
+            left: 10%;
+            top: 0;
+            width: 1px;
+            height: 100%;
+        }
+        
+        .graph-curve {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 3;
+        }
+        
+        .graph-point {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary);
+            transform: translate(-50%, -50%);
+            z-index: 4;
+        }
+        
+        .note-card {
+            border-left: 4px solid var(--primary);
+            background-color: rgba(79, 70, 229, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .note-card:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        .example-card {
+            border-left: 4px solid var(--accent);
+            background-color: rgba(249, 115, 22, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .example-card:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .badge-primary {
+            background-color: rgba(79, 70, 229, 0.1);
+            color: var(--primary);
+        }
+        
+        .badge-secondary {
+            background-color: rgba(6, 182, 212, 0.1);
+            color: var(--secondary);
+        }
+        
+        .badge-accent {
+            background-color: rgba(249, 115, 22, 0.1);
+            color: var(--accent);
+        }
+        
+        .badge-success {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+        
+        .badge-warning {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+        
+        .badge-danger {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+        
+        .checkpoint {
+            position: relative;
+            padding-left: 2rem;
+        }
+        
+        .checkpoint::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 1.5rem;
+            height: 1.5rem;
+            background-color: white;
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .checkpoint.completed::before {
+            background-color: var(--primary);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='white'%3E%3Cpath fill-rule='evenodd' d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z' clip-rule='evenodd' /%3E%3C/svg%3E");
+            background-size: 1rem 1rem;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        
+        .checkpoint::after {
+            content: '';
+            position: absolute;
+            left: 0.75rem;
+            top: 1.5rem;
+            width: 2px;
+            height: calc(100% - 1.5rem);
+            background-color: #E5E7EB;
+            z-index: -1;
+        }
+        
+        .checkpoint:last-child::after {
+            display: none;
+        }
+        
+        .checkpoint.completed::after {
+            background-color: var(--primary);
+        }
+        
+        .checkpoint-content {
+            padding-bottom: 1.5rem;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+        
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        .tab-pane {
+            display: none;
+        }
+        
+        .tab-pane.active {
+            display: block;
+        }
+        
+        .trace-path {
+            stroke: var(--primary-light);
+            stroke-width: 2;
+            fill: none;
+        }
+        
+        .curve-position {
+            stroke: var(--primary);
+            stroke-width: 2;
+            fill: none;
+        }
+        
+        .curve-velocity {
+            stroke: var(--secondary);
+            stroke-width: 2;
+            fill: none;
+        }
+        
+        .curve-acceleration {
+            stroke: var(--accent);
+            stroke-width: 2;
+            fill: none;
+        }
+        
+        .curve-kinetic {
+            stroke: var(--secondary);
+            stroke-width: 2;
+            fill: none;
+        }
+        
+        .curve-potential {
+            stroke: var(--accent);
+            stroke-width: 2;
+            fill: none;
+        }
+        
+        .curve-total {
+            stroke: var(--primary);
+            stroke-width: 2;
+            fill: none;
+        }
+        
+        .simulation-curve {
+            stroke: var(--primary);
+            stroke-width: 2;
+            fill: none;
+        }
+        
+        .radio-circle.selected {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            position: relative;
+        }
+        
+        .radio-circle.selected::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 8px;
+            background-color: white;
+            border-radius: 50%;
+        }
+    </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.16 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:Inter, sans-serif;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.relative{position:relative}.mx-auto{margin-left:auto;margin-right:auto}.mb-2{margin-bottom:0.5rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.mb-6{margin-bottom:1.5rem}.mb-8{margin-bottom:2rem}.ml-2{margin-left:0.5rem}.ml-auto{margin-left:auto}.mr-1{margin-right:0.25rem}.mr-2{margin-right:0.5rem}.mr-3{margin-right:0.75rem}.mt-0\.5{margin-top:0.125rem}.mt-1{margin-top:0.25rem}.mt-2{margin-top:0.5rem}.mt-3{margin-top:0.75rem}.mt-4{margin-top:1rem}.mt-6{margin-top:1.5rem}.block{display:block}.flex{display:flex}.grid{display:grid}.hidden{display:none}.h-12{height:3rem}.h-3{height:0.75rem}.h-5{height:1.25rem}.h-6{height:1.5rem}.h-8{height:2rem}.min-h-screen{min-height:100vh}.w-12{width:3rem}.w-3{width:0.75rem}.w-5{width:1.25rem}.w-6{width:1.5rem}.w-8{width:2rem}.max-w-7xl{max-width:80rem}.flex-shrink-0{flex-shrink:0}.flex-grow{flex-grow:1}.cursor-pointer{cursor:pointer}.list-decimal{list-style-type:decimal}.list-disc{list-style-type:disc}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-3{gap:0.75rem}.gap-6{gap:1.5rem}.space-x-4 > :not([hidden]) ~ :not([hidden]){--tw-space-x-reverse:0;margin-right:calc(1rem * var(--tw-space-x-reverse));margin-left:calc(1rem * calc(1 - var(--tw-space-x-reverse)))}.space-y-1 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.25rem * var(--tw-space-y-reverse))}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.space-y-6 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem * var(--tw-space-y-reverse))}.space-y-8 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(2rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(2rem * var(--tw-space-y-reverse))}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-md{border-radius:0.375rem}.border{border-width:1px}.border-b{border-bottom-width:1px}.border-gray-200{--tw-border-opacity:1;border-color:rgb(229 231 235 / var(--tw-border-opacity, 1))}.border-gray-300{--tw-border-opacity:1;border-color:rgb(209 213 219 / var(--tw-border-opacity, 1))}.border-green-200{--tw-border-opacity:1;border-color:rgb(187 247 208 / var(--tw-border-opacity, 1))}.bg-accent{--tw-bg-opacity:1;background-color:rgb(249 115 22 / var(--tw-bg-opacity, 1))}.bg-gray-100{--tw-bg-opacity:1;background-color:rgb(243 244 246 / var(--tw-bg-opacity, 1))}.bg-gray-50{--tw-bg-opacity:1;background-color:rgb(249 250 251 / var(--tw-bg-opacity, 1))}.bg-gray-600{--tw-bg-opacity:1;background-color:rgb(75 85 99 / var(--tw-bg-opacity, 1))}.bg-green-50{--tw-bg-opacity:1;background-color:rgb(240 253 244 / var(--tw-bg-opacity, 1))}.bg-light{--tw-bg-opacity:1;background-color:rgb(249 250 251 / var(--tw-bg-opacity, 1))}.bg-primary{--tw-bg-opacity:1;background-color:rgb(79 70 229 / var(--tw-bg-opacity, 1))}.bg-secondary{--tw-bg-opacity:1;background-color:rgb(6 182 212 / var(--tw-bg-opacity, 1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.p-3{padding:0.75rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}.p-8{padding:2rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.py-4{padding-top:1rem;padding-bottom:1rem}.py-8{padding-top:2rem;padding-bottom:2rem}.pl-6{padding-left:1.5rem}.text-center{text-align:center}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-semibold{font-weight:600}.text-accent{--tw-text-opacity:1;color:rgb(249 115 22 / var(--tw-text-opacity, 1))}.text-gray-400{--tw-text-opacity:1;color:rgb(156 163 175 / var(--tw-text-opacity, 1))}.text-gray-500{--tw-text-opacity:1;color:rgb(107 114 128 / var(--tw-text-opacity, 1))}.text-gray-600{--tw-text-opacity:1;color:rgb(75 85 99 / var(--tw-text-opacity, 1))}.text-gray-700{--tw-text-opacity:1;color:rgb(55 65 81 / var(--tw-text-opacity, 1))}.text-gray-900{--tw-text-opacity:1;color:rgb(17 24 39 / var(--tw-text-opacity, 1))}.text-green-800{--tw-text-opacity:1;color:rgb(22 101 52 / var(--tw-text-opacity, 1))}.text-primary{--tw-text-opacity:1;color:rgb(79 70 229 / var(--tw-text-opacity, 1))}.text-warning{--tw-text-opacity:1;color:rgb(245 158 11 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.shadow-md{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.transition-shadow{transition-property:box-shadow;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.hover\:bg-gray-700:hover{--tw-bg-opacity:1;background-color:rgb(55 65 81 / var(--tw-bg-opacity, 1))}.hover\:bg-opacity-90:hover{--tw-bg-opacity:0.9}.hover\:shadow-md:hover{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}@media (min-width: 640px){.sm\:px-6{padding-left:1.5rem;padding-right:1.5rem}}@media (min-width: 768px){.md\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}}@media (min-width: 1024px){.lg\:col-span-2{grid-column:span 2 / span 2}.lg\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.lg\:px-8{padding-left:2rem;padding-right:2rem}}</style></head>
+<body>
+    <div class="min-h-screen bg-light">
+        <!-- Header -->
+        <header class="bg-white shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+                <div class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-primary mr-3" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"></path>
+                    </svg>
+                    <h1 class="text-xl font-bold text-gray-900">Vật Lý Học</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="timer-circle">
+                        <svg width="80" height="80">
+                            <circle class="timer-bg" cx="40" cy="40" r="36"></circle>
+                            <circle class="timer-progress" cx="40" cy="40" r="36" stroke-dasharray="226.2" stroke-dashoffset="0" id="timer-circle"></circle>
+                        </svg>
+                        <div class="timer-text" id="timer">45:00</div>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Thời gian còn lại</p>
+                        <div class="flex items-center mt-1">
+                            <button class="text-primary hover:text-primary-dark mr-2" id="pause-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </button>
+                            <button class="text-primary hover:text-primary-dark" id="reset-timer-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Course Header -->
+            <div class="mb-8">
+                <div class="flex items-center mb-2">
+                    <a onclick="window.location.href='homecourse.html'" 
+                    href="#" class="text-primary hover:text-primary-dark flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        Quay lại Bài học
+                    </a>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Dao động điều hòa</h1>
+                <p class="text-gray-600 mb-4">Tìm hiểu về chuyển động dao động điều hòa và các đặc trưng cơ bản</p>
+                <div class="flex flex-wrap items-center gap-3">
+                    <span class="badge badge-primary">Cơ học</span>
+                    <span class="badge badge-secondary">Lớp 12</span>
+                    <span class="badge badge-accent">45 phút</span>
+                    <div class="flex items-center ml-auto">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-warning mr-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                        </svg>
+                        <span class="text-sm font-medium">4.8/5 (124 đánh giá)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="mb-8">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-medium text-gray-700">Tiến độ bài học</span>
+                    <span class="text-sm font-medium text-primary" id="progress-text">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-value" id="progress-bar" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Content Tabs -->
+            <div class="mb-6">
+                <div class="flex border-b border-gray-200">
+                    <div class="tab active px-4 py-2" data-tab="theory">Lý thuyết</div>
+                    <div class="tab px-4 py-2" data-tab="simulation">Mô phỏng</div>
+                    <div class="tab px-4 py-2" data-tab="exercises">Bài tập</div>
+                    <div class="tab px-4 py-2" data-tab="summary">Tóm tắt</div>
+                </div>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="tab-content">
+                <!-- Theory Tab -->
+                <div class="tab-pane active" id="theory-tab">
+                    <div class="space-y-8">
+                        <!-- Introduction -->
+                        <section class="card p-6">
+                            <h2 class="text-2xl font-bold mb-4 gradient-text">Giới thiệu về dao động điều hòa</h2>
+                            <p class="mb-4">Dao động điều hòa là một dạng chuyển động tuần hoàn đặc biệt, trong đó vật dao động qua lại quanh vị trí cân bằng dưới tác dụng của lực phục hồi tỷ lệ thuận với độ lệch khỏi vị trí cân bằng và hướng về vị trí cân bằng.</p>
+                            
+                            <div class="note-card p-4 rounded-lg mb-4">
+                                <h3 class="font-semibold mb-2 flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-primary" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2h.01a1 1 0 100-2H9z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Định nghĩa
+                                </h3>
+                                <p>Dao động điều hòa là dao động trong đó li độ của vật là một hàm sin (hoặc cosin) của thời gian:</p>
+                                <div class="formula mt-2">
+                                    x(t) = A·cos(ωt + φ)
+                                </div>
+                            </div>
+                            
+                            <p class="mb-4">Các ví dụ về dao động điều hòa trong thực tế:</p>
+                            <ul class="list-disc pl-6 space-y-2 mb-4">
+                                <li>Con lắc đơn với biên độ dao động nhỏ</li>
+                                <li>Vật nối với lò xo dao động trên mặt phẳng ngang không ma sát</li>
+                                <li>Dao động của màng nhĩ khi nghe âm thanh đơn</li>
+                                <li>Dao động của mạch điện LC lý tưởng</li>
+                            </ul>
+                            
+                            <div class="mt-6">
+                                <h3 class="font-semibold mb-3">Video minh họa:</h3>
+                                <div class="aspect-w-16 aspect-h-9 bg-gray-100 rounded-lg flex items-center justify-center">
+                                    <div class="text-center p-8">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        <p class="text-gray-500">Video minh họa dao động điều hòa</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="checkpoint mt-6" data-checkpoint="intro">
+                                <h4 class="font-medium">Kiểm tra hiểu biết</h4>
+                                <div class="checkpoint-content">
+                                    <p class="text-sm text-gray-600 mb-2">Đánh dấu hoàn thành khi bạn đã hiểu các khái niệm cơ bản về dao động điều hòa.</p>
+                                    <button class="btn px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark complete-btn" data-checkpoint="intro">
+                                        Đánh dấu hoàn thành
+                                    </button>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Characteristics -->
+                        <section class="card p-6">
+                            <h2 class="text-2xl font-bold mb-4 gradient-text">Các đặc trưng của dao động điều hòa</h2>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div>
+                                    <h3 class="text-lg font-semibold mb-3 text-primary">Biên độ (A)</h3>
+                                    <p class="mb-2">Biên độ là độ lệch lớn nhất của vật dao động so với vị trí cân bằng.</p>
+                                    <div class="formula">
+                                        |x|<sub>max</sub> = A
+                                    </div>
+                                    <p class="mt-2 text-sm text-gray-600">Đơn vị: mét (m)</p>
+                                </div>
+                                
+                                <div>
+                                    <h3 class="text-lg font-semibold mb-3 text-primary">Chu kỳ (T)</h3>
+                                    <p class="mb-2">Chu kỳ là khoảng thời gian để vật thực hiện một dao động toàn phần.</p>
+                                    <div class="formula">
+                                        T = 2π/ω = 1/f
+                                    </div>
+                                    <p class="mt-2 text-sm text-gray-600">Đơn vị: giây (s)</p>
+                                </div>
+                                
+                                <div>
+                                    <h3 class="text-lg font-semibold mb-3 text-primary">Tần số (f)</h3>
+                                    <p class="mb-2">Tần số là số dao động toàn phần thực hiện trong một đơn vị thời gian.</p>
+                                    <div class="formula">
+                                        f = 1/T = ω/2π
+                                    </div>
+                                    <p class="mt-2 text-sm text-gray-600">Đơn vị: héc (Hz)</p>
+                                </div>
+                                
+                                <div>
+                                    <h3 class="text-lg font-semibold mb-3 text-primary">Tần số góc (ω)</h3>
+                                    <p class="mb-2">Tần số góc (hay vận tốc góc) là đại lượng đặc trưng cho tốc độ dao động.</p>
+                                    <div class="formula">
+                                        ω = 2π/T = 2πf
+                                    </div>
+                                    <p class="mt-2 text-sm text-gray-600">Đơn vị: radian/giây (rad/s)</p>
+                                </div>
+                                
+                                <div>
+                                    <h3 class="text-lg font-semibold mb-3 text-primary">Pha ban đầu (φ)</h3>
+                                    <p class="mb-2">Pha ban đầu xác định vị trí ban đầu của vật dao động tại thời điểm t = 0.</p>
+                                    <div class="formula">
+                                        φ = φ<sub>0</sub> (tại t = 0)
+                                    </div>
+                                    <p class="mt-2 text-sm text-gray-600">Đơn vị: radian (rad)</p>
+                                </div>
+                                
+                                <div>
+                                    <h3 class="text-lg font-semibold mb-3 text-primary">Pha của dao động (φ(t))</h3>
+                                    <p class="mb-2">Pha của dao động tại thời điểm t xác định vị trí của vật dao động.</p>
+                                    <div class="formula">
+                                        φ(t) = ωt + φ
+                                    </div>
+                                    <p class="mt-2 text-sm text-gray-600">Đơn vị: radian (rad)</p>
+                                </div>
+                            </div>
+                            
+                            <div class="example-card p-4 rounded-lg mb-6">
+                                <h3 class="font-semibold mb-2 flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-accent" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+                                    </svg>
+                                    Ví dụ
+                                </h3>
+                                <p class="mb-2">Một vật dao động điều hòa theo phương trình: x = 5·cos(2πt + π/4) (cm)</p>
+                                <p class="mb-2">Xác định các đặc trưng của dao động:</p>
+                                <ul class="list-disc pl-6 space-y-1">
+                                    <li>Biên độ: A = 5 cm</li>
+                                    <li>Tần số góc: ω = 2π rad/s</li>
+                                    <li>Tần số: f = ω/2π = 1 Hz</li>
+                                    <li>Chu kỳ: T = 1/f = 1 s</li>
+                                    <li>Pha ban đầu: φ = π/4 rad</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="checkpoint" data-checkpoint="characteristics">
+                                <h4 class="font-medium">Kiểm tra hiểu biết</h4>
+                                <div class="checkpoint-content">
+                                    <p class="text-sm text-gray-600 mb-2">Đánh dấu hoàn thành khi bạn đã hiểu các đặc trưng của dao động điều hòa.</p>
+                                    <button class="btn px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark complete-btn" data-checkpoint="characteristics">
+                                        Đánh dấu hoàn thành
+                                    </button>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Equations -->
+                        <section class="card p-6">
+                            <h2 class="text-2xl font-bold mb-4 gradient-text">Các phương trình dao động điều hòa</h2>
+                            
+                            <div class="space-y-6">
+                                <div>
+                                    <h3 class="text-lg font-semibold mb-3 text-primary">Phương trình li độ</h3>
+                                    <div class="formula mb-2">
+                                        x(t) = A·cos(ωt + φ)
+                                    </div>
+                                    <p>Biểu diễn vị trí của vật dao động theo thời gian.</p>
+                                </div>
+                                
+                                <div>
+                                    <h3 class="text-lg font-semibold mb-3 text-primary">Phương trình vận tốc</h3>
+                                    <div class="formula mb-2">
+                                        v(t) = dx/dt = -ωA·sin(ωt + φ) = v<sub>max</sub>·sin(ωt + φ + π/2)
+                                    </div>
+                                    <p>Trong đó vận tốc cực đại: v<sub>max</sub> = ωA</p>
+                                </div>
+                                
+                                <div>
+                                    <h3 class="text-lg font-semibold mb-3 text-primary">Phương trình gia tốc</h3>
+                                    <div class="formula mb-2">
+                                        a(t) = dv/dt = -ω²A·cos(ωt + φ) = -ω²x
+                                    </div>
+                                    <p>Trong đó gia tốc cực đại: a<sub>max</sub> = ω²A</p>
+                                </div>
+                                
+                                <div>
+                                    <h3 class="text-lg font-semibold mb-3 text-primary">Mối quan hệ giữa li độ, vận tốc và gia tốc</h3>
+                                    <div class="formula mb-2">
+                                        a = -ω²x
+                                    </div>
+                                    <p>Gia tốc tỷ lệ thuận với li độ và luôn hướng về vị trí cân bằng.</p>
+                                </div>
+                                
+                                <div>
+                                    <h3 class="text-lg font-semibold mb-3 text-primary">Phương trình động lực học</h3>
+                                    <div class="formula mb-2">
+                                        F = ma = -mω²x = -kx
+                                    </div>
+                                    <p>Trong đó k là hằng số lò xo (hoặc hệ số đàn hồi tương đương).</p>
+                                </div>
+                            </div>
+                            
+                            <div class="graph-container mt-6">
+                                <div class="graph-grid"></div>
+                                <div class="graph-axis graph-x-axis"></div>
+                                <div class="graph-axis graph-y-axis"></div>
+                                <svg class="graph-curve" id="position-curve" width="100%" height="100%" preserveAspectRatio="none"></svg>
+                                <svg class="graph-curve" id="velocity-curve" width="100%" height="100%" preserveAspectRatio="none"></svg>
+                                <svg class="graph-curve" id="acceleration-curve" width="100%" height="100%" preserveAspectRatio="none"></svg>
+                                <div class="graph-point" id="position-point"></div>
+                            </div>
+                            <div class="flex items-center justify-center mt-2 space-x-4 text-sm">
+                                <div class="flex items-center">
+                                    <span class="w-3 h-3 bg-primary rounded-full mr-1"></span>
+                                    <span>Li độ (x)</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="w-3 h-3 bg-secondary rounded-full mr-1"></span>
+                                    <span>Vận tốc (v)</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="w-3 h-3 bg-accent rounded-full mr-1"></span>
+                                    <span>Gia tốc (a)</span>
+                                </div>
+                            </div>
+                            
+                            <div class="checkpoint mt-6" data-checkpoint="equations">
+                                <h4 class="font-medium">Kiểm tra hiểu biết</h4>
+                                <div class="checkpoint-content">
+                                    <p class="text-sm text-gray-600 mb-2">Đánh dấu hoàn thành khi bạn đã hiểu các phương trình dao động điều hòa.</p>
+                                    <button class="btn px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark complete-btn" data-checkpoint="equations">
+                                        Đánh dấu hoàn thành
+                                    </button>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Energy -->
+                        <section class="card p-6">
+                            <h2 class="text-2xl font-bold mb-4 gradient-text">Năng lượng trong dao động điều hòa</h2>
+                            
+                            <div class="space-y-6">
+                                <div>
+                                    <h3 class="text-lg font-semibold mb-3 text-primary">Động năng</h3>
+                                    <div class="formula mb-2">
+                                        E<sub>k</sub> = (1/2)mv² = (1/2)mω²A²sin²(ωt + φ)
+                                    </div>
+                                    <p>Động năng đạt cực đại khi vật qua vị trí cân bằng (x = 0).</p>
+                                </div>
+                                
+                                <div>
+                                    <h3 class="text-lg font-semibold mb-3 text-primary">Thế năng</h3>
+                                    <div class="formula mb-2">
+                                        E<sub>p</sub> = (1/2)kx² = (1/2)mω²x² = (1/2)mω²A²cos²(ωt + φ)
+                                    </div>
+                                    <p>Thế năng đạt cực đại khi vật ở vị trí biên (x = ±A).</p>
+                                </div>
+                                
+                                <div>
+                                    <h3 class="text-lg font-semibold mb-3 text-primary">Cơ năng</h3>
+                                    <div class="formula mb-2">
+                                        E = E<sub>k</sub> + E<sub>p</sub> = (1/2)mω²A²
+                                    </div>
+                                    <p>Cơ năng của vật dao động điều hòa được bảo toàn và không đổi theo thời gian.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="graph-container mt-6">
+                                <div class="graph-grid"></div>
+                                <div class="graph-axis graph-x-axis"></div>
+                                <div class="graph-axis graph-y-axis"></div>
+                                <svg class="graph-curve" id="kinetic-curve" width="100%" height="100%" preserveAspectRatio="none"></svg>
+                                <svg class="graph-curve" id="potential-curve" width="100%" height="100%" preserveAspectRatio="none"></svg>
+                                <svg class="graph-curve" id="total-energy-curve" width="100%" height="100%" preserveAspectRatio="none"></svg>
+                            </div>
+                            <div class="flex items-center justify-center mt-2 space-x-4 text-sm">
+                                <div class="flex items-center">
+                                    <span class="w-3 h-3 bg-secondary rounded-full mr-1"></span>
+                                    <span>Động năng</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="w-3 h-3 bg-accent rounded-full mr-1"></span>
+                                    <span>Thế năng</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="w-3 h-3 bg-primary rounded-full mr-1"></span>
+                                    <span>Cơ năng</span>
+                                </div>
+                            </div>
+                            
+                            <div class="checkpoint mt-6" data-checkpoint="energy">
+                                <h4 class="font-medium">Kiểm tra hiểu biết</h4>
+                                <div class="checkpoint-content">
+                                    <p class="text-sm text-gray-600 mb-2">Đánh dấu hoàn thành khi bạn đã hiểu về năng lượng trong dao động điều hòa.</p>
+                                    <button class="btn px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark complete-btn" data-checkpoint="energy">
+                                        Đánh dấu hoàn thành
+                                    </button>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Applications -->
+                        <section class="card p-6">
+                            <h2 class="text-2xl font-bold mb-4 gradient-text">Ứng dụng của dao động điều hòa</h2>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                    <h3 class="font-semibold mb-2 text-primary">Đồng hồ quả lắc</h3>
+                                    <p>Đồng hồ quả lắc sử dụng dao động điều hòa của con lắc đơn để đo thời gian. Chu kỳ dao động của con lắc phụ thuộc vào chiều dài của nó.</p>
+                                </div>
+                                
+                                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                    <h3 class="font-semibold mb-2 text-primary">Hệ thống giảm xóc</h3>
+                                    <p>Hệ thống giảm xóc trong ô tô hoạt động dựa trên nguyên lý dao động điều hòa tắt dần, giúp giảm rung lắc và tăng độ êm ái khi di chuyển.</p>
+                                </div>
+                                
+                                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                    <h3 class="font-semibold mb-2 text-primary">Mạch dao động điện từ</h3>
+                                    <p>Mạch dao động LC tạo ra dao động điện từ, được ứng dụng trong các thiết bị thu phát sóng vô tuyến, radar và nhiều thiết bị điện tử khác.</p>
+                                </div>
+                                
+                                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                    <h3 class="font-semibold mb-2 text-primary">Nhạc cụ</h3>
+                                    <p>Nhiều nhạc cụ như đàn dây, kèn hơi tạo ra âm thanh dựa trên nguyên lý dao động điều hòa của dây đàn hoặc cột không khí.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="checkpoint mt-6" data-checkpoint="applications">
+                                <h4 class="font-medium">Kiểm tra hiểu biết</h4>
+                                <div class="checkpoint-content">
+                                    <p class="text-sm text-gray-600 mb-2">Đánh dấu hoàn thành khi bạn đã hiểu về các ứng dụng của dao động điều hòa.</p>
+                                    <button class="btn px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark complete-btn" data-checkpoint="applications">
+                                        Đánh dấu hoàn thành
+                                    </button>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+
+                <!-- Simulation Tab -->
+                <div class="tab-pane" id="simulation-tab">
+                    <div class="card p-6">
+                        <h2 class="text-2xl font-bold mb-6 gradient-text">Mô phỏng dao động điều hòa</h2>
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div class="lg:col-span-2">
+                                <div class="oscillator" id="oscillator">
+                                    <div class="oscillator-grid"></div>
+                                    <div class="oscillator-axis oscillator-x-axis"></div>
+                                    <div class="oscillator-axis oscillator-y-axis"></div>
+                                    <div class="oscillator-path"></div>
+                                    <div class="oscillator-spring" id="spring"></div>
+                                    <div class="oscillator-mass" id="mass"></div>
+                                    <svg class="oscillator-trace" id="trace" width="100%" height="100%" preserveAspectRatio="none">
+                                        <path class="trace-path" id="trace-path" d=""></path>
+                                    </svg>
+                                </div>
+                                
+                                <div class="mt-4 flex flex-wrap gap-3">
+                                    <button id="start-btn" class="btn px-5 py-2.5 bg-primary hover:bg-opacity-90 text-white rounded-md flex items-center shadow-md">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Bắt đầu
+                                    </button>
+                                    <button id="reset-btn" class="btn px-5 py-2.5 bg-gray-600 hover:bg-gray-700 text-white rounded-md flex items-center shadow-md">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Đặt lại
+                                    </button>
+                                    <div class="relative has-tooltip ml-auto">
+                                        <button class="btn px-5 py-2.5 bg-accent hover:bg-opacity-90 text-white rounded-md flex items-center shadow-md">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2h.01a1 1 0 100-2H9z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            Giải thích
+                                        </button>
+                                        <span class="tooltip">Mô phỏng này thể hiện dao động điều hòa của hệ vật-lò xo. Bạn có thể điều chỉnh các thông số như biên độ, khối lượng và độ cứng lò xo để quan sát sự thay đổi của dao động.</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-6">
+                                    <h3 class="font-semibold mb-3">Đồ thị dao động</h3>
+                                    <div class="graph-container">
+                                        <div class="graph-grid"></div>
+                                        <div class="graph-axis graph-x-axis"></div>
+                                        <div class="graph-axis graph-y-axis"></div>
+                                        <svg class="graph-curve" id="simulation-curve" width="100%" height="100%" preserveAspectRatio="none">
+                                            <path class="simulation-curve" id="simulation-path" d=""></path>
+                                        </svg>
+                                    </div>
+                                    <div class="flex justify-between text-sm mt-1">
+                                        <span>0</span>
+                                        <span>Thời gian (s)</span>
+                                        <span>5</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h3 class="font-semibold mb-4 flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                                    </svg>
+                                    Điều chỉnh thông số
+                                </h3>
+                                
+                                <div class="space-y-4">
+                                    <!-- Amplitude Control -->
+                                    <div class="relative has-tooltip">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Biên độ (cm)</label>
+                                        <div class="flex items-center">
+                                            <span class="text-xs text-gray-500 mr-2">1</span>
+                                            <div class="relative flex-grow slider-container">
+                                                <div class="slider-track">
+                                                    <div class="slider-track-highlight" id="amplitude-track" style="width: 50%"></div>
+                                                </div>
+                                                <input type="range" min="1" max="10" value="5" class="slider" id="amplitude-slider">
+                                            </div>
+                                            <span class="text-xs text-gray-500 ml-2">10</span>
+                                        </div>
+                                        <div class="mt-1">
+                                            <span class="text-sm font-medium" id="amplitude-value">5 cm</span>
+                                        </div>
+                                        <span class="tooltip">Điều chỉnh biên độ dao động ban đầu.</span>
+                                    </div>
+                                    
+                                    <!-- Mass Control -->
+                                    <div class="relative has-tooltip">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Khối lượng (kg)</label>
+                                        <div class="flex items-center">
+                                            <span class="text-xs text-gray-500 mr-2">0.1</span>
+                                            <div class="relative flex-grow slider-container">
+                                                <div class="slider-track">
+                                                    <div class="slider-track-highlight" id="mass-track" style="width: 40%"></div>
+                                                </div>
+                                                <input type="range" min="1" max="10" value="4" class="slider" id="mass-slider">
+                                            </div>
+                                            <span class="text-xs text-gray-500 ml-2">1.0</span>
+                                        </div>
+                                        <div class="mt-1">
+                                            <span class="text-sm font-medium" id="mass-value">0.4 kg</span>
+                                        </div>
+                                        <span class="tooltip">Điều chỉnh khối lượng của vật dao động.</span>
+                                    </div>
+                                    
+                                    <!-- Spring Constant Control -->
+                                    <div class="relative has-tooltip">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Độ cứng lò xo (N/m)</label>
+                                        <div class="flex items-center">
+                                            <span class="text-xs text-gray-500 mr-2">5</span>
+                                            <div class="relative flex-grow slider-container">
+                                                <div class="slider-track">
+                                                    <div class="slider-track-highlight" id="spring-track" style="width: 60%"></div>
+                                                </div>
+                                                <input type="range" min="5" max="50" value="30" class="slider" id="spring-slider">
+                                            </div>
+                                            <span class="text-xs text-gray-500 ml-2">50</span>
+                                        </div>
+                                        <div class="mt-1">
+                                            <span class="text-sm font-medium" id="spring-value">30 N/m</span>
+                                        </div>
+                                        <span class="tooltip">Điều chỉnh độ cứng của lò xo.</span>
+                                    </div>
+                                    
+                                    <!-- Damping Control -->
+                                    <div class="relative has-tooltip">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Hệ số cản</label>
+                                        <div class="flex items-center">
+                                            <span class="text-xs text-gray-500 mr-2">0</span>
+                                            <div class="relative flex-grow slider-container">
+                                                <div class="slider-track">
+                                                    <div class="slider-track-highlight" id="damping-track" style="width: 10%"></div>
+                                                </div>
+                                                <input type="range" min="0" max="100" value="10" class="slider" id="damping-slider">
+                                            </div>
+                                            <span class="text-xs text-gray-500 ml-2">1.0</span>
+                                        </div>
+                                        <div class="mt-1">
+                                            <span class="text-sm font-medium" id="damping-value">0.1</span>
+                                        </div>
+                                        <span class="tooltip">Điều chỉnh hệ số cản của môi trường. Giá trị 0 tương ứng với không có cản, dao động điều hòa lý tưởng.</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-6 p-4 bg-white rounded-lg shadow-sm">
+                                    <h4 class="font-medium mb-2">Kết quả tính toán</h4>
+                                    <div class="space-y-2 text-sm">
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Chu kỳ:</span>
+                                            <span class="font-medium" id="period-value">0.72 s</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Tần số:</span>
+                                            <span class="font-medium" id="frequency-value">1.39 Hz</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Tần số góc:</span>
+                                            <span class="font-medium" id="angular-frequency-value">8.66 rad/s</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Vận tốc cực đại:</span>
+                                            <span class="font-medium" id="max-velocity-value">0.43 m/s</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Gia tốc cực đại:</span>
+                                            <span class="font-medium" id="max-acceleration-value">3.75 m/s²</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Cơ năng:</span>
+                                            <span class="font-medium" id="energy-value">0.038 J</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="checkpoint mt-6" data-checkpoint="simulation">
+                            <h4 class="font-medium">Kiểm tra hiểu biết</h4>
+                            <div class="checkpoint-content">
+                                <p class="text-sm text-gray-600 mb-2">Đánh dấu hoàn thành khi bạn đã thực hiện mô phỏng và hiểu được ảnh hưởng của các thông số đến dao động điều hòa.</p>
+                                <button class="btn px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark complete-btn" data-checkpoint="simulation">
+                                    Đánh dấu hoàn thành
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exercises Tab -->
+                <div class="tab-pane" id="exercises-tab">
+                    <div class="card p-6">
+                        <h2 class="text-2xl font-bold mb-6 gradient-text">Bài tập về dao động điều hòa</h2>
+                        
+                        <div class="space-y-8">
+                            <!-- Exercise 1 -->
+                            <div class="border border-gray-200 rounded-lg p-6">
+                                <div class="flex items-start">
+                                    <div class="bg-primary text-white rounded-full w-6 h-6 flex items-center justify-center font-medium mr-3 mt-0.5 flex-shrink-0">1</div>
+                                    <div class="flex-grow">
+                                        <h3 class="font-semibold mb-3">Xác định các đặc trưng của dao động</h3>
+                                        <p class="mb-4">Một vật dao động điều hòa theo phương trình x = 8cos(5πt + π/6) (cm). Xác định:</p>
+                                        <ol class="list-decimal pl-6 mb-4 space-y-1">
+                                            <li>Biên độ dao động</li>
+                                            <li>Tần số góc</li>
+                                            <li>Chu kỳ dao động</li>
+                                            <li>Pha ban đầu</li>
+                                            <li>Vận tốc cực đại của vật</li>
+                                        </ol>
+                                        
+                                        <div class="mt-4 space-y-3">
+                                            <button class="btn px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark" id="show-hint-1">
+                                                Gợi ý
+                                            </button>
+                                            
+                                            <div class="bg-gray-50 p-4 rounded-lg hidden" id="hint-1">
+                                                <p class="mb-2 font-medium">Gợi ý:</p>
+                                                <ul class="list-disc pl-6 space-y-1">
+                                                    <li>So sánh với phương trình tổng quát x = Acos(ωt + φ)</li>
+                                                    <li>Chu kỳ T = 2π/ω</li>
+                                                    <li>Vận tốc cực đại v<sub>max</sub> = ωA</li>
+                                                </ul>
+                                            </div>
+                                            
+                                            <button class="btn px-4 py-2 bg-secondary text-white rounded-md hover:bg-opacity-90" id="show-solution-1">
+                                                Xem lời giải
+                                            </button>
+                                            
+                                            <div class="bg-gray-50 p-4 rounded-lg hidden" id="solution-1">
+                                                <p class="font-medium mb-2">Lời giải:</p>
+                                                <p>Từ phương trình x = 8cos(5πt + π/6) (cm), ta có:</p>
+                                                <ol class="list-decimal pl-6 space-y-2">
+                                                    <li>Biên độ dao động: A = 8 cm</li>
+                                                    <li>Tần số góc: ω = 5π rad/s</li>
+                                                    <li>Chu kỳ dao động: T = 2π/ω = 2π/(5π) = 0,4 s</li>
+                                                    <li>Pha ban đầu: φ = π/6 rad</li>
+                                                    <li>Vận tốc cực đại: v<sub>max</sub> = ωA = 5π × 8 = 40π cm/s = 1,26 m/s</li>
+                                                </ol>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Exercise 2 -->
+                            <div class="border border-gray-200 rounded-lg p-6">
+                                <div class="flex items-start">
+                                    <div class="bg-primary text-white rounded-full w-6 h-6 flex items-center justify-center font-medium mr-3 mt-0.5 flex-shrink-0">2</div>
+                                    <div class="flex-grow">
+                                        <h3 class="font-semibold mb-3">Dao động của con lắc lò xo</h3>
+                                        <p class="mb-4">Một vật có khối lượng 200g được gắn vào một lò xo có độ cứng k = 20 N/m. Vật được kéo ra khỏi vị trí cân bằng một đoạn 5 cm rồi thả ra cho dao động điều hòa. Xác định:</p>
+                                        <ol class="list-decimal pl-6 mb-4 space-y-1">
+                                            <li>Chu kỳ dao động của vật</li>
+                                            <li>Tần số dao động của vật</li>
+                                            <li>Phương trình dao động của vật</li>
+                                            <li>Vận tốc của vật khi qua vị trí cân bằng</li>
+                                            <li>Cơ năng của vật</li>
+                                        </ol>
+                                        
+                                        <div class="mt-4 space-y-3">
+                                            <button class="btn px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark" id="show-hint-2">
+                                                Gợi ý
+                                            </button>
+                                            
+                                            <div class="bg-gray-50 p-4 rounded-lg hidden" id="hint-2">
+                                                <p class="mb-2 font-medium">Gợi ý:</p>
+                                                <ul class="list-disc pl-6 space-y-1">
+                                                    <li>Chu kỳ dao động của con lắc lò xo: T = 2π√(m/k)</li>
+                                                    <li>Tần số f = 1/T</li>
+                                                    <li>Phương trình dao động có dạng x = Acos(ωt + φ)</li>
+                                                    <li>Vận tốc khi qua vị trí cân bằng: v = ±ωA</li>
+                                                    <li>Cơ năng: E = (1/2)kA²</li>
+                                                </ul>
+                                            </div>
+                                            
+                                            <button class="btn px-4 py-2 bg-secondary text-white rounded-md hover:bg-opacity-90" id="show-solution-2">
+                                                Xem lời giải
+                                            </button>
+                                            
+                                            <div class="bg-gray-50 p-4 rounded-lg hidden" id="solution-2">
+                                                <p class="font-medium mb-2">Lời giải:</p>
+                                                <ol class="list-decimal pl-6 space-y-2">
+                                                    <li>Chu kỳ dao động: T = 2π√(m/k) = 2π√(0,2/20) = 2π√0,01 = 0,628 s</li>
+                                                    <li>Tần số dao động: f = 1/T = 1/0,628 = 1,59 Hz</li>
+                                                    <li>
+                                                        Phương trình dao động:
+                                                        <ul class="list-disc pl-6 mt-1">
+                                                            <li>Biên độ A = 5 cm = 0,05 m</li>
+                                                            <li>Tần số góc ω = 2πf = 2π × 1,59 = 10 rad/s</li>
+                                                            <li>Pha ban đầu φ = 0 (vì vật được thả từ vị trí biên)</li>
+                                                            <li>Phương trình dao động: x = 0,05cos(10t) (m)</li>
+                                                        </ul>
+                                                    </li>
+                                                    <li>Vận tốc khi qua vị trí cân bằng: v<sub>max</sub> = ωA = 10 × 0,05 = 0,5 m/s</li>
+                                                    <li>Cơ năng: E = (1/2)kA² = (1/2) × 20 × (0,05)² = 0,025 J</li>
+                                                </ol>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Exercise 3 - Quiz -->
+                            <div class="border border-gray-200 rounded-lg p-6">
+                                <div class="flex items-start">
+                                    <div class="bg-primary text-white rounded-full w-6 h-6 flex items-center justify-center font-medium mr-3 mt-0.5 flex-shrink-0">3</div>
+                                    <div class="flex-grow">
+                                        <h3 class="font-semibold mb-3">Câu hỏi trắc nghiệm</h3>
+                                        <p class="mb-4">Chọn đáp án đúng cho các câu hỏi sau:</p>
+                                        
+                                        <div class="space-y-6">
+                                            <!-- Question 1 -->
+                                            <div>
+                                                <p class="mb-3 font-medium">1. Trong dao động điều hòa, khi nào vận tốc của vật có giá trị cực đại?</p>
+                                                <div class="space-y-2">
+                                                    <div class="quiz-option p-3 rounded-md cursor-pointer" data-correct="true" data-question="1">
+                                                        <div class="flex items-center">
+                                                            <div class="w-5 h-5 border border-gray-300 rounded-full mr-3 flex-shrink-0 radio-circle"></div>
+                                                            <span>Khi vật đi qua vị trí cân bằng</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="quiz-option p-3 rounded-md cursor-pointer" data-question="1">
+                                                        <div class="flex items-center">
+                                                            <div class="w-5 h-5 border border-gray-300 rounded-full mr-3 flex-shrink-0 radio-circle"></div>
+                                                            <span>Khi vật ở vị trí biên</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="quiz-option p-3 rounded-md cursor-pointer" data-question="1">
+                                                        <div class="flex items-center">
+                                                            <div class="w-5 h-5 border border-gray-300 rounded-full mr-3 flex-shrink-0 radio-circle"></div>
+                                                            <span>Khi vật ở giữa vị trí cân bằng và vị trí biên</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="quiz-option p-3 rounded-md cursor-pointer" data-question="1">
+                                                        <div class="flex items-center">
+                                                            <div class="w-5 h-5 border border-gray-300 rounded-full mr-3 flex-shrink-0 radio-circle"></div>
+                                                            <span>Vận tốc của vật luôn không đổi</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="quiz-feedback mt-3 bg-green-50 p-3 rounded-md border border-green-200 hidden" id="feedback-1">
+                                                    <p class="text-green-800">Đúng! Trong dao động điều hòa, vận tốc của vật đạt giá trị cực đại khi vật đi qua vị trí cân bằng (x = 0).</p>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Question 2 -->
+                                            <div>
+                                                <p class="mb-3 font-medium">2. Chu kỳ dao động của con lắc lò xo phụ thuộc vào:</p>
+                                                <div class="space-y-2">
+                                                    <div class="quiz-option p-3 rounded-md cursor-pointer" data-question="2">
+                                                        <div class="flex items-center">
+                                                            <div class="w-5 h-5 border border-gray-300 rounded-full mr-3 flex-shrink-0 radio-circle"></div>
+                                                            <span>Biên độ dao động</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="quiz-option p-3 rounded-md cursor-pointer" data-question="2">
+                                                        <div class="flex items-center">
+                                                            <div class="w-5 h-5 border border-gray-300 rounded-full mr-3 flex-shrink-0 radio-circle"></div>
+                                                            <span>Gia tốc trọng trường</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="quiz-option p-3 rounded-md cursor-pointer" data-correct="true" data-question="2">
+                                                        <div class="flex items-center">
+                                                            <div class="w-5 h-5 border border-gray-300 rounded-full mr-3 flex-shrink-0 radio-circle"></div>
+                                                            <span>Khối lượng vật và độ cứng lò xo</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="quiz-option p-3 rounded-md cursor-pointer" data-question="2">
+                                                        <div class="flex items-center">
+                                                            <div class="w-5 h-5 border border-gray-300 rounded-full mr-3 flex-shrink-0 radio-circle"></div>
+                                                            <span>Vị trí ban đầu của vật</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="quiz-feedback mt-3 bg-green-50 p-3 rounded-md border border-green-200 hidden" id="feedback-2">
+                                                    <p class="text-green-800">Đúng! Chu kỳ dao động của con lắc lò xo được tính theo công thức T = 2π√(m/k), chỉ phụ thuộc vào khối lượng vật (m) và độ cứng lò xo (k).</p>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Question 3 -->
+                                            <div>
+                                                <p class="mb-3 font-medium">3. Trong dao động điều hòa, khi nào gia tốc của vật có độ lớn cực đại?</p>
+                                                <div class="space-y-2">
+                                                    <div class="quiz-option p-3 rounded-md cursor-pointer" data-question="3">
+                                                        <div class="flex items-center">
+                                                            <div class="w-5 h-5 border border-gray-300 rounded-full mr-3 flex-shrink-0 radio-circle"></div>
+                                                            <span>Khi vật đi qua vị trí cân bằng</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="quiz-option p-3 rounded-md cursor-pointer" data-correct="true" data-question="3">
+                                                        <div class="flex items-center">
+                                                            <div class="w-5 h-5 border border-gray-300 rounded-full mr-3 flex-shrink-0 radio-circle"></div>
+                                                            <span>Khi vật ở vị trí biên</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="quiz-option p-3 rounded-md cursor-pointer" data-question="3">
+                                                        <div class="flex items-center">
+                                                            <div class="w-5 h-5 border border-gray-300 rounded-full mr-3 flex-shrink-0 radio-circle"></div>
+                                                            <span>Khi vật ở giữa vị trí cân bằng và vị trí biên</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="quiz-option p-3 rounded-md cursor-pointer" data-question="3">
+                                                        <div class="flex items-center">
+                                                            <div class="w-5 h-5 border border-gray-300 rounded-full mr-3 flex-shrink-0 radio-circle"></div>
+                                                            <span>Gia tốc của vật luôn không đổi</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="quiz-feedback mt-3 bg-green-50 p-3 rounded-md border border-green-200 hidden" id="feedback-3">
+                                                    <p class="text-green-800">Đúng! Trong dao động điều hòa, gia tốc của vật có độ lớn cực đại khi vật ở vị trí biên (x = ±A), với giá trị a<sub>max</sub> = ω²A.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mt-6">
+                                            <button class="btn px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark" id="check-answers">
+                                                Kiểm tra đáp án
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="checkpoint mt-6" data-checkpoint="exercises">
+                            <h4 class="font-medium">Kiểm tra hiểu biết</h4>
+                            <div class="checkpoint-content">
+                                <p class="text-sm text-gray-600 mb-2">Đánh dấu hoàn thành khi bạn đã làm xong các bài tập và hiểu được cách giải.</p>
+                                <button class="btn px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark complete-btn" data-checkpoint="exercises">
+                                    Đánh dấu hoàn thành
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Summary Tab -->
+                <div class="tab-pane" id="summary-tab">
+                    <div class="card p-6">
+                        <h2 class="text-2xl font-bold mb-6 gradient-text">Tóm tắt kiến thức</h2>
+                        
+                        <div class="space-y-6">
+                            <div class="bg-gray-50 p-5 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3 text-primary">Định nghĩa dao động điều hòa</h3>
+                                <p>Dao động điều hòa là dao động trong đó li độ của vật là một hàm sin (hoặc cosin) của thời gian: x(t) = A·cos(ωt + φ)</p>
+                            </div>
+                            
+                            <div class="bg-gray-50 p-5 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3 text-primary">Các đặc trưng của dao động điều hòa</h3>
+                                <ul class="list-disc pl-6 space-y-2">
+                                    <li><strong>Biên độ (A):</strong> Độ lệch lớn nhất của vật so với vị trí cân bằng</li>
+                                    <li><strong>Chu kỳ (T):</strong> Thời gian để vật thực hiện một dao động toàn phần, T = 2π/ω</li>
+                                    <li><strong>Tần số (f):</strong> Số dao động toàn phần trong một đơn vị thời gian, f = 1/T</li>
+                                    <li><strong>Tần số góc (ω):</strong> ω = 2πf = 2π/T</li>
+                                    <li><strong>Pha ban đầu (φ):</strong> Xác định vị trí ban đầu của vật tại t = 0</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="bg-gray-50 p-5 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3 text-primary">Các phương trình dao động điều hòa</h3>
+                                <ul class="list-disc pl-6 space-y-2">
+                                    <li><strong>Phương trình li độ:</strong> x(t) = A·cos(ωt + φ)</li>
+                                    <li><strong>Phương trình vận tốc:</strong> v(t) = -ωA·sin(ωt + φ)</li>
+                                    <li><strong>Phương trình gia tốc:</strong> a(t) = -ω²A·cos(ωt + φ) = -ω²x</li>
+                                    <li><strong>Vận tốc cực đại:</strong> v<sub>max</sub> = ωA</li>
+                                    <li><strong>Gia tốc cực đại:</strong> a<sub>max</sub> = ω²A</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="bg-gray-50 p-5 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3 text-primary">Năng lượng trong dao động điều hòa</h3>
+                                <ul class="list-disc pl-6 space-y-2">
+                                    <li><strong>Động năng:</strong> E<sub>k</sub> = (1/2)mv² = (1/2)<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'95d6d63e655b1fac',t:'MTc1MjIyMTU1Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></li></ul></div></div></div></div></div></main></div><iframe height="1" width="1" style="position: absolute; top: 0px; left: 0px; border: none; visibility: hidden;"></iframe></body></html>

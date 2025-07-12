@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mô Phỏng Chuyển Động Ném Tương Tác</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        }
+        
+        .simulation-canvas {
+            background: linear-gradient(180deg, #87CEEB 0%, #98FB98 100%);
+            border: 3px solid #4A90E2;
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .projectile {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, #FF6B6B, #FF4757);
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(255, 107, 107, 0.6);
+            z-index: 10;
+            transition: all 0.05s linear;
+        }
+        
+        .trajectory-path {
+            stroke: #FF6B6B;
+            stroke-width: 3;
+            fill: none;
+            opacity: 0.8;
+            stroke-dasharray: 5,5;
+        }
+        
+        .ground {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: linear-gradient(180deg, #8B4513, #654321);
+            border-top: 2px solid #A0522D;
+        }
+        
+        .cannon {
+            position: absolute;
+            bottom: 40px;
+            left: 50px;
+            width: 60px;
+            height: 30px;
+            background: linear-gradient(45deg, #2C3E50, #34495E);
+            border-radius: 5px;
+            transform-origin: right center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        
+        .target {
+            position: absolute;
+            bottom: 40px;
+            width: 30px;
+            height: 60px;
+            background: linear-gradient(180deg, #E74C3C, #C0392B);
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        
+        .control-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #E2E8F0, #CBD5E1);
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.4);
+        }
+        
+        .data-display {
+            background: linear-gradient(135deg, #2C3E50, #34495E);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.9);
+            color: #4A5568;
+            padding: 12px 24px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            background: white;
+            transform: translateY(-2px);
+        }
+        
+        .info-card {
+            background: linear-gradient(135deg, #F7FAFC, #EDF2F7);
+            border: 2px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        
+        @keyframes explosion {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(2); opacity: 0.7; }
+            100% { transform: scale(3); opacity: 0; }
+        }
+        
+        .explosion {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, #FFD700, #FF6347);
+            border-radius: 50%;
+            animation: explosion 0.5s ease-out;
+        }
+    </style>
+</head>
+<body class="p-6">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8">
+            <div class="text-center flex-1">
+                <h1 class="text-4xl font-bold text-white mb-4">
+                    <i class="fas fa-rocket mr-4"></i>
+                    Mô Phỏng Chuyển Động Ném Tương Tác
+                </h1>
+                <p class="text-xl text-white opacity-90">Khám phá vật lý chuyển động ném xiên với mô phỏng thực tế</p>
+            </div>
+            <a href="homecourse.html" class="btn-secondary">
+                <i class="fas fa-arrow-left mr-2"></i>Quay lại
+            </a>
+        </div>
+
+        <div class="grid lg:grid-cols-4 gap-6">
+            <!-- Main Simulation Area -->
+            <div class="lg:col-span-3">
+                <div class="glass-card p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-2xl font-bold text-white">
+                            <i class="fas fa-crosshairs mr-3"></i>Khu Vực Mô Phỏng
+                        </h2>
+                        <div class="flex gap-3">
+                            <button onclick="startSimulation()" class="btn-primary">
+                                <i class="fas fa-play mr-2"></i>Bắn
+                            </button>
+                            <button onclick="resetSimulation()" class="btn-secondary">
+                                <i class="fas fa-redo mr-2"></i>Đặt Lại
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Canvas -->
+                    <div class="simulation-canvas" style="width: 100%; height: 500px;" id="simulationCanvas">
+                        <svg width="100%" height="100%" id="trajectorySVG" style="position: absolute; top: 0; left: 0; z-index: 5;">
+                            <defs>
+                                <marker id="arrowhead" markerWidth="10" markerHeight="7" 
+                                        refX="9" refY="3.5" orient="auto">
+                                    <polygon points="0 0, 10 3.5, 0 7" fill="#FF6B6B" />
+                                </marker>
+                            </defs>
+                        </svg>
+                        
+                        <!-- Ground -->
+                        <div class="ground"></div>
+                        
+                        <!-- Cannon -->
+                        <div class="cannon" id="cannon"></div>
+                        
+                        <!-- Target -->
+                        <div class="target" id="target" style="right: 100px;"></div>
+                        
+                        <!-- Projectile -->
+                        <div class="projectile" id="projectile" style="display: none;"></div>
+                        
+                        <!-- Wind indicator -->
+                        <div style="position: absolute; top: 20px; right: 20px; color: white; font-weight: bold;">
+                            <i class="fas fa-wind mr-2"></i>
+                            <span id="windIndicator">Gió: 0 m/s</span>
+                        </div>
+                        
+                        <!-- Distance markers -->
+                        <div style="position: absolute; bottom: 45px; left: 0; right: 0; height: 20px;">
+                            <div style="position: absolute; left: 100px; color: #666; font-size: 12px;">100m</div>
+                            <div style="position: absolute; left: 200px; color: #666; font-size: 12px;">200m</div>
+                            <div style="position: absolute; left: 300px; color: #666; font-size: 12px;">300m</div>
+                            <div style="position: absolute; left: 400px; color: #666; font-size: 12px;">400m</div>
+                            <div style="position: absolute; left: 500px; color: #666; font-size: 12px;">500m</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Instructions -->
+                    <div class="info-card mt-6">
+                        <h4 class="font-bold text-gray-800 mb-3 flex items-center">
+                            <i class="fas fa-info-circle mr-3 text-blue-600"></i>Hướng Dẫn Sử Dụng
+                        </h4>
+                        <div class="grid md:grid-cols-2 gap-4 text-gray-700 text-sm">
+                            <div class="flex items-center">
+                                <i class="fas fa-angle-up mr-3 text-green-600"></i>
+                                <span>Điều chỉnh <strong>góc bắn</strong> (0° - 90°)</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-tachometer-alt mr-3 text-blue-600"></i>
+                                <span>Thay đổi <strong>vận tốc ban đầu</strong></span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-wind mr-3 text-purple-600"></i>
+                                <span>Thiết lập <strong>tốc độ gió</strong></span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-crosshairs mr-3 text-red-600"></i>
+                                <span>Nhắm vào <strong>mục tiêu</strong> để ghi điểm</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Control Panel -->
+            <div class="lg:col-span-1">
+                <div class="control-panel">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                        <i class="fas fa-sliders-h mr-3 text-purple-600"></i>Điều Khiển
+                    </h3>
+                    
+                    <!-- Launch Angle -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="font-semibold text-gray-700">Góc Bắn</span>
+                            <span class="text-purple-600 font-bold text-lg" id="angleValue">45°</span>
+                        </div>
+                        <input type="range" min="0" max="90" value="45" class="slider" id="angleSlider" oninput="updateAngle(this.value)">
+                        <div class="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>0°</span>
+                            <span>90°</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Initial Velocity -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="font-semibold text-gray-700">Vận Tốc Ban Đầu</span>
+                            <span class="text-purple-600 font-bold text-lg" id="velocityValue">50 m/s</span>
+                        </div>
+                        <input type="range" min="10" max="100" value="50" class="slider" id="velocitySlider" oninput="updateVelocity(this.value)">
+                        <div class="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>10 m/s</span>
+                            <span>100 m/s</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Wind Speed -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="font-semibold text-gray-700">Tốc Độ Gió</span>
+                            <span class="text-purple-600 font-bold text-lg" id="windValue">0 m/s</span>
+                        </div>
+                        <input type="range" min="-20" max="20" value="0" class="slider" id="windSlider" oninput="updateWind(this.value)">
+                        <div class="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>-20 m/s</span>
+                            <span>+20 m/s</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Gravity -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="font-semibold text-gray-700">Gia Tốc Trọng Trường</span>
+                            <span class="text-purple-600 font-bold text-lg" id="gravityValue">9.8 m/s²</span>
+                        </div>
+                        <input type="range" min="1" max="20" step="0.1" value="9.8" class="slider" id="gravitySlider" oninput="updateGravity(this.value)">
+                        <div class="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>1 m/s²</span>
+                            <span>20 m/s²</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Display Options -->
+                    <div class="mb-6">
+                        <label class="font-semibold text-gray-700 block mb-3">Tùy Chọn Hiển Thị</label>
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" id="showTrajectory" checked class="mr-3" onchange="toggleTrajectory()">
+                                <span>Hiển thị quỹ đạo</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="showVectors" class="mr-3" onchange="toggleVectors()">
+                                <span>Hiển thị vector vận tốc</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="showGrid" class="mr-3" onchange="toggleGrid()">
+                                <span>Hiển thị lưới tọa độ</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Data Display -->
+                    <div class="data-display">
+                        <h4 class="text-white font-bold mb-4 flex items-center">
+                            <i class="fas fa-chart-line mr-2"></i>Dữ Liệu Thời Gian Thực
+                        </h4>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span>Thời gian bay:</span>
+                                <span class="text-green-400 font-bold" id="flightTime">0.0 s</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Tầm xa:</span>
+                                <span class="text-blue-400 font-bold" id="range">0.0 m</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Độ cao tối đa:</span>
+                                <span class="text-yellow-400 font-bold" id="maxHeight">0.0 m</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Vận tốc hiện tại:</span>
+                                <span class="text-red-400 font-bold" id="currentVelocity">0.0 m/s</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Góc vận tốc:</span>
+                                <span class="text-purple-400 font-bold" id="velocityAngle">0.0°</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Điểm số:</span>
+                                <span class="text-orange-400 font-bold" id="score">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Physics Formulas -->
+        <div class="glass-card p-6 mt-6">
+            <h3 class="text-2xl font-bold text-white mb-6 flex items-center">
+                <i class="fas fa-calculator mr-3"></i>Công Thức Vật Lý
+            </h3>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="info-card">
+                    <h4 class="font-bold text-gray-800 mb-3">Thành Phần Vận Tốc</h4>
+                    <div class="text-gray-700 font-mono text-sm">
+                        <div>vₓ = v₀ × cos(θ)</div>
+                        <div>vᵧ = v₀ × sin(θ) - g×t</div>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <h4 class="font-bold text-gray-800 mb-3">Vị Trí</h4>
+                    <div class="text-gray-700 font-mono text-sm">
+                        <div>x = v₀ × cos(θ) × t</div>
+                        <div>y = v₀ × sin(θ) × t - ½gt²</div>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <h4 class="font-bold text-gray-800 mb-3">Tầm Xa & Độ Cao</h4>
+                    <div class="text-gray-700 font-mono text-sm">
+                        <div>R = v₀² × sin(2θ) / g</div>
+                        <div>H = v₀² × sin²(θ) / (2g)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simulation parameters
+        let simulation = {
+            angle: 45,
+            velocity: 50,
+            wind: 0,
+            gravity: 9.8,
+            isRunning: false,
+            showTrajectory: true,
+            showVectors: false,
+            showGrid: false,
+            score: 0,
+            projectile: {
+                x: 65,
+                y: 0,
+                vx: 0,
+                vy: 0,
+                time: 0
+            }
+        };
+        
+        // Canvas dimensions (scaled for display)
+        const CANVAS_WIDTH = 800;
+        const CANVAS_HEIGHT = 460;
+        const SCALE = 1; // 1 pixel = 1 meter
+        
+        // Update functions
+        function updateAngle(value) {
+            simulation.angle = parseFloat(value);
+            document.getElementById('angleValue').textContent = value + '°';
+            updateCannonAngle();
+            if (!simulation.isRunning) {
+                calculateTrajectory();
+            }
+        }
+        
+        function updateVelocity(value) {
+            simulation.velocity = parseFloat(value);
+            document.getElementById('velocityValue').textContent = value + ' m/s';
+            if (!simulation.isRunning) {
+                calculateTrajectory();
+            }
+        }
+        
+        function updateWind(value) {
+            simulation.wind = parseFloat(value);
+            document.getElementById('windValue').textContent = value + ' m/s';
+            document.getElementById('windIndicator').textContent = `Gió: ${value} m/s`;
+            if (!simulation.isRunning) {
+                calculateTrajectory();
+            }
+        }
+        
+        function updateGravity(value) {
+            simulation.gravity = parseFloat(value);
+            document.getElementById('gravityValue').textContent = value + ' m/s²';
+            if (!simulation.isRunning) {
+                calculateTrajectory();
+            }
+        }
+        
+        function updateCannonAngle() {
+            const cannon = document.getElementById('cannon');
+            cannon.style.transform = `rotate(${-simulation.angle}deg)`;
+        }
+        
+        function toggleTrajectory() {
+            simulation.showTrajectory = document.getElementById('showTrajectory').checked;
+            if (!simulation.showTrajectory) {
+                document.getElementById('trajectorySVG').innerHTML = '<defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#FF6B6B" /></marker></defs>';
+            } else if (!simulation.isRunning) {
+                calculateTrajectory();
+            }
+        }
+        
+        function toggleVectors() {
+            simulation.showVectors = document.getElementById('showVectors').checked;
+        }
+        
+        function toggleGrid() {
+            simulation.showGrid = document.getElementById('showGrid').checked;
+            // Implementation for grid display would go here
+        }
+        
+        function calculateTrajectory() {
+            if (!simulation.showTrajectory) return;
+            
+            const svg = document.getElementById('trajectorySVG');
+            svg.innerHTML = '<defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#FF6B6B" /></marker></defs>';
+            
+            const angleRad = simulation.angle * Math.PI / 180;
+            const v0x = simulation.velocity * Math.cos(angleRad);
+            const v0y = simulation.velocity * Math.sin(angleRad);
+            
+            let path = `M 65 ${CANVAS_HEIGHT - 40}`;
+            
+            for (let t = 0; t <= 20; t += 0.1) {
+                const x = 65 + v0x * t + 0.5 * simulation.wind * t * t;
+                const y = CANVAS_HEIGHT - 40 - (v0y * t - 0.5 * simulation.gravity * t * t);
+                
+                if (y >= CANVAS_HEIGHT - 40) break;
+                if (x >= CANVAS_WIDTH) break;
+                
+                path += ` L ${x} ${y}`;
+            }
+            
+            const pathElement = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            pathElement.setAttribute('d', path);
+            pathElement.setAttribute('class', 'trajectory-path');
+            svg.appendChild(pathElement);
+        }
+        
+        function startSimulation() {
+            if (simulation.isRunning) return;
+            
+            simulation.isRunning = true;
+            simulation.projectile.time = 0;
+            
+            const angleRad = simulation.angle * Math.PI / 180;
+            simulation.projectile.x = 65;
+            simulation.projectile.y = CANVAS_HEIGHT - 40;
+            simulation.projectile.vx = simulation.velocity * Math.cos(angleRad);
+            simulation.projectile.vy = simulation.velocity * Math.sin(angleRad);
+            
+            const projectile = document.getElementById('projectile');
+            projectile.style.display = 'block';
+            projectile.style.left = simulation.projectile.x + 'px';
+            projectile.style.bottom = '40px';
+            
+            animateProjectile();
+        }
+        
+        function animateProjectile() {
+            if (!simulation.isRunning) return;
+            
+            const dt = 0.05;
+            simulation.projectile.time += dt;
+            
+            // Update position
+            simulation.projectile.x += simulation.projectile.vx * dt + 0.5 * simulation.wind * dt * dt;
+            simulation.projectile.y -= simulation.projectile.vy * dt - 0.5 * simulation.gravity * dt * dt;
+            
+            // Update velocity
+            simulation.projectile.vy -= simulation.gravity * dt;
+            simulation.projectile.vx += simulation.wind * dt * 0.1; // Wind effect
+            
+            const projectile = document.getElementById('projectile');
+            projectile.style.left = simulation.projectile.x + 'px';
+            projectile.style.bottom = (CANVAS_HEIGHT - simulation.projectile.y) + 'px';
+            
+            // Update data display
+            updateDataDisplay();
+            
+            // Check for ground collision
+            if (simulation.projectile.y >= CANVAS_HEIGHT - 40) {
+                landProjectile();
+                return;
+            }
+            
+            // Check for target hit
+            checkTargetHit();
+            
+            // Continue animation
+            if (simulation.projectile.x < CANVAS_WIDTH && simulation.projectile.y < CANVAS_HEIGHT) {
+                requestAnimationFrame(animateProjectile);
+            } else {
+                simulation.isRunning = false;
+            }
+        }
+        
+        function landProjectile() {
+            simulation.isRunning = false;
+            
+            // Create explosion effect
+            const explosion = document.createElement('div');
+            explosion.className = 'explosion';
+            explosion.style.left = simulation.projectile.x + 'px';
+            explosion.style.bottom = '40px';
+            document.getElementById('simulationCanvas').appendChild(explosion);
+            
+            setTimeout(() => {
+                explosion.remove();
+            }, 500);
+            
+            updateDataDisplay();
+        }
+        
+        function checkTargetHit() {
+            const target = document.getElementById('target');
+            const targetRect = target.getBoundingClientRect();
+            const canvasRect = document.getElementById('simulationCanvas').getBoundingClientRect();
+            
+            const targetX = CANVAS_WIDTH - 130; // Approximate target position
+            const targetWidth = 30;
+            
+            if (simulation.projectile.x >= targetX && 
+                simulation.projectile.x <= targetX + targetWidth && 
+                simulation.projectile.y >= CANVAS_HEIGHT - 100) {
+                
+                // Hit target!
+                simulation.score += 10;
+                target.style.background = 'linear-gradient(180deg, #27AE60, #2ECC71)';
+                
+                setTimeout(() => {
+                    target.style.background = 'linear-gradient(180deg, #E74C3C, #C0392B)';
+                }, 1000);
+                
+                landProjectile();
+            }
+        }
+        
+        function updateDataDisplay() {
+            document.getElementById('flightTime').textContent = simulation.projectile.time.toFixed(1) + ' s';
+            document.getElementById('range').textContent = (simulation.projectile.x - 65).toFixed(1) + ' m';
+            
+            // Calculate max height (theoretical)
+            const angleRad = simulation.angle * Math.PI / 180;
+            const maxHeight = (simulation.velocity * Math.sin(angleRad)) ** 2 / (2 * simulation.gravity);
+            document.getElementById('maxHeight').textContent = maxHeight.toFixed(1) + ' m';
+            
+            // Current velocity
+            const currentSpeed = Math.sqrt(simulation.projectile.vx ** 2 + simulation.projectile.vy ** 2);
+            document.getElementById('currentVelocity').textContent = currentSpeed.toFixed(1) + ' m/s';
+            
+            // Velocity angle
+            const velocityAngle = Math.atan2(simulation.projectile.vy, simulation.projectile.vx) * 180 / Math.PI;
+            document.getElementById('velocityAngle').textContent = velocityAngle.toFixed(1) + '°';
+            
+            document.getElementById('score').textContent = simulation.score;
+        }
+        
+        function resetSimulation() {
+            simulation.isRunning = false;
+            simulation.projectile.time = 0;
+            
+            const projectile = document.getElementById('projectile');
+            projectile.style.display = 'none';
+            
+            // Clear any explosions
+            const explosions = document.querySelectorAll('.explosion');
+            explosions.forEach(exp => exp.remove());
+            
+            // Reset data display
+            document.getElementById('flightTime').textContent = '0.0 s';
+            document.getElementById('range').textContent = '0.0 m';
+            document.getElementById('currentVelocity').textContent = '0.0 m/s';
+            document.getElementById('velocityAngle').textContent = '0.0°';
+            
+            // Recalculate trajectory
+            calculateTrajectory();
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCannonAngle();
+            calculateTrajectory();
+            updateDataDisplay();
+        });
+        
+        // Keyboard controls
+        document.addEventListener('keydown', function(e) {
+            switch(e.key) {
+                case ' ':
+                    e.preventDefault();
+                    startSimulation();
+                    break;
+                case 'r':
+                case 'R':
+                    resetSimulation();
+                    break;
+            }
+        });
+    </script>
+</body>
+</html>

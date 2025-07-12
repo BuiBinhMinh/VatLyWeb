@@ -1,0 +1,1789 @@
+<!DOCTYPE html>
+<html lang="vi" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mô phỏng Điện trường và Từ trường - Học tập toàn diện</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#8B5CF6',
+                        secondary: '#06B6D4',
+                        accent: '#F472B6'
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="shortcut icon" href="https://cdn-icons-png.flaticon.com/512/8270/8270064.png" type="image/x-icon">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', system-ui, sans-serif; }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #8B5CF6 0%, #F472B6 50%, #06B6D4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .simulation-canvas {
+            background: radial-gradient(circle at center, #f8fafc 0%, #e2e8f0 100%);
+            border: 2px solid #e2e8f0;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .charge {
+            position: absolute;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            cursor: grab;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        .charge:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .charge.dragging {
+            cursor: grabbing;
+            transform: scale(1.2);
+            z-index: 1000;
+        }
+        
+        .positive-charge {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+        
+        .negative-charge {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        }
+        
+        .field-line {
+            position: absolute;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        
+        .vector-arrow {
+            position: absolute;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+        
+        .magnet {
+            position: absolute;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            cursor: grab;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        .magnet:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .magnet.dragging {
+            cursor: grabbing;
+            transform: scale(1.1);
+            z-index: 1000;
+        }
+        
+        .north-pole {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+        
+        .south-pole {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        }
+        
+        .control-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .slider {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            border-radius: 3px;
+            background: #e2e8f0;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #8B5CF6, #F472B6);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #8B5CF6, #F472B6);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #8B5CF6, #F472B6);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #06B6D4, #0891b2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(6, 182, 212, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4);
+        }
+        
+        .info-panel {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border: 1px solid #bae6fd;
+            border-radius: 15px;
+            padding: 15px;
+        }
+        
+        .measurement-display {
+            background: linear-gradient(135deg, #1f2937, #374151);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+        
+        .pulsing {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes fieldAnimation {
+            0% { stroke-dashoffset: 0; }
+            100% { stroke-dashoffset: 20; }
+        }
+        
+        .animated-field {
+            stroke-dasharray: 5,5;
+            animation: fieldAnimation 2s linear infinite;
+        }
+        
+        .mode-tab {
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .mode-tab.active {
+            background: linear-gradient(135deg, #8B5CF6, #F472B6);
+            color: white;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+        
+        .mode-tab:not(.active) {
+            background: #f8fafc;
+            color: #64748b;
+            border-color: #e2e8f0;
+        }
+        
+        .mode-tab:not(.active):hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+        
+        .section-tab {
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .section-tab.active {
+            background: linear-gradient(135deg, #06B6D4, #0891b2);
+            color: white;
+            border-color: #06B6D4;
+        }
+        
+        .section-tab:not(.active):hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+        
+        .theory-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .theory-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .formula-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 15px 0;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .exercise-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+        
+        .quiz-option {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .quiz-option:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+        
+        .quiz-option.selected {
+            background: #dbeafe;
+            border-color: #3b82f6;
+        }
+        
+        .quiz-option.correct {
+            background: #dcfce7;
+            border-color: #22c55e;
+        }
+        
+        .quiz-option.incorrect {
+            background: #fef2f2;
+            border-color: #ef4444;
+        }
+        
+        .progress-bar {
+            background: #e2e8f0;
+            border-radius: 10px;
+            height: 8px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(135deg, #8B5CF6, #F472B6);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white/90 backdrop-blur-xl border-b border-gray-200/50 shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <button onclick="goBack()" class="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
+                        <i class="fas fa-arrow-left text-gray-600"></i>
+                    </button>
+                    <div>
+                        <div class="flex items-center space-x-2 text-sm text-gray-500 mb-1">
+                            <span>Học tập</span>
+                            <i class="fas fa-chevron-right text-xs"></i>
+                            <span class="text-violet-600 font-medium">Điện từ học</span>
+                        </div>
+                        <h1 class="text-2xl font-bold gradient-text">Điện trường và Từ trường</h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-6 py-8">
+        <!-- Section Navigation -->
+        <div class="mb-8">
+            <div class="flex items-center justify-center space-x-4 flex-wrap">
+                <div class="section-tab active" onclick="switchSection('simulation')" id="simulation-tab">
+                    <i class="fas fa-flask mr-2"></i>Mô phỏng
+                </div>
+                <div class="section-tab" onclick="switchSection('theory')" id="theory-tab">
+                    <i class="fas fa-book mr-2"></i>Lý thuyết
+                </div>
+                <div class="section-tab" onclick="switchSection('exercises')" id="exercises-tab">
+                    <i class="fas fa-pencil-alt mr-2"></i>Bài tập
+                </div>
+                <div class="section-tab" onclick="switchSection('quiz')" id="quiz-tab">
+                    <i class="fas fa-question-circle mr-2"></i>Quiz
+                </div>
+            </div>
+        </div>
+
+        <!-- Simulation Section -->
+        <div id="simulation-section" class="section-content">
+            <!-- Mode Selection -->
+            <div class="mb-8">
+                <div class="flex items-center justify-center space-x-4">
+                    <div class="mode-tab active" onclick="switchMode('electric')" id="electric-tab">
+                        <i class="fas fa-bolt mr-2"></i>Điện trường
+                    </div>
+                    <div class="mode-tab" onclick="switchMode('magnetic')" id="magnetic-tab">
+                        <i class="fas fa-magnet mr-2"></i>Từ trường
+                    </div>
+                    <div class="mode-tab" onclick="switchMode('combined')" id="combined-tab">
+                        <i class="fas fa-sync-alt mr-2"></i>Kết hợp
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-4 gap-8">
+                <!-- Main Simulation Area -->
+                <div class="lg:col-span-3">
+                    <div class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 border border-gray-200/50 shadow-xl">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-2xl font-bold text-gray-800">Khu vực Mô phỏng</h2>
+                            <div class="flex items-center space-x-3">
+                                <button onclick="toggleAnimation()" class="btn-secondary" id="animation-btn">
+                                    <i class="fas fa-play mr-2"></i>Bắt đầu
+                                </button>
+                                <button onclick="resetSimulation()" class="btn-secondary">
+                                    <i class="fas fa-redo mr-2"></i>Đặt lại
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Simulation Canvas -->
+                        <div class="simulation-canvas" style="width: 100%; height: 500px;" id="simulation-canvas">
+                            <!-- Electric Field Mode Elements -->
+                            <div id="electric-elements" class="mode-content">
+                                <!-- Positive Charge -->
+                                <div class="charge positive-charge" style="width: 40px; height: 40px; left: 200px; top: 150px;" 
+                                     data-charge="1" data-type="positive" id="charge1">
+                                    +
+                                </div>
+                                <!-- Negative Charge -->
+                                <div class="charge negative-charge" style="width: 40px; height: 40px; left: 400px; top: 250px;" 
+                                     data-charge="-1" data-type="negative" id="charge2">
+                                    -
+                                </div>
+                            </div>
+
+                            <!-- Magnetic Field Mode Elements -->
+                            <div id="magnetic-elements" class="mode-content hidden">
+                                <!-- North Pole -->
+                                <div class="magnet north-pole" style="width: 80px; height: 40px; left: 200px; top: 180px;" 
+                                     data-pole="north" id="magnet1">
+                                    N
+                                </div>
+                                <!-- South Pole -->
+                                <div class="magnet south-pole" style="width: 80px; height: 40px; left: 400px; top: 220px;" 
+                                     data-pole="south" id="magnet2">
+                                    S
+                                </div>
+                            </div>
+
+                            <!-- Combined Mode Elements -->
+                            <div id="combined-elements" class="mode-content hidden">
+                                <!-- Moving Charge -->
+                                <div class="charge positive-charge" style="width: 30px; height: 30px; left: 150px; top: 200px;" 
+                                     data-charge="1" data-velocity="50" id="moving-charge">
+                                    +
+                                </div>
+                                <!-- Magnetic Field Source -->
+                                <div class="magnet north-pole" style="width: 60px; height: 30px; left: 450px; top: 200px;" 
+                                     data-pole="north" id="field-source">
+                                    B
+                                </div>
+                            </div>
+
+                            <!-- Field Lines SVG -->
+                            <svg class="absolute inset-0 w-full h-full pointer-events-none" id="field-svg">
+                                <defs>
+                                    <marker id="arrowhead-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                        <polygon points="0 0, 10 3.5, 0 7" fill="#ef4444" />
+                                    </marker>
+                                    <marker id="arrowhead-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                        <polygon points="0 0, 10 3.5, 0 7" fill="#3b82f6" />
+                                    </marker>
+                                    <marker id="arrowhead-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                        <polygon points="0 0, 10 3.5, 0 7" fill="#10b981" />
+                                    </marker>
+                                </defs>
+                            </svg>
+
+                            <!-- Test Charge -->
+                            <div class="charge" style="width: 20px; height: 20px; left: 300px; top: 200px; background: linear-gradient(135deg, #fbbf24, #f59e0b);" 
+                                 id="test-charge" data-charge="0.1">
+                                q
+                            </div>
+                        </div>
+
+                        <!-- Measurement Display -->
+                        <div class="mt-6">
+                            <div class="measurement-display">
+                                <div class="grid md:grid-cols-2 gap-4">
+                                    <div>
+                                        <div class="text-cyan-400 font-semibold mb-2">📊 Thông số đo được:</div>
+                                        <div id="measurements">
+                                            <div>Điện trường E: <span id="electric-field">0.00</span> N/C</div>
+                                            <div>Từ trường B: <span id="magnetic-field">0.00</span> T</div>
+                                            <div>Lực tác dụng F: <span id="force">0.00</span> N</div>
+                                            <div>Thế năng U: <span id="potential">0.00</span> J</div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="text-green-400 font-semibold mb-2">📍 Vị trí điện tích thử:</div>
+                                        <div id="position-info">
+                                            <div>Tọa độ: (<span id="pos-x">300</span>, <span id="pos-y">200</span>)</div>
+                                            <div>Khoảng cách đến nguồn 1: <span id="dist1">0</span> px</div>
+                                            <div>Khoảng cách đến nguồn 2: <span id="dist2">0</span> px</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Control Panel -->
+                <div class="lg:col-span-1">
+                    <div class="space-y-6">
+                        <!-- Parameters Control -->
+                        <div class="control-panel">
+                            <h3 class="text-lg font-bold text-gray-800 mb-4">⚙️ Điều khiển</h3>
+                            
+                            <!-- Electric Field Controls -->
+                            <div id="electric-controls" class="control-group">
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Điện tích 1 (μC)</label>
+                                        <input type="range" min="-10" max="10" value="5" step="0.5" class="slider w-full" 
+                                               id="charge1-slider" oninput="updateCharge(1, this.value)">
+                                        <div class="text-center text-sm text-gray-600 mt-1">
+                                            <span id="charge1-value">+5.0</span> μC
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Điện tích 2 (μC)</label>
+                                        <input type="range" min="-10" max="10" value="-5" step="0.5" class="slider w-full" 
+                                               id="charge2-slider" oninput="updateCharge(2, this.value)">
+                                        <div class="text-center text-sm text-gray-600 mt-1">
+                                            <span id="charge2-value">-5.0</span> μC
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Magnetic Field Controls -->
+                            <div id="magnetic-controls" class="control-group hidden">
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Cường độ từ trường (T)</label>
+                                        <input type="range" min="0.1" max="2" value="1" step="0.1" class="slider w-full" 
+                                               id="magnetic-strength" oninput="updateMagneticField(this.value)">
+                                        <div class="text-center text-sm text-gray-600 mt-1">
+                                            <span id="magnetic-value">1.0</span> T
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Hướng từ trường</label>
+                                        <select class="w-full p-2 border border-gray-300 rounded-lg" id="magnetic-direction" onchange="updateMagneticDirection(this.value)">
+                                            <option value="horizontal">Ngang →</option>
+                                            <option value="vertical">Dọc ↑</option>
+                                            <option value="into">Vào trong ⊗</option>
+                                            <option value="out">Ra ngoài ⊙</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Combined Mode Controls -->
+                            <div id="combined-controls" class="control-group hidden">
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Vận tốc điện tích (m/s)</label>
+                                        <input type="range" min="10" max="100" value="50" step="5" class="slider w-full" 
+                                               id="velocity-slider" oninput="updateVelocity(this.value)">
+                                        <div class="text-center text-sm text-gray-600 mt-1">
+                                            <span id="velocity-value">50</span> m/s
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Góc vận tốc (độ)</label>
+                                        <input type="range" min="0" max="360" value="0" step="15" class="slider w-full" 
+                                               id="angle-slider" oninput="updateAngle(this.value)">
+                                        <div class="text-center text-sm text-gray-600 mt-1">
+                                            <span id="angle-value">0</span>°
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Display Options -->
+                        <div class="control-panel">
+                            <h3 class="text-lg font-bold text-gray-800 mb-4">👁️ Hiển thị</h3>
+                            <div class="space-y-3">
+                                <label class="flex items-center space-x-3">
+                                    <input type="checkbox" checked class="w-4 h-4 text-violet-600 rounded" id="show-field-lines" onchange="toggleFieldLines()">
+                                    <span class="text-sm text-gray-700">Đường sức</span>
+                                </label>
+                                <label class="flex items-center space-x-3">
+                                    <input type="checkbox" checked class="w-4 h-4 text-violet-600 rounded" id="show-vectors" onchange="toggleVectors()">
+                                    <span class="text-sm text-gray-700">Vector lực</span>
+                                </label>
+                                <label class="flex items-center space-x-3">
+                                    <input type="checkbox" class="w-4 h-4 text-violet-600 rounded" id="show-equipotential" onchange="toggleEquipotential()">
+                                    <span class="text-sm text-gray-700">Đường đẳng thế</span>
+                                </label>
+                                <label class="flex items-center space-x-3">
+                                    <input type="checkbox" checked class="w-4 h-4 text-violet-600 rounded" id="show-measurements" onchange="toggleMeasurements()">
+                                    <span class="text-sm text-gray-700">Số liệu đo</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Information Panel -->
+                        <div class="info-panel">
+                            <h3 class="text-lg font-bold text-blue-800 mb-3">💡 Hướng dẫn</h3>
+                            <div class="text-sm text-blue-700 space-y-2">
+                                <p><strong>Kéo thả:</strong> Di chuyển các điện tích và nam châm</p>
+                                <p><strong>Điện tích thử:</strong> Quan sát lực tác dụng tại các vị trí</p>
+                                <p><strong>Thanh trượt:</strong> Thay đổi độ lớn điện tích/từ trường</p>
+                                <p><strong>Chế độ:</strong> Chuyển đổi giữa điện trường, từ trường và kết hợp</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Theory Section -->
+        <div id="theory-section" class="section-content hidden">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-12">
+                    <h2 class="text-4xl font-bold gradient-text mb-4">Lý thuyết Điện trường và Từ trường</h2>
+                    <p class="text-xl text-gray-600">Khám phá các khái niệm cơ bản và công thức quan trọng</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8 mb-12">
+                    <!-- Điện trường -->
+                    <div class="theory-card">
+                        <div class="text-center mb-6">
+                            <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-bolt text-white text-2xl"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-blue-800">Điện trường</h3>
+                        </div>
+                        
+                        <div class="space-y-6">
+                            <div>
+                                <h4 class="font-semibold text-blue-700 mb-2">Định nghĩa:</h4>
+                                <p class="text-gray-700 text-sm">Điện trường là vùng không gian xung quanh điện tích, trong đó có tác dụng lực điện lên các điện tích khác đặt trong đó.</p>
+                            </div>
+                            
+                            <div class="formula-box">
+                                E⃗ = F⃗/q = kQ/r² · r̂
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-semibold text-blue-700 mb-2">Các đặc điểm:</h4>
+                                <ul class="text-gray-700 text-sm space-y-1">
+                                    <li>• Đại lượng vector</li>
+                                    <li>• Đơn vị: N/C hoặc V/m</li>
+                                    <li>• Hướng từ điện tích dương đến điện tích âm</li>
+                                    <li>• Tuân theo nguyên lý chồng chất</li>
+                                </ul>
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-semibold text-blue-700 mb-2">Công thức quan trọng:</h4>
+                                <div class="bg-blue-50 p-4 rounded-lg space-y-2 text-sm">
+                                    <div><strong>Thông lượng điện:</strong> Φ = E⃗·S⃗ = ES cos α</div>
+                                    <div><strong>Định luật Gauss:</strong> ∮E⃗·dS⃗ = Q/ε₀</div>
+                                    <div><strong>Điện thế:</strong> V = kQ/r</div>
+                                    <div><strong>Liên hệ E và V:</strong> E⃗ = -∇V</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Từ trường -->
+                    <div class="theory-card">
+                        <div class="text-center mb-6">
+                            <div class="w-16 h-16 bg-gradient-to-br from-red-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-magnet text-white text-2xl"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-red-800">Từ trường</h3>
+                        </div>
+                        
+                        <div class="space-y-6">
+                            <div>
+                                <h4 class="font-semibold text-red-700 mb-2">Định nghĩa:</h4>
+                                <p class="text-gray-700 text-sm">Từ trường là vùng không gian xung quanh nam châm hoặc dòng điện, trong đó có tác dụng lực từ lên nam châm hoặc dòng điện khác.</p>
+                            </div>
+                            
+                            <div class="formula-box" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                                B⃗ = F⃗/(qv⃗) = μ₀I/(2πr)
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-semibold text-red-700 mb-2">Các đặc điểm:</h4>
+                                <ul class="text-gray-700 text-sm space-y-1">
+                                    <li>• Đại lượng vector</li>
+                                    <li>• Đơn vị: T (Tesla) hoặc G (Gauss)</li>
+                                    <li>• Đường sức từ là đường cong khép kín</li>
+                                    <li>• Không có từ tích (monopole từ)</li>
+                                </ul>
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-semibold text-red-700 mb-2">Công thức quan trọng:</h4>
+                                <div class="bg-red-50 p-4 rounded-lg space-y-2 text-sm">
+                                    <div><strong>Lực Lorentz:</strong> F⃗ = q(v⃗ × B⃗)</div>
+                                    <div><strong>Từ thông:</strong> Φ = B⃗·S⃗ = BS cos α</div>
+                                    <div><strong>Định luật Biot-Savart:</strong> dB⃗ = (μ₀I/4π) × (dl⃗ × r̂)/r²</div>
+                                    <div><strong>Định luật Ampère:</strong> ∮B⃗·dl⃗ = μ₀I</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phương trình Maxwell -->
+                <div class="theory-card mb-8">
+                    <div class="text-center mb-8">
+                        <div class="w-20 h-20 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-3xl flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-infinity text-white text-3xl"></i>
+                        </div>
+                        <h3 class="text-3xl font-bold text-purple-800">Phương trình Maxwell</h3>
+                        <p class="text-gray-600 mt-2">Bốn phương trình cơ bản mô tả toàn bộ hiện tượng điện từ</p>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="space-y-6">
+                            <div class="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-xl border border-blue-200">
+                                <h4 class="font-bold text-blue-800 mb-3">1. Định luật Gauss (Điện)</h4>
+                                <div class="formula-box text-lg">∇·E⃗ = ρ/ε₀</div>
+                                <p class="text-blue-700 text-sm">Thông lượng điện qua mặt kín tỉ lệ với điện tích bên trong</p>
+                            </div>
+                            
+                            <div class="bg-gradient-to-r from-red-50 to-pink-50 p-6 rounded-xl border border-red-200">
+                                <h4 class="font-bold text-red-800 mb-3">2. Định luật Gauss (Từ)</h4>
+                                <div class="formula-box text-lg" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">∇·B⃗ = 0</div>
+                                <p class="text-red-700 text-sm">Không tồn tại từ tích, đường sức từ luôn khép kín</p>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-6">
+                            <div class="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-xl border border-green-200">
+                                <h4 class="font-bold text-green-800 mb-3">3. Định luật Faraday</h4>
+                                <div class="formula-box text-lg" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">∇×E⃗ = -∂B⃗/∂t</div>
+                                <p class="text-green-700 text-sm">Từ trường biến thiên sinh ra điện trường xoáy</p>
+                            </div>
+                            
+                            <div class="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-xl border border-purple-200">
+                                <h4 class="font-bold text-purple-800 mb-3">4. Định luật Ampère-Maxwell</h4>
+                                <div class="formula-box text-lg" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);">∇×B⃗ = μ₀J⃗ + μ₀ε₀∂E⃗/∂t</div>
+                                <p class="text-purple-700 text-sm">Dòng điện và điện trường biến thiên sinh ra từ trường</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ứng dụng -->
+                <div class="theory-card">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center">Ứng dụng thực tế</h3>
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-lightbulb text-white text-2xl"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-800 mb-2">Máy phát điện</h4>
+                            <p class="text-gray-600 text-sm">Biến cơ năng thành điện năng dựa trên cảm ứng điện từ</p>
+                        </div>
+                        
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-broadcast-tower text-white text-2xl"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-800 mb-2">Truyền thông</h4>
+                            <p class="text-gray-600 text-sm">Sóng radio, TV, internet sử dụng sóng điện từ</p>
+                        </div>
+                        
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-magnet text-white text-2xl"></i>
+                            </div>
+                            <h4 class="font-semibold text-gray-800 mb-2">MRI</h4>
+                            <p class="text-gray-600 text-sm">Chụp cộng hưởng từ trong y học</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Exercises Section -->
+        <div id="exercises-section" class="section-content hidden">
+            <div class="max-w-4xl mx-auto">
+                <div class="text-center mb-12">
+                    <h2 class="text-4xl font-bold gradient-text mb-4">Bài tập Điện trường và Từ trường</h2>
+                    <p class="text-xl text-gray-600">Luyện tập với các bài tập từ cơ bản đến nâng cao</p>
+                </div>
+
+                <!-- Exercise 1 -->
+                <div class="exercise-card">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-white font-bold text-sm">1</span>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold text-gray-800 mb-4">Điện trường của điện tích điểm</h3>
+                            <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                                <p class="text-gray-700">
+                                    Một điện tích điểm Q = +4μC đặt tại gốc tọa độ. Tính cường độ điện trường tại điểm M cách Q một khoảng 30cm.
+                                </p>
+                                <p class="text-gray-600 text-sm mt-2">Cho: k = 9×10⁹ N·m²/C²</p>
+                            </div>
+                            
+                            <div class="space-y-3">
+                                <h4 class="font-semibold text-gray-700">Lời giải:</h4>
+                                <div class="bg-blue-50 p-4 rounded-lg">
+                                    <div class="space-y-2 text-sm">
+                                        <div><strong>Bước 1:</strong> Xác định công thức</div>
+                                        <div class="ml-4">E = kQ/r²</div>
+                                        
+                                        <div><strong>Bước 2:</strong> Thay số</div>
+                                        <div class="ml-4">
+                                            E = (9×10⁹ × 4×10⁻⁶)/(0.3)²<br>
+                                            E = 36×10³/0.09 = 4×10⁵ N/C
+                                        </div>
+                                        
+                                        <div><strong>Đáp án:</strong> E = 4×10⁵ N/C</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4 flex items-center space-x-3">
+                                <button onclick="toggleSolution(1)" class="btn-secondary" id="solution-btn-1">
+                                    <i class="fas fa-eye mr-2"></i>Xem lời giải
+                                </button>
+                                <button onclick="simulateExercise(1)" class="btn-primary">
+                                    <i class="fas fa-flask mr-2"></i>Mô phỏng
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exercise 2 -->
+                <div class="exercise-card">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-8 h-8 bg-gradient-to-br from-red-500 to-pink-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-white font-bold text-sm">2</span>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold text-gray-800 mb-4">Lực từ tác dụng lên dòng điện</h3>
+                            <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                                <p class="text-gray-700">
+                                    Một dây dẫn thẳng dài 20cm mang dòng điện I = 5A đặt vuông góc với từ trường đều B = 0.2T. 
+                                    Tính lực từ tác dụng lên dây dẫn.
+                                </p>
+                            </div>
+                            
+                            <div class="space-y-3 hidden" id="solution-2">
+                                <h4 class="font-semibold text-gray-700">Lời giải:</h4>
+                                <div class="bg-red-50 p-4 rounded-lg">
+                                    <div class="space-y-2 text-sm">
+                                        <div><strong>Bước 1:</strong> Xác định công thức</div>
+                                        <div class="ml-4">F = BIL sin α (với α = 90°)</div>
+                                        
+                                        <div><strong>Bước 2:</strong> Thay số</div>
+                                        <div class="ml-4">
+                                            F = 0.2 × 5 × 0.2 × sin(90°)<br>
+                                            F = 0.2 × 5 × 0.2 × 1 = 0.2 N
+                                        </div>
+                                        
+                                        <div><strong>Đáp án:</strong> F = 0.2 N</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4 flex items-center space-x-3">
+                                <button onclick="toggleSolution(2)" class="btn-secondary" id="solution-btn-2">
+                                    <i class="fas fa-eye mr-2"></i>Xem lời giải
+                                </button>
+                                <button onclick="simulateExercise(2)" class="btn-primary">
+                                    <i class="fas fa-flask mr-2"></i>Mô phỏng
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exercise 3 -->
+                <div class="exercise-card">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-white font-bold text-sm">3</span>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold text-gray-800 mb-4">Cảm ứng điện từ</h3>
+                            <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                                <p class="text-gray-700">
+                                    Một cuộn dây có 100 vòng, diện tích mỗi vòng S = 50cm². Từ thông qua cuộn dây biến thiên từ 0.1Wb đến 0.3Wb trong thời gian 0.2s. 
+                                    Tính suất điện động cảm ứng.
+                                </p>
+                            </div>
+                            
+                            <div class="space-y-3 hidden" id="solution-3">
+                                <h4 class="font-semibold text-gray-700">Lời giải:</h4>
+                                <div class="bg-green-50 p-4 rounded-lg">
+                                    <div class="space-y-2 text-sm">
+                                        <div><strong>Bước 1:</strong> Xác định công thức</div>
+                                        <div class="ml-4">ε = -N × ΔΦ/Δt</div>
+                                        
+                                        <div><strong>Bước 2:</strong> Tính độ biến thiên từ thông</div>
+                                        <div class="ml-4">ΔΦ = 0.3 - 0.1 = 0.2 Wb</div>
+                                        
+                                        <div><strong>Bước 3:</strong> Thay số</div>
+                                        <div class="ml-4">
+                                            |ε| = 100 × 0.2/0.2 = 100 V
+                                        </div>
+                                        
+                                        <div><strong>Đáp án:</strong> |ε| = 100 V</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4 flex items-center space-x-3">
+                                <button onclick="toggleSolution(3)" class="btn-secondary" id="solution-btn-3">
+                                    <i class="fas fa-eye mr-2"></i>Xem lời giải
+                                </button>
+                                <button onclick="simulateExercise(3)" class="btn-primary">
+                                    <i class="fas fa-flask mr-2"></i>Mô phỏng
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exercise 4 -->
+                <div class="exercise-card">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-white font-bold text-sm">4</span>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold text-gray-800 mb-4">Chuyển động của điện tích trong từ trường</h3>
+                            <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                                <p class="text-gray-700">
+                                    Một electron có vận tốc v = 10⁶ m/s bay vuông góc vào từ trường đều B = 0.01T. 
+                                    Tính bán kính quỹ đạo của electron.
+                                </p>
+                                <p class="text-gray-600 text-sm mt-2">Cho: e = 1.6×10⁻¹⁹ C, mₑ = 9.1×10⁻³¹ kg</p>
+                            </div>
+                            
+                            <div class="space-y-3 hidden" id="solution-4">
+                                <h4 class="font-semibold text-gray-700">Lời giải:</h4>
+                                <div class="bg-purple-50 p-4 rounded-lg">
+                                    <div class="space-y-2 text-sm">
+                                        <div><strong>Bước 1:</strong> Phân tích chuyển động</div>
+                                        <div class="ml-4">Electron chuyển động tròn đều với lực hướng tâm = lực Lorentz</div>
+                                        
+                                        <div><strong>Bước 2:</strong> Thiết lập phương trình</div>
+                                        <div class="ml-4">mv²/r = evB → r = mv/(eB)</div>
+                                        
+                                        <div><strong>Bước 3:</strong> Thay số</div>
+                                        <div class="ml-4">
+                                            r = (9.1×10⁻³¹ × 10⁶)/(1.6×10⁻¹⁹ × 0.01)<br>
+                                            r = 9.1×10⁻²⁵/(1.6×10⁻²¹) = 5.69×10⁻⁴ m = 0.569 mm
+                                        </div>
+                                        
+                                        <div><strong>Đáp án:</strong> r = 0.569 mm</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4 flex items-center space-x-3">
+                                <button onclick="toggleSolution(4)" class="btn-secondary" id="solution-btn-4">
+                                    <i class="fas fa-eye mr-2"></i>Xem lời giải
+                                </button>
+                                <button onclick="simulateExercise(4)" class="btn-primary">
+                                    <i class="fas fa-flask mr-2"></i>Mô phỏng
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Practice Section -->
+                <div class="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-2xl p-8 mt-8">
+                    <h3 class="text-2xl font-bold text-indigo-800 mb-6 text-center">Luyện tập thêm</h3>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="bg-white p-6 rounded-xl border border-indigo-200">
+                            <h4 class="font-semibold text-indigo-800 mb-3">Bài tập cơ bản</h4>
+                            <ul class="text-indigo-700 text-sm space-y-2">
+                                <li>• Tính điện trường của hệ điện tích</li>
+                                <li>• Áp dụng định luật Gauss</li>
+                                <li>• Tính từ trường của dòng điện thẳng</li>
+                                <li>• Lực từ tác dụng lên dây dẫn</li>
+                            </ul>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl border border-indigo-200">
+                            <h4 class="font-semibold text-indigo-800 mb-3">Bài tập nâng cao</h4>
+                            <ul class="text-indigo-700 text-sm space-y-2">
+                                <li>• Phương trình Maxwell</li>
+                                <li>• Sóng điện từ</li>
+                                <li>• Cảm ứng điện từ phức tạp</li>
+                                <li>• Ứng dụng thực tế</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz Section -->
+        <div id="quiz-section" class="section-content hidden">
+            <div class="max-w-4xl mx-auto">
+                <div class="text-center mb-12">
+                    <h2 class="text-4xl font-bold gradient-text mb-4">Quiz Điện trường và Từ trường</h2>
+                    <p class="text-xl text-gray-600">Kiểm tra kiến thức của bạn với 5 câu hỏi</p>
+                </div>
+
+                <!-- Quiz Progress -->
+                <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-lg mb-8">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800">Tiến độ Quiz</h3>
+                        <span class="text-sm text-gray-600">Câu <span id="current-question">1</span>/5</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="quiz-progress" style="width: 20%;"></div>
+                    </div>
+                    <div class="flex items-center justify-between mt-4 text-sm text-gray-600">
+                        <span>Điểm: <span id="quiz-score">0</span>/5</span>
+                        <span>Thời gian: <span id="quiz-time">00:00</span></span>
+                    </div>
+                </div>
+
+                <!-- Quiz Questions -->
+                <div id="quiz-container">
+                    <!-- Question 1 -->
+                    <div class="quiz-question bg-white rounded-2xl p-8 border border-gray-200 shadow-lg" id="question-1">
+                        <div class="mb-6">
+                            <div class="flex items-center space-x-3 mb-4">
+                                <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
+                                    <span class="text-white font-bold text-sm">1</span>
+                                </div>
+                                <h3 class="text-xl font-bold text-gray-800">Điện trường là gì?</h3>
+                            </div>
+                            <p class="text-gray-700">Chọn định nghĩa đúng nhất về điện trường:</p>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <div class="quiz-option" onclick="selectOption(1, 'A')" data-option="A">
+                                <strong>A.</strong> Vùng không gian xung quanh điện tích có tác dụng lực lên điện tích khác
+                            </div>
+                            <div class="quiz-option" onclick="selectOption(1, 'B')" data-option="B">
+                                <strong>B.</strong> Lực tác dụng giữa hai điện tích
+                            </div>
+                            <div class="quiz-option" onclick="selectOption(1, 'C')" data-option="C">
+                                <strong>C.</strong> Năng lượng của điện tích trong không gian
+                            </div>
+                            <div class="quiz-option" onclick="selectOption(1, 'D')" data-option="D">
+                                <strong>D.</strong> Đường thẳng nối hai điện tích
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Question 2 -->
+                    <div class="quiz-question bg-white rounded-2xl p-8 border border-gray-200 shadow-lg hidden" id="question-2">
+                        <div class="mb-6">
+                            <div class="flex items-center space-x-3 mb-4">
+                                <div class="w-8 h-8 bg-gradient-to-br from-red-500 to-pink-500 rounded-full flex items-center justify-center">
+                                    <span class="text-white font-bold text-sm">2</span>
+                                </div>
+                                <h3 class="text-xl font-bold text-gray-800">Đơn vị của cường độ điện trường là:</h3>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <div class="quiz-option" onclick="selectOption(2, 'A')" data-option="A">
+                                <strong>A.</strong> N (Newton)
+                            </div>
+                            <div class="quiz-option" onclick="selectOption(2, 'B')" data-option="B">
+                                <strong>B.</strong> N/C (Newton trên Coulomb)
+                            </div>
+                            <div class="quiz-option" onclick="selectOption(2, 'C')" data-option="C">
+                                <strong>C.</strong> C (Coulomb)
+                            </div>
+                            <div class="quiz-option" onclick="selectOption(2, 'D')" data-option="D">
+                                <strong>D.</strong> J (Joule)
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Question 3 -->
+                    <div class="quiz-question bg-white rounded-2xl p-8 border border-gray-200 shadow-lg hidden" id="question-3">
+                        <div class="mb-6">
+                            <div class="flex items-center space-x-3 mb-4">
+                                <div class="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
+                                    <span class="text-white font-bold text-sm">3</span>
+                                </div>
+                                <h3 class="text-xl font-bold text-gray-800">Đường sức từ có đặc điểm:</h3>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <div class="quiz-option" onclick="selectOption(3, 'A')" data-option="A">
+                                <strong>A.</strong> Là đường thẳng
+                            </div>
+                            <div class="quiz-option" onclick="selectOption(3, 'B')" data-option="B">
+                                <strong>B.</strong> Là đường cong khép kín
+                            </div>
+                            <div class="quiz-option" onclick="selectOption(3, 'C')" data-option="C">
+                                <strong>C.</strong> Có điểm đầu và điểm cuối
+                            </div>
+                            <div class="quiz-option" onclick="selectOption(3, 'D')" data-option="D">
+                                <strong>D.</strong> Cắt nhau tại nhiều điểm
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Question 4 -->
+                    <div class="quiz-question bg-white rounded-2xl p-8 border border-gray-200 shadow-lg hidden" id="question-4">
+                        <div class="mb-6">
+                            <div class="flex items-center space-x-3 mb-4">
+                                <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-full flex items-center justify-center">
+                                    <span class="text-white font-bold text-sm">4</span>
+                                </div>
+                                <h3 class="text-xl font-bold text-gray-800">Lực Lorentz tác dụng lên điện tích chuyển động trong từ trường:</h3>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <div class="quiz-option" onclick="selectOption(4, 'A')" data-option="A">
+                                <strong>A.</strong> F = qE
+                            </div>
+                            <div class="quiz-option" onclick="selectOption(4, 'B')" data-option="B">
+                                <strong>B.</strong> F = qvB sin α
+                            </div>
+                            <div class="quiz-option" onclick="selectOption(4, 'C')" data-option="C">
+                                <strong>C.</strong> F = kqQ/r²
+                            </div>
+                            <div class="quiz-option" onclick="selectOption(4, 'D')" data-option="D">
+                                <strong>D.</strong> F = BIL
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Question 5 -->
+                    <div class="quiz-question bg-white rounded-2xl p-8 border border-gray-200 shadow-lg hidden" id="question-5">
+                        <div class="mb-6">
+                            <div class="flex items-center space-x-3 mb-4">
+                                <div class="w-8 h-8 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-full flex items-center justify-center">
+                                    <span class="text-white font-bold text-sm">5</span>
+                                </div>
+                                <h3 class="text-xl font-bold text-gray-800">Định luật Faraday về cảm ứng điện từ:</h3>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <div class="quiz-option" onclick="selectOption(5, 'A')" data-option="A">
+                                <strong>A.</strong> ε = -dΦ/dt
+                            </div>
+                            <div class="quiz-option" onclick="selectOption(5, 'B')" data-option="B">
+                                <strong>B.</strong> ε = BLv
+                            </div>
+                            <div class="quiz-option" onclick="selectOption(5, 'C')" data-option="C">
+                                <strong>C.</strong> ε = IR
+                            </div>
+                            <div class="quiz-option" onclick="selectOption(5, 'D')" data-option="D">
+                                <strong>D.</strong> ε = qE
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quiz Navigation -->
+                <div class="flex items-center justify-between mt-8">
+                    <button onclick="previousQuestion()" class="btn-secondary" id="prev-btn" disabled>
+                        <i class="fas fa-chevron-left mr-2"></i>Câu trước
+                    </button>
+                    <button onclick="nextQuestion()" class="btn-primary" id="next-btn">
+                        Câu tiếp <i class="fas fa-chevron-right ml-2"></i>
+                    </button>
+                    <button onclick="finishQuiz()" class="btn-primary hidden" id="finish-btn">
+                        <i class="fas fa-check mr-2"></i>Hoàn thành
+                    </button>
+                </div>
+
+                <!-- Quiz Results -->
+                <div id="quiz-results" class="hidden bg-white rounded-2xl p-8 border border-gray-200 shadow-lg mt-8">
+                    <div class="text-center">
+                        <div class="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <i class="fas fa-trophy text-white text-3xl"></i>
+                        </div>
+                        <h3 class="text-3xl font-bold text-gray-800 mb-4">Kết quả Quiz</h3>
+                        <div class="text-6xl font-bold gradient-text mb-4" id="final-score">0/5</div>
+                        <p class="text-xl text-gray-600 mb-6" id="score-message">Hãy xem lại lý thuyết!</p>
+                        
+                        <div class="grid md:grid-cols-3 gap-6 mb-8">
+                            <div class="bg-green-50 p-4 rounded-xl border border-green-200">
+                                <div class="text-2xl font-bold text-green-800" id="correct-answers">0</div>
+                                <div class="text-green-600">Câu đúng</div>
+                            </div>
+                            <div class="bg-red-50 p-4 rounded-xl border border-red-200">
+                                <div class="text-2xl font-bold text-red-800" id="wrong-answers">0</div>
+                                <div class="text-red-600">Câu sai</div>
+                            </div>
+                            <div class="bg-blue-50 p-4 rounded-xl border border-blue-200">
+                                <div class="text-2xl font-bold text-blue-800" id="completion-time">00:00</div>
+                                <div class="text-blue-600">Thời gian</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-center space-x-4">
+                            <button onclick="retakeQuiz()" class="btn-secondary">
+                                <i class="fas fa-redo mr-2"></i>Làm lại
+                            </button>
+                            <button onclick="reviewAnswers()" class="btn-primary">
+                                <i class="fas fa-eye mr-2"></i>Xem đáp án
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentMode = 'electric';
+        let currentSection = 'simulation';
+        let isAnimating = false;
+        let animationId = null;
+        let charges = [];
+        let magnets = [];
+        let testCharge = { x: 300, y: 200, q: 0.1 };
+        
+        // Quiz variables
+        let currentQuestionIndex = 1;
+        let quizAnswers = {};
+        let quizStartTime = null;
+        let quizTimer = null;
+        
+        // Quiz data
+        const quizData = {
+            1: { correct: 'A', explanation: 'Điện trường là vùng không gian xung quanh điện tích có tác dụng lực lên điện tích khác.' },
+            2: { correct: 'B', explanation: 'Đơn vị của cường độ điện trường là N/C (Newton trên Coulomb) hoặc V/m.' },
+            3: { correct: 'B', explanation: 'Đường sức từ là đường cong khép kín, không có điểm đầu và điểm cuối.' },
+            4: { correct: 'B', explanation: 'Lực Lorentz tác dụng lên điện tích chuyển động trong từ trường: F = qvB sin α.' },
+            5: { correct: 'A', explanation: 'Định luật Faraday: Suất điện động cảm ứng ε = -dΦ/dt.' }
+        };
+        
+        // Constants
+        const k = 8.99e9; // Coulomb constant (scaled for visualization)
+        const mu0 = 4 * Math.PI * 1e-7; // Permeability of free space
+        
+        // Initialize simulation
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeElements();
+            setupDragAndDrop();
+            updateSimulation();
+        });
+        
+        function initializeElements() {
+            charges = [
+                { id: 'charge1', x: 220, y: 170, q: 5, element: document.getElementById('charge1') },
+                { id: 'charge2', x: 420, y: 270, q: -5, element: document.getElementById('charge2') }
+            ];
+            magnets = [
+                { id: 'magnet1', x: 240, y: 200, strength: 1, pole: 'north', element: document.getElementById('magnet1') },
+                { id: 'magnet2', x: 440, y: 240, strength: 1, pole: 'south', element: document.getElementById('magnet2') }
+            ];
+        }
+        
+        function setupDragAndDrop() {
+            document.querySelectorAll('.charge, .magnet').forEach(element => {
+                let isDragging = false;
+                let startX, startY, initialX, initialY;
+                
+                element.addEventListener('mousedown', startDrag);
+                element.addEventListener('touchstart', startDrag);
+                
+                function startDrag(e) {
+                    isDragging = true;
+                    element.classList.add('dragging');
+                    const clientX = e.clientX || e.touches[0].clientX;
+                    const clientY = e.clientY || e.touches[0].clientY;
+                    startX = clientX;
+                    startY = clientY;
+                    initialX = parseInt(element.style.left);
+                    initialY = parseInt(element.style.top);
+                    document.addEventListener('mousemove', drag);
+                    document.addEventListener('touchmove', drag);
+                    document.addEventListener('mouseup', stopDrag);
+                    document.addEventListener('touchend', stopDrag);
+                    e.preventDefault();
+                }
+                
+                function drag(e) {
+                    if (!isDragging) return;
+                    const clientX = e.clientX || e.touches[0].clientX;
+                    const clientY = e.clientY || e.touches[0].clientY;
+                    const deltaX = clientX - startX;
+                    const deltaY = clientY - startY;
+                    const newX = Math.max(0, Math.min(initialX + deltaX, 700));
+                    const newY = Math.max(0, Math.min(initialY + deltaY, 460));
+                    element.style.left = newX + 'px';
+                    element.style.top = newY + 'px';
+                    updateElementPosition(element.id, newX, newY);
+                    updateSimulation();
+                    e.preventDefault();
+                }
+                
+                function stopDrag() {
+                    isDragging = false;
+                    element.classList.remove('dragging');
+                    document.removeEventListener('mousemove', drag);
+                    document.removeEventListener('touchmove', drag);
+                    document.removeEventListener('mouseup', stopDrag);
+                    document.removeEventListener('touchend', stopDrag);
+                }
+            });
+            
+            // Setup drag for test charge
+            const testChargeElement = document.getElementById('test-charge');
+            let isDraggingTest = false;
+            let startX, startY, initialX, initialY;
+            
+            testChargeElement.addEventListener('mousedown', startTestDrag);
+            testChargeElement.addEventListener('touchstart', startTestDrag);
+            
+            function startTestDrag(e) {
+                isDraggingTest = true;
+                testChargeElement.classList.add('dragging');
+                const clientX = e.clientX || e.touches[0].clientX;
+                const clientY = e.clientY || e.touches[0].clientY;
+                startX = clientX;
+                startY = clientY;
+                initialX = parseInt(testChargeElement.style.left);
+                initialY = parseInt(testChargeElement.style.top);
+                document.addEventListener('mousemove', dragTest);
+                document.addEventListener('touchmove', dragTest);
+                document.addEventListener('mouseup', stopTestDrag);
+                document.addEventListener('touchend', stopTestDrag);
+                e.preventDefault();
+            }
+            
+            function dragTest(e) {
+                if (!isDraggingTest) return;
+                const clientX = e.clientX || e.touches[0].clientX;
+                const clientY = e.clientY || e.touches[0].clientY;
+                const deltaX = clientX - startX;
+                const deltaY = clientY - startY;
+                const newX = Math.max(0, Math.min(initialX + deltaX, 700));
+                const newY = Math.max(0, Math.min(initialY + deltaY, 460));
+                testChargeElement.style.left = newX + 'px';
+                testChargeElement.style.top = newY + 'px';
+                testCharge.x = newX + 10;
+                testCharge.y = newY + 10;
+                updateSimulation();
+                e.preventDefault();
+            }
+            
+            function stopTestDrag() {
+                isDraggingTest = false;
+                testChargeElement.classList.remove('dragging');
+                document.removeEventListener('mousemove', dragTest);
+                document.removeEventListener('touchmove', dragTest);
+                document.removeEventListener('mouseup', stopTestDrag);
+                document.removeEventListener('touchend', stopTestDrag);
+            }
+        }
+        
+        function updateElementPosition(id, x, y) {
+            const charge = charges.find(c => c.id === id);
+            if (charge) {
+                charge.x = x + 20;
+                charge.y = y + 20;
+            }
+            const magnet = magnets.find(m => m.id === id);
+            if (magnet) {
+                magnet.x = x + 40;
+                magnet.y = y + 20;
+            }
+        }
+        
+        function switchSection(section) {
+            document.querySelectorAll('.section-tab').forEach(tab => tab.classList.remove('active'));
+            document.getElementById(section + '-tab').classList.add('active');
+            document.querySelectorAll('.section-content').forEach(content => content.classList.add('hidden'));
+            document.getElementById(section + '-section').classList.remove('hidden');
+            currentSection = section;
+            if (section === 'quiz' && !quizStartTime) startQuizTimer();
+            if (section !== 'simulation' && isAnimating) toggleAnimation();
+        }
+        
+        function switchMode(mode) {
+            document.querySelectorAll('.mode-tab').forEach(tab => tab.classList.remove('active'));
+            document.getElementById(mode + '-tab').classList.add('active');
+            document.querySelectorAll('.mode-content').forEach(content => content.classList.add('hidden'));
+            document.getElementById(mode + '-elements').classList.remove('hidden');
+            document.querySelectorAll('.control-group').forEach(group => group.classList.add('hidden'));
+            document.getElementById(mode + '-controls').classList.remove('hidden');
+            currentMode = mode;
+            updateSimulation();
+        }
+        
+        function toggleAnimation() {
+            const btn = document.getElementById('animation-btn');
+            if (isAnimating) {
+                isAnimating = false;
+                cancelAnimationFrame(animationId);
+                btn.innerHTML = '<i class="fas fa-play mr-2"></i>Bắt đầu';
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-secondary');
+            } else {
+                isAnimating = true;
+                animate();
+                btn.innerHTML = '<i class="fas fa-pause mr-2"></i>Dừng';
+                btn.classList.remove('btn-secondary');
+                btn.classList.add('btn-primary');
+            }
+        }
+        
+        function resetSimulation() {
+            document.getElementById('charge1').style.left = '200px';
+            document.getElementById('charge1').style.top = '150px';
+            document.getElementById('charge2').style.left = '400px';
+            document.getElementById('charge2').style.top = '250px';
+            document.getElementById('charge1-slider').value = 5;
+            document.getElementById('charge2-slider').value = -5;
+            document.getElementById('magnetic-strength').value = 1;
+            updateCharge(1, 5);
+            updateCharge(2, -5);
+            updateMagneticField(1);
+            if (isAnimating) toggleAnimation();
+            initializeElements();
+            updateSimulation();
+        }
+        
+        function animate() {
+            if (!isAnimating) return;
+            updateSimulation();
+            animationId = requestAnimationFrame(animate);
+        }
+        
+        function updateCharge(chargeNum, value) {
+            const charge = charges[chargeNum - 1];
+            if (charge) {
+                charge.q = parseFloat(value);
+                document.getElementById(`charge${chargeNum}-value`).textContent = (value >= 0 ? '+' : '') + parseFloat(value).toFixed(1);
+                const element = charge.element;
+                if (value > 0) {
+                    element.className = 'charge positive-charge';
+                    element.textContent = '+';
+                } else if (value < 0) {
+                    element.className = 'charge negative-charge';
+                    element.textContent = '-';
+                } else {
+                    element.className = 'charge';
+                    element.style.background = 'linear-gradient(135deg, #6b7280, #4b5563)';
+                    element.textContent = '0';
+                }
+            }
+            updateSimulation();
+        }
+        
+        function updateMagneticField(value) {
+            document.getElementById('magnetic-value').textContent = parseFloat(value).toFixed(1);
+            magnets.forEach(magnet => magnet.strength = parseFloat(value));
+            updateSimulation();
+        }
+        
+        function updateMagneticDirection(direction) {
+            updateSimulation();
+        }
+        
+        function updateVelocity(value) {
+            document.getElementById('velocity-value').textContent = value;
+            updateSimulation();
+        }
+        
+        function updateAngle(value) {
+            document.getElementById('angle-value').textContent = value;
+            updateSimulation();
+        }
+        
+        function toggleFieldLines() {
+            const show = document.getElementById('show-field-lines').checked;
+            document.getElementById('field-svg').style.display = show ? 'block' : 'none';
+        }
+        
+        function toggleVectors() {
+            const show = document.getElementById('show-vectors').checked;
+            document.querySelectorAll('.vector-arrow').forEach(arrow => arrow.style.display = show ? 'block' : 'none');
+        }
+        
+        function toggleEquipotential() {
+            const show = document.getElementById('show-equipotential').checked;
+            // Future implementation for equipotential lines
+        }
+        
+        function toggleMeasurements() {
+            const show = document.getElementById('show-measurements').checked;
+            document.querySelector('.measurement-display').style.display = show ? 'block' : 'none';
+        }
+        
+        function updateSimulation() {
+            if (currentMode === 'electric') updateElectricField();
+            else if (currentMode === 'magnetic') updateMagneticField();
+            else if (currentMode === 'combined') updateCombinedField();
+            updateMeasurements();
+            drawFieldLines();
+        }
+        
+        function updateElectricField() {
+            let Ex = 0, Ey = 0;
+            let potential = 0;
+            charges.forEach(charge => {
+                const dx = testCharge.x - charge.x;
+                const dy = testCharge.y - charge.y;
+                const r = Math.sqrt(dx * dx + dy * dy);
+                if (r > 0) {
+                    const E = k * Math.abs(charge.q) / (r * r) * 0.001;
+                    const Ex_component = E * dx / r * Math.sign(charge.q);
+                    const Ey_component = E * dy / r * Math.sign(charge.q);
+                    Ex += Ex_component;
+                    Ey += Ey_component;
+                    potential += k * charge.q / r * 0.001;
+                }
+            });
+            const dist1 = Math.sqrt(Math.pow(testCharge.x - charges[0].x, 2) + Math.pow(testCharge.y - charges[0].y, 2));
+            const dist2 = Math.sqrt(Math.pow(testCharge.x - charges[1].x, 2) + Math.pow(testCharge.y - charges[1].y, 2));
+            document.getElementById('electric-field').textContent = Math.sqrt(Ex * Ex + Ey * Ey).toFixed(2);
+            document.getElementById('force').textContent = (Math.sqrt(Ex * Ex + Ey * Ey) * testCharge.q).toFixed(2);
+            document.getElementById('potential').textContent = potential.toFixed(2);
+            document.getElementById('pos-x').textContent = Math.round(testCharge.x);
+            document.getElementById('pos-y').textContent = Math.round(testCharge.y);
+            document.getElementById('dist1').textContent = Math.round(dist1);
+            document.getElementById('dist2').textContent = Math.round(dist2);
+        }
+        
+        function updateMagneticField() {
+            const B = document.getElementById('magnetic-strength').value;
+            document.getElementById('magnetic-field').textContent = parseFloat(B).toFixed(2);
+        }
+        
+        function updateCombinedField() {
+            updateElectricField();
+            updateMagneticField();
+        }
+        
+        function updateMeasurements() {
+            // Additional measurement updates can be implemented here
+        }
+        
+        function drawFieldLines() {
+            const svg = document.getElementById('field-svg');
+            svg.innerHTML = '<defs><marker id="arrowhead-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#ef4444" /></marker><marker id="arrowhead-blue" markerWidth="10" markerHeight=" sniff7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#3b82f6" /></marker><marker id="arrowhead-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#10b981" /></marker></defs>';
+            if (currentMode === 'electric') drawElectricFieldLines(svg);
+            else if (currentMode === 'magnetic') drawMagneticFieldLines(svg);
+            else if (currentMode === 'combined') drawCombinedFieldLines(svg);
+        }
+        
+        function drawElectricFieldLines(svg) {
+            charges.forEach(charge => {
+                const numLines = 8;
+                for (let i = 0; i < numLines; i++) {
+                    const angle = (2 * Math.PI * i) / numLines;
+                    const startX = charge.x + 25 * Math.cos(angle);
+                    const startY = charge.y + 25 * Math.sin(angle);
+                    let x = startX, y = startY;
+                    let path = `M ${x} ${y}`;
+                    for (let step = 0; step < 50; step++) {
+                        let Ex = 0, Ey = 0;
+                        charges.forEach(otherCharge => {
+                            const dx = x - otherCharge.x;
+                            const dy = y - otherCharge.y;
+                            const r = Math.sqrt(dx * dx + dy * dy);
+                            if (r > 5) {
+                                const E = otherCharge.q / (r * r);
+                                Ex += E * dx / r;
+                                Ey += E * dy / r;
+                            }
+                        });
+                        const E_mag = Math.sqrt(Ex * Ex + Ey * Ey);
+                        if (E_mag > 0) {
+                            Ex /= E_mag;
+                            Ey /= E_mag;
+                            x += Ex * 5 * (charge.q > 0 ? 1 : -1);
+                            y += Ey * 5 * (charge.q > 0 ? 1 : -1);
+                            if (x < 0 || x > 700 || y < 0 || y > 500) break;
+                            path += ` L ${x} ${y}`;
+                        } else break;
+                    }
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    line.setAttribute('d', path);
+                    line.setAttribute('stroke', charge.q > 0 ? '#ef4444' : '#3b82f6');
+                    line.setAttribute('stroke-width', '2');
+                    line.setAttribute('fill', 'none');
+                    line.setAttribute('marker-end', charge.q > 0 ? 'url(#arrowhead-red)' : 'url(#arrowhead-blue)');
+                    line.classList.add('field-line', 'animated-field');
+                    svg.appendChild(line);
+                }
+            });
+        }
+        
+        function drawMagneticFieldLines(svg) {
+            const numLines = 6;
+            for (let i = 0; i < numLines; i++) {
+                const offset = (i - (numLines - 1) / 2) * 40;
+                const startX = magnets[0].x;
+                const startY = magnets[0].y + offset;
+                const endX = magnets[1].x;
+                const endY = magnets[1].y + offset;
+                const controlX = (startX + endX) / 2;
+                const controlY = (startY + endY) / 2 - 50;
+                const path = `M ${startX} ${startY} Q ${controlX} ${controlY} ${endX} ${endY}`;
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                line.setAttribute('d', path);
+                line.setAttribute('stroke', '#10b981');
+                line.setAttribute('stroke-width', '2');
+                line.setAttribute('fill', 'none');
+                line.setAttribute('marker-end', 'url(#arrowhead-green)');
+                line.classList.add('field-line', 'animated-field');
+                svg.appendChild(line);
+            }
+        }
+        
+        function drawCombinedFieldLines(svg) {
+            drawElectricFieldLines(svg);
+            drawMagneticFieldLines(svg);
+        }
+        
+        function toggleSolution(exerciseNum) {
+            const solution = document.getElementById(`solution-${exerciseNum}`);
+            const btn = document.getElementById(`solution-btn-${exerciseNum}`);
+            if (solution.classList.contains('hidden')) {
+                solution.classList.remove('hidden');
+                btn.innerHTML = '<i class="fas fa-eye-slash mr-2"></i>Ẩn lời giải';
+            } else {
+                solution.classList.add('hidden');
+                btn.innerHTML = '<i class="fas fa-eye mr-2"></i>Xem lời giải';
+            }
+        }
+        
+        function simulateExercise(exerciseNum) {
+            switchSection('simulation');
+            switch (exerciseNum) {
+                case 1:
+                    switchMode('electric');
+                    resetSimulation();
+                    updateCharge(1, 4);
+                    updateCharge(2, 0);
+                    break;
+                case 2:
+                    switchMode('magnetic');
+                    resetSimulation();
+                    break;
+                case 3:
+                    switchMode('combined');
+                    resetSimulation();
+                    break;
+                case 4:
+                    switchMode('combined');
+                    resetSimulation();
+                    updateVelocity(100);
+                    break;
+            }
+        }
+        
+        function startQuizTimer() {
+            quizStartTime = Date.now();
+            quizTimer = setInterval(updateQuizTimer, 1000);
+        }
+        
+        function updateQuizTimer() {
+            if (!quizStartTime) return;
+            const elapsed = Math.floor((Date.now() - quizStartTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            document.getElementById('quiz-time').textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        function selectOption(questionNum, option) {
+            document.querySelectorAll(`#question-${questionNum} .quiz-option`).forEach(opt => opt.classList.remove('selected'));
+            document.querySelector(`#question-${questionNum} .quiz-option[data-option="${option}"]`).classList.add('selected');
+            quizAnswers[questionNum] = option;
+        }
+        
+        function nextQuestion() {
+            if (currentQuestionIndex < 5) {
+                document.getElementById(`question-${currentQuestionIndex}`).classList.add('hidden');
+                currentQuestionIndex++;
+                document.getElementById(`question-${currentQuestionIndex}`).classList.remove('hidden');
+                document.getElementById('current-question').textContent = currentQuestionIndex;
+                document.getElementById('quiz-progress').style.width = `${(currentQuestionIndex / 5) * 100}%`;
+                document.getElementById('prev-btn').disabled = false;
+                if (currentQuestionIndex === 5) {
+                    document.getElementById('next-btn').classList.add('hidden');
+                    document.getElementById('finish-btn').classList.remove('hidden');
+                }
+            }
+        }
+        
+        function previousQuestion() {
+            if (currentQuestionIndex > 1) {
+                document.getElementById(`question-${currentQuestionIndex}`).classList.add('hidden');
+                currentQuestionIndex--;
+                document.getElementById(`question-${currentQuestionIndex}`).classList.remove('hidden');
+                document.getElementById('current-question').textContent = currentQuestionIndex;
+                document.getElementById('quiz-progress').style.width = `${(currentQuestionIndex / 5) * 100}%`;
+                document.getElementById('next-btn').classList.remove('hidden');
+                document.getElementById('finish-btn').classList.add('hidden');
+                if (currentQuestionIndex === 1) document.getElementById('prev-btn').disabled = true;
+            }
+        }
+        
+        function finishQuiz() {
+            let correctAnswers = 0;
+            for (let i = 1; i <= 5; i++) {
+                if (quizAnswers[i] === quizData[i].correct) correctAnswers++;
+            }
+            if (quizTimer) clearInterval(quizTimer);
+            document.getElementById('quiz-container').classList.add('hidden');
+            document.getElementById('quiz-results').classList.remove('hidden');
+            document.getElementById('final-score').textContent = `${correctAnswers}/5`;
+            document.getElementById('correct-answers').textContent = correctAnswers;
+            document.getElementById('wrong-answers').textContent = 5 - correctAnswers;
+            document.getElementById('completion-time').textContent = document.getElementById('quiz-time').textContent;
+            const scoreMessage = document.getElementById('score-message');
+            if (correctAnswers === 5) scoreMessage.textContent = 'Hoàn hảo! Bạn đã nắm vững toàn bộ kiến thức.';
+            else if (correctAnswers >= 4) scoreMessage.textContent = 'Xuất sắc! Bạn đã hiểu rất tốt về điện từ học.';
+            else if (correctAnswers >= 3) scoreMessage.textContent = 'Tốt! Bạn cần ôn lại một số khái niệm.';
+            else scoreMessage.textContent = 'Cần cố gắng thêm! Hãy xem lại lý thuyết.';
+            document.getElementById('quiz-score').textContent = `${correctAnswers}/5`;
+        }
+        
+        function retakeQuiz() {
+            currentQuestionIndex = 1;
+            quizAnswers = {};
+            quizStartTime = null;
+            document.getElementById('quiz-results').classList.add('hidden');
+            document.getElementById('quiz-container').classList.remove('hidden');
+            document.querySelectorAll('.quiz-question').forEach((q, index) => {
+                if (index === 0) q.classList.remove('hidden');
+                else q.classList.add('hidden');
+            });
+            document.querySelectorAll('.quiz-option').forEach(opt => opt.classList.remove('selected', 'correct', 'incorrect'));
+            document.getElementById('prev-btn').disabled = true;
+            document.getElementById('next-btn').classList.remove('hidden');
+            document.getElementById('finish-btn').classList.add('hidden');
+            document.getElementById('current-question').textContent = '1';
+            document.getElementById('quiz-progress').style.width = '20%';
+            document.getElementById('quiz-score').textContent = '0/5';
+            document.getElementById('quiz-time').textContent = '00:00';
+            startQuizTimer();
+        }
+        
+        function reviewAnswers() {
+            for (let i = 1; i <= 5; i++) {
+                const question = document.getElementById(`question-${i}`);
+                const options = question.querySelectorAll('.quiz-option');
+                options.forEach(option => {
+                    const optionLetter = option.getAttribute('data-option');
+                    if (optionLetter === quizData[i].correct) option.classList.add('correct');
+                    else if (optionLetter === quizAnswers[i] && optionLetter !== quizData[i].correct) option.classList.add('incorrect');
+                });
+            }
+            document.querySelectorAll('.quiz-question').forEach(q => q.classList.remove('hidden'));
+            document.getElementById('quiz-results').classList.add('hidden');
+        }
+        
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+</body>
+</html>

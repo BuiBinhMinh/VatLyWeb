@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mô Phỏng Giao Thoa Sóng Hoàn Chỉnh - 15+ Tính Năng</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #2d1b69 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        }
+        
+        .wave-canvas {
+            background: linear-gradient(135deg, #000428 0%, #004e92 100%);
+            border: 3px solid;
+            border-image: linear-gradient(45deg, #3b82f6, #8b5cf6, #06b6d4) 1;
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
+        }
+        
+        .wave-source {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 4px solid white;
+            cursor: move;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .wave-source:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 40px rgba(255, 255, 255, 0.8);
+        }
+        
+        .wave-source.source1 {
+            background: radial-gradient(circle, #ff4757, #ff3742);
+            box-shadow: 0 0 30px rgba(255, 71, 87, 0.8);
+            animation: sourcePulse1 1s ease-in-out infinite;
+        }
+        
+        .wave-source.source2 {
+            background: radial-gradient(circle, #2ed573, #1dd1a1);
+            box-shadow: 0 0 30px rgba(46, 213, 115, 0.8);
+            animation: sourcePulse2 1s ease-in-out infinite;
+        }
+        
+        @keyframes sourcePulse1 {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(255, 71, 87, 0.8); }
+            50% { transform: scale(1.1); box-shadow: 0 0 50px rgba(255, 71, 87, 1); }
+        }
+        
+        @keyframes sourcePulse2 {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(46, 213, 115, 0.8); }
+            50% { transform: scale(1.1); box-shadow: 0 0 50px rgba(46, 213, 115, 1); }
+        }
+        
+        .wave-circle {
+            position: absolute;
+            border-radius: 50%;
+            border: 2px solid;
+            pointer-events: none;
+            animation: waveExpand linear infinite;
+        }
+        
+        .wave-circle.red {
+            border-color: rgba(255, 71, 87, 0.7);
+            box-shadow: 0 0 10px rgba(255, 71, 87, 0.5);
+        }
+        
+        .wave-circle.green {
+            border-color: rgba(46, 213, 115, 0.7);
+            box-shadow: 0 0 10px rgba(46, 213, 115, 0.5);
+        }
+        
+        @keyframes waveExpand {
+            0% {
+                width: 0px;
+                height: 0px;
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+            100% {
+                width: 1200px;
+                height: 1200px;
+                opacity: 0;
+                transform: translate(-50%, -50%);
+            }
+        }
+        
+        .control-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #e2e8f0, #cbd5e1);
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-enhanced {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-enhanced:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+        }
+        
+        .btn-enhanced:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-enhanced:hover:before {
+            left: 100%;
+        }
+        
+        .info-card {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border: 2px solid #0ea5e9;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        
+        .measurement-display {
+            background: linear-gradient(135deg, #1f2937, #374151);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .preset-button {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            margin: 8px 0;
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            border: 2px solid #cbd5e1;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-align: left;
+        }
+        
+        .preset-button:hover {
+            background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .preset-button.active {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border-color: #1d4ed8;
+        }
+        
+        .wave-info {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 200;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .wave-source:hover + .wave-info,
+        .wave-source:hover .wave-info {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .grid-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+        
+        .wave-amplitude-display {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            width: 250px;
+            height: 120px;
+            background: rgba(0, 0, 0, 0.9);
+            border-radius: 15px;
+            padding: 15px;
+            color: white;
+            font-size: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .amplitude-graph {
+            width: 100%;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .wave-line {
+            position: absolute;
+            height: 3px;
+            background: linear-gradient(90deg, #00ff00, #00ffff);
+            animation: waveLine 2s linear infinite;
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+        
+        @keyframes waveLine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        .feature-highlight {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 2px solid #f59e0b;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        
+        .tutorial-step {
+            background: rgba(255, 255, 255, 0.9);
+            border-left: 4px solid #3b82f6;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 0 10px 10px 0;
+        }
+        
+        .status-indicator {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 8px 16px;
+            border-radius: 20px;
+            color: white;
+            font-size: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .speed-gauge {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            width: 100px;
+            height: 100px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            border: 3px solid #3b82f6;
+        }
+        
+        .distance-line {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+            z-index: 90;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        
+        .measurement-tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            z-index: 95;
+            pointer-events: none;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .wave-equation {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 300px;
+        }
+        
+        .interference-legend {
+            position: absolute;
+            top: 80px;
+            right: 15px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 11px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .phase-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .wave-frequency-display {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 11px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* CSS cho nút quay lại */
+        .back-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+           font-weight: 600;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .back-button:hover {
+            background-color: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+        }
+    </style>
+</head>
+
+<body class="p-6">
+    <!-- Nút quay lại -->
+    <a href="homecourse.html" class="back-button">
+        <i class="fas fa-arrow-left"></i> Quay lại
+    </a>
+
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-white mb-4">
+                <i class="fas fa-water mr-4"></i>
+                Mô Phỏng Giao Thoa Sóng Hoàn Chỉnh
+            </h1>
+            <p class="text-xl text-white opacity-90">Trực quan hóa đầy đủ các hiện tượng giao thoa sóng</p>
+        </div>
+
+        <div class="grid lg:grid-cols-4 gap-6">
+            <!-- Main Wave Simulation Area -->
+            <div class="lg:col-span-3">
+                <div class="glass-card p-8 relative overflow-hidden">
+                    <!-- Animated Background -->
+                    <div class="absolute inset-0 opacity-10">
+                        <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 animate-pulse"></div>
+                        <div class="absolute top-1/4 left-1/4 w-32 h-32 bg-blue-400 rounded-full blur-3xl animate-bounce opacity-20"></div>
+                        <div class="absolute bottom-1/4 right-1/4 w-40 h-40 bg-purple-400 rounded-full blur-3xl animate-pulse opacity-20"></div>
+                    </div>
+                    
+                    <!-- Header with Enhanced Design -->
+                    <div class="relative z-10 flex items-center justify-between mb-8">
+                        <div class="flex items-center space-x-4">
+                            <div class="p-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-2xl">
+                                <i class="fas fa-wave-square text-3xl text-white"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-3xl font-bold text-white mb-2 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                                    Khu Vực Mô Phỏng Sóng
+                                </h2>
+                                <p class="text-white opacity-80 text-sm">Trực quan hóa giao thoa sóng với hiệu ứng 3D</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Enhanced Control Buttons -->
+                        <div class="flex gap-4">
+                            <button onclick="startSimulation()" class="btn-enhanced bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700" id="playBtn">
+                                <i class="fas fa-play mr-3"></i>Bắt Đầu
+                            </button>
+                            
+                            <button onclick="pauseSimulation()" class="btn-enhanced bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600">
+                                <i class="fas fa-pause mr-3"></i>Tạm Dừng
+                            </button>
+                            
+                            <button onclick="resetSimulation()" class="btn-enhanced bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600">
+                                <i class="fas fa-redo mr-3"></i>Đặt Lại
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Enhanced Wave Canvas -->
+                    <div class="relative">
+                        <div class="wave-canvas relative" style="width: 100%; height: 600px;" id="waveCanvas">
+                            <!-- Grid Overlay -->
+                            <div class="grid-overlay"></div>
+                            
+                            <!-- Wave Equation Display -->
+                            <div class="wave-equation" id="waveEquation">
+                                <div class="mb-1"><strong>Phương trình sóng:</strong></div>
+                                <div>y₁ = A₁sin(ωt - kx + φ₁)</div>
+                                <div>y₂ = A₂sin(ωt - kx + φ₂)</div>
+                                <div class="mt-1 text-yellow-400">y = y₁ + y₂</div>
+                            </div>
+                            
+                            <!-- Frequency Display -->
+                            <div class="wave-frequency-display" id="frequencyDisplay">
+                                f₁ = 2.0 Hz | f₂ = 2.0 Hz | Δf = 0.0 Hz
+                            </div>
+                            
+                            <!-- Status Indicator -->
+                            <div class="status-indicator">
+                                <div class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse" id="statusDot"></div>
+                                <span id="statusText">Sẵn Sàng</span>
+                            </div>
+                            
+                            <!-- Speed Gauge -->
+                            <div class="speed-gauge">
+                                <div class="text-xs opacity-80">Tốc độ</div>
+                                <div class="text-lg font-bold" id="speedGauge">200</div>
+                                <div class="text-xs opacity-80">px/s</div>
+                            </div>
+                            
+                            <!-- Wave Sources -->
+                            <div class="wave-source source1" id="source1" style="left: 150px; top: 250px;">
+                                S1
+                                <div class="wave-info" style="top: -50px; left: -20px;">
+                                    <div>Nguồn Sóng 1</div>
+                                    <div>A₁ = <span id="tooltipA1">1.0</span></div>
+                                    <div>f₁ = <span id="tooltipF1">2.0</span> Hz</div>
+                                    <div>φ₁ = <span id="tooltipP1">0</span>°</div>
+                                </div>
+                            </div>
+                            
+                            <div class="wave-source source2" id="source2" style="left: 650px; top: 250px;">
+                                S2
+                                <div class="wave-info" style="top: -50px; left: -20px;">
+                                    <div>Nguồn Sóng 2</div>
+                                    <div>A₂ = <span id="tooltipA2">1.0</span></div>
+                                    <div>f₂ = <span id="tooltipF2">2.0</span> Hz</div>
+                                    <div>φ₂ = <span id="tooltipP2">0</span>°</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Distance Line -->
+                            <div class="distance-line" id="distanceLine"></div>
+                            <div class="measurement-tooltip" id="distanceTooltip">
+                                Khoảng cách: <span id="distanceValue">500px</span>
+                            </div>
+                            
+                            <!-- Phase Indicator -->
+                            <div class="phase-indicator" id="phaseIndicator">
+                                Δφ = <span id="phaseDiffValue">0°</span>
+                            </div>
+                            
+                            <!-- Wave Amplitude Display -->
+                            <div class="wave-amplitude-display">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-sm font-bold">Biên Độ Tổng Hợp</span>
+                                    <div class="flex items-center">
+                                        <div class="w-2 h-2 bg-yellow-400 rounded-full mr-1 animate-pulse"></div>
+                                        <span id="totalAmplitude" class="text-yellow-400 font-bold">0.0</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="amplitude-graph mb-3" id="amplitudeGraph">
+                                    <div class="wave-line"></div>
+                                    <!-- Grid lines for graph -->
+                                    <div class="absolute inset-0 opacity-30">
+                                        <div class="absolute top-1/2 left-0 w-full h-px bg-gray-400"></div>
+                                        <div class="absolute top-1/4 left-0 w-full h-px bg-gray-500"></div>
+                                        <div class="absolute top-3/4 left-0 w-full h-px bg-gray-500"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex justify-between text-xs">
+                                    <span>Min: <span id="minAmp" class="text-blue-400">0.0</span></span>
+                                    <span>Max: <span id="maxAmp" class="text-red-400">0.0</span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Real-time Analysis -->
+                    <div class="info-card mt-6">
+                        <h4 class="font-bold text-blue-800 mb-3 flex items-center">
+                            <i class="fas fa-chart-line mr-3"></i>Phân Tích Thời Gian Thực
+                        </h4>
+                        <div class="grid md:grid-cols-4 gap-4 text-blue-700 text-sm">
+                            <div class="flex items-center justify-between">
+                                <span>Khoảng cách S1-S2:</span>
+                                <span class="font-bold text-purple-600" id="sourceDistance">500px</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span>Số vân giao thoa:</span>
+                                <span class="font-bold text-green-600" id="fringeCount">8</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span>Biên độ cực đại:</span>
+                                <span class="font-bold text-red-600" id="maxAmplitude">2.0A</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span>Độ lệch pha:</span>
+                                <span class="font-bold text-yellow-600" id="phaseDiff">0°</span>
+                            </div>
+                        </div>
+                        <div class="grid md:grid-cols-4 gap-4 text-blue-700 text-sm mt-3">
+                            <div class="flex items-center justify-between">
+                                <span>Bước sóng λ:</span>
+                                <span class="font-bold text-indigo-600" id="wavelength">100px</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span>Tần số trung bình:</span>
+                                <span class="font-bold text-pink-600" id="avgFrequency">2.0 Hz</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span>Chu kỳ T:</span>
+                                <span class="font-bold text-teal-600" id="period">0.5s</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span>Tốc độ v:</span>
+                                <span class="font-bold text-orange-600" id="waveSpeed">200 px/s</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Feature Highlights -->
+                    <div class="feature-highlight mt-6">
+                        <h4 class="font-bold text-yellow-800 mb-3 flex items-center">
+                            <i class="fas fa-star mr-3"></i>15+ Tính Năng Hoàn Chỉnh
+                        </h4>
+                        <div class="grid md:grid-cols-3 gap-4 text-yellow-700 text-sm">
+                            <div class="space-y-2">
+                                <div class="flex items-center">
+                                    <i class="fas fa-hand-pointer mr-2 text-red-600"></i>
+                                    <span><strong>1. Kéo thả nguồn sóng</strong> - Di chuyển S1, S2</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-sliders-h mr-2 text-blue-600"></i>
+                                    <span><strong>2. Điều chỉnh biên độ</strong> - A1, A2 (0.1-3.0)</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-wave-square mr-2 text-green-600"></i>
+                                    <span><strong>3. Thay đổi tần số</strong> - f1, f2 (0.5-5.0 Hz)</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-adjust mr-2 text-purple-600"></i>
+                                    <span><strong>4. Điều chỉnh pha</strong> - φ1, φ2 (0°-360°)</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-tachometer-alt mr-2 text-indigo-600"></i>
+                                    <span><strong>5. Thay đổi tốc độ sóng</strong> - v (50-300 px/s)</span>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="flex items-center">
+                                    <i class="fas fa-eye mr-2 text-yellow-600"></i>
+                                    <span><strong>6. Hiển thị vân giao thoa</strong> - Vàng/Xanh</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-circle mr-2 text-red-600"></i>
+                                    <span><strong>7. Sóng tròn lan truyền</strong> - Từ S1, S2</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-chart-line mr-2 text-green-600"></i>
+                                    <span><strong>8. Đồ thị biên độ</strong> - Thời gian thực</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-calculator mr-2 text-blue-600"></i>
+                                    <span><strong>9. Tính toán tự động</strong> - λ, T, f, v</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-flask mr-2 text-purple-600"></i>
+                                    <span><strong>10. 6 mẫu thí nghiệm</strong> - Sẵn có</span>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="flex items-center">
+                                    <i class="fas fa-play mr-2 text-green-600"></i>
+                                    <span><strong>11. Điều khiển phát</strong> - Play/Pause/Reset</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-ruler mr-2 text-blue-600"></i>
+                                    <span><strong>12. Đo khoảng cách</strong> - Giữa các nguồn</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-palette mr-2 text-red-600"></i>
+                                    <span><strong>13. Mã màu trực quan</strong> - Đỏ/Xanh/Vàng</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-grid-3x3 mr-2 text-gray-600"></i>
+                                    <span><strong>14. Lưới tọa độ</strong> - Dễ quan sát</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-info-circle mr-2 text-teal-600"></i>
+                                    <span><strong>15. Hướng dẫn chi tiết</strong> - Từng bước</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Control Panel -->
+            <div class="lg:col-span-1">
+                <div class="control-panel">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                        <i class="fas fa-cogs mr-3 text-blue-600"></i>Điều Khiển Chi Tiết
+                    </h3>
+                    
+                    <!-- Source 1 Controls -->
+                    <div class="mb-6 p-4 bg-red-50 rounded-lg border-2 border-red-200">
+                        <h4 class="font-bold text-red-800 mb-3 flex items-center">
+                            <div class="w-4 h-4 bg-red-500 rounded-full mr-2"></div>Nguồn Sóng S1 (Đỏ)
+                        </h4>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Biên độ A₁</label>
+                                <input type="range" min="0.1" max="3" step="0.1" value="1" 
+                                       class="slider" id="amplitude1" onchange="updateWaveParams()">
+                                <div class="text-center text-sm mt-1" id="amp1Value">1.0</div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Tần số f₁ (Hz)</label>
+                                <input type="range" min="0.5" max="5" step="0.1" value="2" 
+                                       class="slider" id="frequency1" onchange="updateWaveParams()">
+                                <div class="text-center text-sm mt-1" id="freq1Value">2.0 Hz</div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Pha ban đầu φ₁</label>
+                                <input type="range" min="0" max="360" step="10" value="0" 
+                                       class="slider" id="phase1" onchange="updateWaveParams()">
+                                <div class="text-center text-sm mt-1" id="phase1Value">0°</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Source 2 Controls -->
+                    <div class="mb-6 p-4 bg-green-50 rounded-lg border-2 border-green-200">
+                        <h4 class="font-bold text-green-800 mb-3 flex items-center">
+                            <div class="w-4 h-4 bg-green-500 rounded-full mr-2"></div>Nguồn Sóng S2 (Xanh)
+                        </h4>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Biên độ A₂</label>
+                                <input type="range" min="0.1" max="3" step="0.1" value="1" 
+                                       class="slider" id="amplitude2" onchange="updateWaveParams()">
+                                <div class="text-center text-sm mt-1" id="amp2Value">1.0</div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Tần số f₂ (Hz)</label>
+                                <input type="range" min="0.5" max="5" step="0.1" value="2" 
+                                       class="slider" id="frequency2" onchange="updateWaveParams()">
+                                <div class="text-center text-sm mt-1" id="freq2Value">2.0 Hz</div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Pha ban đầu φ₂</label>
+                                <input type="range" min="0" max="360" step="10" value="0" 
+                                       class="slider" id="phase2" onchange="updateWaveParams()">
+                                <div class="text-center text-sm mt-1" id="phase2Value">0°</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Global Controls -->
+                    <div class="mb-6 p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
+                        <h4 class="font-bold text-blue-800 mb-3">Điều Khiển Chung</h4>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Tốc độ sóng (px/s)</label>
+                                <input type="range" min="50" max="300" step="10" value="200" 
+                                       class="slider" id="waveSpeedSlider" onchange="updateWaveParams()">
+                                <div class="text-center text-sm mt-1" id="speedValue">200 px/s</div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Độ mờ hiển thị</label>
+                                <input type="range" min="0.1" max="1" step="0.1" value="0.8" 
+                                       class="slider" id="waveOpacity" onchange="updateWaveParams()">
+                                <div class="text-center text-sm mt-1" id="opacityValue">80%</div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Tốc độ animation</label>
+                                <input type="range" min="0.5" max="3" step="0.1" value="1" 
+                                       class="slider" id="animSpeed" onchange="updateWaveParams()">
+                                <div class="text-center text-sm mt-1" id="animSpeedValue">1.0x</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Measurement Display -->
+                    <div class="measurement-display mb-6">
+                        <h4 class="text-white font-bold mb-4 flex items-center">
+                            <i class="fas fa-calculator mr-2"></i>Đo Lường Chính Xác
+                        </h4>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between">
+                                <span>Bước sóng λ₁:</span>
+                                <span class="text-yellow-400 font-bold" id="wavelength1">100px</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Bước sóng λ₂:</span>
+                                <span class="text-green-400 font-bold" id="wavelength2">100px</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Chu kỳ T₁:</span>
+                                <span class="text-blue-400 font-bold" id="period1">0.5s</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Chu kỳ T₂:</span>
+                                <span class="text-purple-400 font-bold" id="period2">0.5s</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Tần số góc ω₁:</span>
+                                <span class="text-red-400 font-bold" id="omega1">12.6 rad/s</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Tần số góc ω₂:</span>
+                                <span class="text-orange-400 font-bold" id="omega2">12.6 rad/s</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Preset Patterns -->
+                    <div class="mb-6">
+                        <h4 class="font-bold text-gray-800 mb-3">6 Mẫu Thí Nghiệm</h4>
+                        <div class="space-y-2">
+                            <button onclick="loadPreset('constructive')" class="preset-button">
+                                <i class="fas fa-plus mr-2 text-green-600"></i>
+                                <div>
+                                    <div class="font-semibold">Tăng Cường Hoàn Toàn</div>
+                                    <div class="text-xs text-gray-600">Cùng pha: φ₂ - φ₁ = 0°</div>
+                                </div>
+                            </button>
+                            
+                            <button onclick="loadPreset('destructive')" class="preset-button">
+                                <i class="fas fa-minus mr-2 text-red-600"></i>
+                                <div>
+                                    <div class="font-semibold">Triệt Tiêu Hoàn Toàn</div>
+                                    <div class="text-xs text-gray-600">Ngược pha: φ₂ - φ₁ = 180°</div>
+                                </div>
+                            </button>
+                            
+                            <button onclick="loadPreset('partial')" class="preset-button">
+                                <i class="fas fa-adjust mr-2 text-yellow-600"></i>
+                                <div>
+                                    <div class="font-semibold">Giao Thoa Một Phần</div>
+                                    <div class="text-xs text-gray-600">Lệch pha: φ₂ - φ₁ = 90°</div>
+                                </div>
+                            </button>
+                            
+                            <button onclick="loadPreset('different_freq')" class="preset-button">
+                                <i class="fas fa-wave-square mr-2 text-purple-600"></i>
+                                <div>
+                                    <div class="font-semibold">Khác Tần Số (Beat)</div>
+                                    <div class="text-xs text-gray-600">f₁ ≠ f₂, tạo phách</div>
+                                </div>
+                            </button>
+                            
+                            <button onclick="loadPreset('different_amp')" class="preset-button">
+                                <i class="fas fa-chart-bar mr-2 text-blue-600"></i>
+                                <div>
+                                    <div class="font-semibold">Khác Biên Độ</div>
+                                    <div class="text-xs text-gray-600">A₁ ≠ A₂, giao thoa không hoàn toàn</div>
+                                </div>
+                            </button>
+                            
+                            <button onclick="loadPreset('complex')" class="preset-button">
+                                <i class="fas fa-cog mr-2 text-indigo-600"></i>
+                                <div>
+                                    <div class="font-semibold">Mẫu Phức Tạp</div>
+                                    <div class="text-xs text-gray-600">Khác cả A, f, φ</div>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Theory Section -->
+        <div class="glass-card p-6 mt-6">
+            <h3 class="text-2xl font-bold text-white mb-6 flex items-center">
+                <i class="fas fa-book mr-3"></i>Lý Thuyết Giao Thoa Sóng Chi Tiết
+            </h3>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="info-card">
+                    <h4 class="font-bold text-blue-800 mb-3">Nguyên Lý Chồng Chất</h4>
+                    <div class="text-blue-700 text-sm space-y-2">
+                        <div class="font-mono bg-gray-100 p-2 rounded">y = y₁ + y₂</div>
+                        <div class="font-mono bg-gray-100 p-2 rounded">y₁ = A₁sin(ωt - kx + φ₁)</div>
+                        <div class="font-mono bg-gray-100 p-2 rounded">y₂ = A₂sin(ωt - kx + φ₂)</div>
+                        <div><strong>Điều kiện giao thoa:</strong></div>
+                        <div class="text-xs">
+                            • Cùng tần số (f₁ = f₂)<br>
+                            • Cùng phương dao động<br>
+                            • Độ lệch pha không đổi<br>
+                            • Biên độ tương đương
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="info-card">
+                    <h4 class="font-bold text-blue-800 mb-3">Giao Thoa Tăng Cường</h4>
+                    <div class="text-blue-700 text-sm space-y-2">
+                        <div class="font-mono bg-green-100 p-2 rounded">Δφ = 2nπ (n = 0, ±1, ±2, ...)</div>
+                        <div class="font-mono bg-green-100 p-2 rounded">A_max = A₁ + A₂</div>
+                        <div class="font-mono bg-green-100 p-2 rounded">|d₂ - d₁| = nλ</div>
+                        <div><strong>Đặc điểm:</strong></div>
+                        <div class="text-xs">
+                            • Hai sóng cùng pha<br>
+                            • Biên độ cộng lại<br>
+                            • Tạo vùng sáng/mạnh<br>
+                            • Màu vàng trong mô phỏng
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="info-card">
+                    <h4 class="font-bold text-blue-800 mb-3">Giao Thoa Triệt Tiêu</h4>
+                    <div class="text-blue-700 text-sm space-y-2">
+                        <div class="font-mono bg-red-100 p-2 rounded">Δφ = (2n+1)π</div>
+                        <div class="font-mono bg-red-100 p-2 rounded">A_min = |A₁ - A₂|</div>
+                        <div class="font-mono bg-red-100 p-2 rounded">|d₂ - d₁| = (2n+1)λ/2</div>
+                        <div><strong>Đặc điểm:</strong></div>
+                        <div class="text-xs">
+                            • Hai sóng ngược pha<br>
+                            • Biên độ trừ nhau<br>
+                            • Tạo vùng tối/yếu<br>
+                            • Màu xanh trong mô phỏng
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Biến toàn cục cho mô phỏng
+        let isRunning = false;
+        let animationId = null;
+        let startTime = Date.now();
+        let waveSpeed = 200;
+        let animationSpeed = 1;
+        let waveOpacity = 0.8;
+        
+        // Thông số sóng
+        let wave1 = {
+            amplitude: 1.0,
+            frequency: 2.0,
+            phase: 0,
+            x: 150,
+            y: 250
+        };
+        
+        let wave2 = {
+            amplitude: 1.0,
+            frequency: 2.0,
+            phase: 0,
+            x: 650,
+            y: 250
+        };
+        
+        // Khởi tạo mô phỏng
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSimulation();
+            makeDraggable();
+            updateWaveParams();
+            updateDistanceLine();
+        });
+        
+        function initializeSimulation() {
+            const canvas = document.getElementById('waveCanvas');
+            updateStatusIndicator('Đã khởi tạo', 'green');
+        }
+        
+        function startSimulation() {
+            if (!isRunning) {
+                isRunning = true;
+                startTime = Date.now();
+                updateStatusIndicator('Đang chạy', 'green');
+                document.getElementById('playBtn').innerHTML = '<i class="fas fa-pause mr-3"></i>Đang Chạy';
+                animate();
+            }
+        }
+        
+        function pauseSimulation() {
+            isRunning = false;
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            updateStatusIndicator('Tạm dừng', 'yellow');
+            document.getElementById('playBtn').innerHTML = '<i class="fas fa-play mr-3"></i>Tiếp Tục';
+        }
+        
+        function resetSimulation() {
+            isRunning = false;
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            
+            // Reset về vị trí ban đầu
+            wave1.x = 150;
+            wave1.y = 250;
+            wave2.x = 650;
+            wave2.y = 250;
+            
+            document.getElementById('source1').style.left = wave1.x + 'px';
+            document.getElementById('source1').style.top = wave1.y + 'px';
+            document.getElementById('source2').style.left = wave2.x + 'px';
+            document.getElementById('source2').style.top = wave2.y + 'px';
+            
+            // Xóa tất cả sóng
+            const existingWaves = document.querySelectorAll('.wave-circle');
+            existingWaves.forEach(wave => wave.remove());
+            
+            updateStatusIndicator('Đã reset', 'blue');
+            document.getElementById('playBtn').innerHTML = '<i class="fas fa-play mr-3"></i>Bắt Đầu';
+            updateDistanceLine();
+            updateWaveParams();
+        }
+        
+        function animate() {
+            if (!isRunning) return;
+            
+            const currentTime = Date.now();
+            const elapsed = (currentTime - startTime) * animationSpeed / 1000;
+            
+            // Tạo sóng từ nguồn 1
+            if (Math.floor(elapsed * wave1.frequency * 4) > Math.floor((elapsed - 0.016) * wave1.frequency * 4)) {
+                createWaveRing(wave1.x, wave1.y, 'red', wave1.frequency);
+            }
+            
+            // Tạo sóng từ nguồn 2
+            if (Math.floor(elapsed * wave2.frequency * 4) > Math.floor((elapsed - 0.016) * wave2.frequency * 4)) {
+                createWaveRing(wave2.x, wave2.y, 'green', wave2.frequency);
+            }
+            
+            // Cập nhật biên độ tổng hợp
+            updateTotalAmplitude(elapsed);
+            
+            animationId = requestAnimationFrame(animate);
+        }
+        
+        function createWaveRing(x, y, color, frequency) {
+            const canvas = document.getElementById('waveCanvas');
+            const ring = document.createElement('div');
+            ring.className = `wave-circle ${color}`;
+            ring.style.left = x + 'px';
+            ring.style.top = y + 'px';
+            ring.style.opacity = waveOpacity;
+            ring.style.animationDuration = (2 / frequency) + 's';
+            
+            canvas.appendChild(ring);
+            
+            // Xóa sau khi animation hoàn thành
+            setTimeout(() => {
+                if (ring.parentNode) {
+                    ring.parentNode.removeChild(ring);
+                }
+            }, (2000 / frequency));
+        }
+        
+        function updateTotalAmplitude(time) {
+            const centerX = (wave1.x + wave2.x) / 2;
+            const centerY = (wave1.y + wave2.y) / 2;
+            
+            const d1 = Math.sqrt(Math.pow(centerX - wave1.x, 2) + Math.pow(centerY - wave1.y, 2));
+            const d2 = Math.sqrt(Math.pow(centerX - wave2.x, 2) + Math.pow(centerY - wave2.y, 2));
+            
+            const wavelength = waveSpeed / ((wave1.frequency + wave2.frequency) / 2);
+            const phaseDiff = (2 * Math.PI * Math.abs(d2 - d1) / wavelength) + 
+                             (wave2.phase - wave1.phase) * Math.PI / 180;
+            
+            const amplitude = calculateTotalAmplitude(d1, d2, phaseDiff);
+            
+            document.getElementById('totalAmplitude').textContent = amplitude.toFixed(2);
+            document.getElementById('minAmp').textContent = Math.abs(wave1.amplitude - wave2.amplitude).toFixed(1);
+            document.getElementById('maxAmp').textContent = (wave1.amplitude + wave2.amplitude).toFixed(1);
+        }
+        
+        function calculateTotalAmplitude(d1, d2, phaseDiff) {
+            const a1 = wave1.amplitude * (1 / (1 + d1 / 100)); // Suy giảm theo khoảng cách
+            const a2 = wave2.amplitude * (1 / (1 + d2 / 100));
+            
+            // Công thức chồng chất sóng
+            const totalAmp = Math.sqrt(
+                Math.pow(a1, 2) + Math.pow(a2, 2) + 
+                2 * a1 * a2 * Math.cos(phaseDiff)
+            );
+            
+            return totalAmp;
+        }
+        
+        function updateWaveParams() {
+            // Cập nhật từ sliders
+            wave1.amplitude = parseFloat(document.getElementById('amplitude1').value);
+            wave1.frequency = parseFloat(document.getElementById('frequency1').value);
+            wave1.phase = parseFloat(document.getElementById('phase1').value);
+            
+            wave2.amplitude = parseFloat(document.getElementById('amplitude2').value);
+            wave2.frequency = parseFloat(document.getElementById('frequency2').value);
+            wave2.phase = parseFloat(document.getElementById('phase2').value);
+            
+            waveSpeed = parseFloat(document.getElementById('waveSpeedSlider').value);
+            waveOpacity = parseFloat(document.getElementById('waveOpacity').value);
+            animationSpeed = parseFloat(document.getElementById('animSpeed').value);
+            
+            // Cập nhật hiển thị values
+            document.getElementById('amp1Value').textContent = wave1.amplitude.toFixed(1);
+            document.getElementById('freq1Value').textContent = wave1.frequency.toFixed(1) + ' Hz';
+            document.getElementById('phase1Value').textContent = wave1.phase + '°';
+            
+            document.getElementById('amp2Value').textContent = wave2.amplitude.toFixed(1);
+            document.getElementById('freq2Value').textContent = wave2.frequency.toFixed(1) + ' Hz';
+            document.getElementById('phase2Value').textContent = wave2.phase + '°';
+            
+            document.getElementById('speedValue').textContent = waveSpeed + ' px/s';
+            document.getElementById('opacityValue').textContent = Math.round(waveOpacity * 100) + '%';
+            document.getElementById('animSpeedValue').textContent = animationSpeed.toFixed(1) + 'x';
+            
+            // Cập nhật tooltips
+            document.getElementById('tooltipA1').textContent = wave1.amplitude.toFixed(1);
+            document.getElementById('tooltipF1').textContent = wave1.frequency.toFixed(1);
+            document.getElementById('tooltipP1').textContent = wave1.phase;
+            
+            document.getElementById('tooltipA2').textContent = wave2.amplitude.toFixed(1);
+            document.getElementById('tooltipF2').textContent = wave2.frequency.toFixed(1);
+            document.getElementById('tooltipP2').textContent = wave2.phase;
+            
+            // Cập nhật các thông số tính toán
+            updateCalculatedParams();
+            updateFrequencyDisplay();
+            updatePhaseIndicator();
+            updateSpeedGauge();
+        }
+        
+        function updateCalculatedParams() {
+            const lambda1 = waveSpeed / wave1.frequency;
+            const lambda2 = waveSpeed / wave2.frequency;
+            const period1 = 1 / wave1.frequency;
+            const period2 = 1 / wave2.frequency;
+            const omega1 = 2 * Math.PI * wave1.frequency;
+            const omega2 = 2 * Math.PI * wave2.frequency;
+            
+            document.getElementById('wavelength1').textContent = lambda1.toFixed(0) + 'px';
+            document.getElementById('wavelength2').textContent = lambda2.toFixed(0) + 'px';
+            document.getElementById('period1').textContent = period1.toFixed(2) + 's';
+            document.getElementById('period2').textContent = period2.toFixed(2) + 's';
+            document.getElementById('omega1').textContent = omega1.toFixed(1) + ' rad/s';
+            document.getElementById('omega2').textContent = omega2.toFixed(1) + ' rad/s';
+            
+            // Cập nhật real-time analysis
+            const distance = Math.sqrt(Math.pow(wave2.x - wave1.x, 2) + Math.pow(wave2.y - wave1.y, 2));
+            const avgWavelength = (lambda1 + lambda2) / 2;
+            const fringeCount = Math.floor(distance / (avgWavelength / 2));
+            const phaseDiff = wave2.phase - wave1.phase;
+            const maxAmp = wave1.amplitude + wave1.amplitude;
+            const avgFreq = (wave1.frequency + wave2.frequency) / 2;
+            const avgPeriod = 1 / avgFreq;
+            
+            document.getElementById('sourceDistance').textContent = distance.toFixed(0) + 'px';
+            document.getElementById('fringeCount').textContent = fringeCount;
+            document.getElementById('maxAmplitude').textContent = maxAmp.toFixed(1) + 'A';
+            document.getElementById('phaseDiff').textContent = phaseDiff + '°';
+            document.getElementById('wavelength').textContent = avgWavelength.toFixed(0) + 'px';
+            document.getElementById('avgFrequency').textContent = avgFreq.toFixed(1) + ' Hz';
+            document.getElementById('period').textContent = avgPeriod.toFixed(2) + 's';
+            document.getElementById('waveSpeed').textContent = waveSpeed + ' px/s';
+        }
+        
+        function updateFrequencyDisplay() {
+            const freqDiff = Math.abs(wave1.frequency - wave2.frequency);
+            document.getElementById('frequencyDisplay').textContent = 
+                `f₁ = ${wave1.frequency.toFixed(1)} Hz | f₂ = ${wave2.frequency.toFixed(1)} Hz | Δf = ${freqDiff.toFixed(1)} Hz`;
+        }
+        
+        function updatePhaseIndicator() {
+            const phaseDiff = wave2.phase - wave1.phase;
+            document.getElementById('phaseDiffValue').textContent = phaseDiff + '°';
+        }
+        
+        function updateSpeedGauge() {
+            document.getElementById('speedGauge').textContent = waveSpeed;
+        }
+        
+        function updateStatusIndicator(status, color) {
+            const statusText = document.getElementById('statusText');
+            const statusDot = document.getElementById('statusDot');
+            
+            statusText.textContent = status;
+            statusDot.className = `w-2 h-2 rounded-full mr-2 animate-pulse bg-${color}-400`;
+        }
+        
+        function makeDraggable() {
+            const source1 = document.getElementById('source1');
+            const source2 = document.getElementById('source2');
+            
+            makeDraggableElement(source1, 1);
+            makeDraggableElement(source2, 2);
+        }
+        
+        function makeDraggableElement(element, sourceNum) {
+            let isDragging = false;
+            let startX, startY, initialX, initialY;
+            
+            element.addEventListener('mousedown', function(e) {
+                isDragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                initialX = parseInt(element.style.left);
+                initialY = parseInt(element.style.top);
+                element.style.cursor = 'grabbing';
+            });
+            
+            document.addEventListener('mousemove', function(e) {
+                if (!isDragging) return;
+                
+                const deltaX = e.clientX - startX;
+                const deltaY = e.clientY - startY;
+                
+                const newX = Math.max(15, Math.min(785, initialX + deltaX));
+                const newY = Math.max(15, Math.min(585, initialY + deltaY));
+                
+                element.style.left = newX + 'px';
+                element.style.top = newY + 'px';
+                
+                if (sourceNum === 1) {
+                    wave1.x = newX;
+                    wave1.y = newY;
+                } else {
+                    wave2.x = newX;
+                    wave2.y = newY;
+                }
+                
+                updateDistanceLine();
+                updateWaveParams();
+            });
+            
+            document.addEventListener('mouseup', function() {
+                isDragging = false;
+                element.style.cursor = 'move';
+            });
+        }
+        
+        function updateDistanceLine() {
+            const line = document.getElementById('distanceLine');
+            const tooltip = document.getElementById('distanceTooltip');
+            
+            const distance = Math.sqrt(Math.pow(wave2.x - wave1.x, 2) + Math.pow(wave2.y - wave1.y, 2));
+            const angle = Math.atan2(wave2.y - wave1.y, wave2.x - wave1.x);
+            
+            line.style.left = wave1.x + 'px';
+            line.style.top = wave1.y + 'px';
+            line.style.width = distance + 'px';
+            line.style.transform = `rotate(${angle}rad)`;
+            line.style.transformOrigin = '0 50%';
+            
+            tooltip.style.left = (wave1.x + wave2.x) / 2 + 'px';
+            tooltip.style.top = (wave1.y + wave2.y) / 2 - 30 + 'px';
+            document.getElementById('distanceValue').textContent = distance.toFixed(0) + 'px';
+        }
+        
+        function loadPreset(type) {
+            // Remove active class from all buttons
+            document.querySelectorAll('.preset-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Add active class to clicked button
+            event.target.closest('.preset-button').classList.add('active');
+            
+            switch(type) {
+                case 'constructive':
+                    // Tăng cường hoàn toàn: cùng pha
+                    wave1.amplitude = 1.0;
+                    wave1.frequency = 2.0;
+                    wave1.phase = 0;
+                    wave2.amplitude = 1.0;
+                    wave2.frequency = 2.0;
+                    wave2.phase = 0;
+                    break;
+                    
+                case 'destructive':
+                    // Triệt tiêu hoàn toàn: ngược pha
+                    wave1.amplitude = 1.0;
+                    wave1.frequency = 2.0;
+                    wave1.phase = 0;
+                    wave2.amplitude = 1.0;
+                    wave2.frequency = 2.0;
+                    wave2.phase = 180;
+                    break;
+                    
+                case 'partial':
+                    // Giao thoa một phần: lệch pha 90°
+                    wave1.amplitude = 1.0;
+                    wave1.frequency = 2.0;
+                    wave1.phase = 0;
+                    wave2.amplitude = 1.0;
+                    wave2.frequency = 2.0;
+                    wave2.phase = 90;
+                    break;
+                    
+                case 'different_freq':
+                    // Khác tần số (beat)
+                    wave1.amplitude = 1.0;
+                    wave1.frequency = 2.0;
+                    wave1.phase = 0;
+                    wave2.amplitude = 1.0;
+                    wave2.frequency = 2.5;
+                    wave2.phase = 0;
+                    break;
+                    
+                case 'different_amp':
+                    // Khác biên độ
+                    wave1.amplitude = 1.5;
+                    wave1.frequency = 2.0;
+                    wave1.phase = 0;
+                    wave2.amplitude = 0.8;
+                    wave2.frequency = 2.0;
+                    wave2.phase = 0;
+                    break;
+                    
+                case 'complex':
+                    // Mẫu phức tạp
+                    wave1.amplitude = 1.2;
+                    wave1.frequency = 1.8;
+                    wave1.phase = 45;
+                    wave2.amplitude = 0.9;
+                    wave2.frequency = 2.3;
+                    wave2.phase = 120;
+                    break;
+            }
+            
+            // Cập nhật sliders
+            document.getElementById('amplitude1').value = wave1.amplitude;
+            document.getElementById('frequency1').value = wave1.frequency;
+            document.getElementById('phase1').value = wave1.phase;
+            document.getElementById('amplitude2').value = wave2.amplitude;
+            document.getElementById('frequency2').value = wave2.frequency;
+            document.getElementById('phase2').value = wave2.phase;
+            
+            updateWaveParams();
+        }
+    </script>
+</body>
+</html>

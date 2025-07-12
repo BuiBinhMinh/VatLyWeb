@@ -1,0 +1,408 @@
+    :root { --grad-bg: linear-gradient(135deg,#667eea 0,#764ba2 100%); }
+    body {
+      margin:0; font-family:'Inter',sans-serif;
+      background:var(--grad-bg); overflow:hidden;
+    }
+    .physics-bg {
+      position:relative; min-height:100vh;
+      display:flex; align-items:center; justify-content:center;
+      padding:1rem;
+    }
+
+    .login-card {
+      position:relative; max-width:448px; width:100%;
+      padding:2rem; border-radius:1rem;
+      background:rgba(255,255,255,0.1); backdrop-filter:blur(20px);
+      box-shadow:0 25px 45px rgba(0,0,0,0.1);
+      transform:perspective(1000px) rotateX(5deg);
+      transition:all .3s ease; z-index:10;
+    }
+    .login-card:hover {
+      transform:perspective(1000px) rotateX(0) translateY(-5px);
+      box-shadow:0 35px 55px rgba(0,0,0,0.15);
+    }
+
+    @keyframes pulse {
+      0%,100% { transform:scale(1); }
+      50%     { transform:scale(1.1); }
+    }
+
+    @keyframes rotate { to { transform:rotate(360deg); } }
+    .electron {
+      position:absolute; width:8px;height:8px; background:#fff; border-radius:50%;
+      box-shadow:0 0 10px rgba(255,255,255,0.8);
+    }
+
+    .physics-formula {
+      position:absolute; color:rgba(255,255,255,0.1);
+      font-size:1.2rem; font-weight:300;
+      animation:drift 8s ease-in-out infinite;
+    }
+    @keyframes drift {
+      0%,100% { transform:translate(0,0); opacity:.1; }
+      50%     { transform:translate(10px,-15px); opacity:.3; }
+    }
+    .f1 { top:15%; left:5%;  animation-delay:0s; }
+    .f2 { top:70%; right:8%; animation-delay:2s; }
+    .f3 { bottom:25%; left:10%; animation-delay:4s; }
+    .f4 { top:40%; right:25%;animation-delay:1s; }
+    .f5 { bottom:40%; right:15%;animation-delay:3s; }
+
+    .wave-container {
+      position:absolute; bottom:0; left:0; width:100%; height:100px;
+      overflow:hidden; opacity:.1;
+    }
+    .wave {
+      position:absolute; bottom:0; left:0; width:200%; height:100px;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent);
+      animation:wave-motion 8s ease-in-out infinite;
+    }
+    .w1 { animation-delay:0s;    opacity:1; }
+    .w2 { animation-delay:-2s;   opacity:.5; }
+    .w3 { animation-delay:-4s;   opacity:.3; }
+    @keyframes wave-motion {
+      0%,100% { transform:translate(-50%,0); }
+      50%     { transform:translate(-50%,-20px); }
+    }
+
+    .pendulum {
+      position:absolute; top:5%; left:5%;
+      width:2px; height:80px; background:rgba(255,255,255,0.3);
+      transform-origin:top center; animation:pendulum-swing 4s ease-in-out infinite;
+    }
+    .pendulum::after {
+      content:''; position:absolute; bottom:-10px; left:-7px;
+      width:16px;height:16px; background:#fff; border-radius:50%;
+      box-shadow:0 0 15px rgba(255,255,255,0.8);
+    }
+    @keyframes pendulum-swing {
+      0%,100% { transform:rotate(-30deg); }
+      50%     { transform:rotate(30deg); }
+    }
+
+    .magnetic-field {
+      position:absolute; top:30%; right:5%;
+      width:150px;height:150px; border:2px solid rgba(255,255,255,0.1);
+      border-radius:50%; animation:magnetic-pulse 6s ease-in-out infinite;
+    }
+    .magnetic-field::before,
+    .magnetic-field::after {
+      content:''; position:absolute; top:0;left:0;right:0;bottom:0;
+      border:2px solid rgba(255,255,255,0.05); border-radius:50%;
+    }
+    .magnetic-field::before { transform:scale(1.3); animation-delay:1s; }
+    .magnetic-field::after  { transform:scale(1.6); animation-delay:2s; }
+    @keyframes magnetic-pulse {
+      0%,100% { opacity:.1; transform:scale(1); }
+      50%     { opacity:.3; transform:scale(1.1); }
+    }
+
+    .dna-helix {
+      position:absolute; top:20%; right:15%;
+      width:4px;height:200px; transform-origin:center;
+      background:linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.3),transparent 25%,
+        rgba(255,255,255,0.3) 50%,transparent 75%,
+        rgba(255,255,255,0.3)
+      );
+      animation:dna-rotate 8s linear infinite;
+    }
+    @keyframes dna-rotate { to { transform:rotateY(360deg); } }
+    .electric-spark {
+      position:absolute; width:2px;height:40px;
+      background:linear-gradient(to bottom,#fff,transparent);
+      animation:electric-flash 2s ease-in-out infinite;
+    }
+    .s1 { top:25%; left:20%; animation-delay:.5s; }
+    .s2 { bottom:30%;right:30%; animation-delay:1.5s; }
+    .s3 { top:60%; left:8%;  animation-delay:2.5s; }
+    @keyframes electric-flash {
+      0%,90%,100% { opacity:0; }
+      5%,85%      { opacity:1; }
+    }
+
+    .gravity-particle {
+      position:absolute; width:6px;height:6px; background:rgba(255,255,255,0.7);
+      border-radius:50%; animation:gravity-fall 3s linear forwards;
+    }
+    @keyframes gravity-fall {
+      0%   { transform:translateY(-20px); opacity:0; }
+      50%  { opacity:1; }
+      100% { transform:translateY(100vh); opacity:0; }
+    }
+
+    .input-field {
+      background:rgba(255,255,255,0.1);
+      border:1px solid rgba(255,255,255,0.3);
+      backdrop-filter:blur(10px);
+      color:#fff; transition:all .2s;
+    }
+    .input-field::placeholder { color:rgba(255,255,255,0.6); }
+    .input-field:focus {
+      background:rgba(255,255,255,0.2);
+      border-color:rgba(255,255,255,0.6);
+      box-shadow:0 0 20px rgba(255,255,255,0.2);
+      transform:translateY(-2px); outline:none;
+    }
+    .btn-login {
+      background:linear-gradient(135deg,#ff6b6b,#ee5a24);
+      position:relative; overflow:hidden; transition:all .3s;
+    }
+    .btn-login::before {
+      content:''; position:absolute; top:0; left:-100%;
+      width:100%; height:100%;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent);
+      transition:left .5s;
+    }
+    .btn-login:hover::before { left:100%; }
+    .btn-login:hover {
+      transform:translateY(-2px);
+      box-shadow:0 10px 25px rgba(255,107,107,0.4);
+    }
+
+    .social-orbit {
+      position:absolute; width:4px; height:4px; background:#fff;
+      border-radius:50%; opacity:.8;
+    }
+    @keyframes rotate_small { to { transform:rotate(360deg); } }
+    @keyframes rotate_small_rev { to { transform:rotate(-360deg); } }
+
+  .physics-text {
+    background: linear-gradient(45deg, #3b82f6, #8b5cf6, #06b6d4);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientShift 3s ease-in-out infinite;
+  }
+
+  .pro-badge {
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    color: white;
+    animation: float 3s ease-in-out infinite;
+    box-shadow: 0 2px 10px rgba(245,158,11,0.3);
+  }
+
+  .tagline-text {
+    color: #64748b;
+    font-weight: 500;
+  }
+
+  @keyframes orbit {
+    0%   { transform: rotateX(0deg) rotateY(0deg); }
+    100% { transform: rotateX(360deg) rotateY(360deg); }
+  }
+  @keyframes electronMove {
+    0%   { transform: translateX(-8px) scale(0.8); opacity:0.7; }
+    100% { transform: translateX(8px)  scale(1.2); opacity:1;   }
+  }
+  @keyframes pulse {
+    0%,100% { transform: translate(-50%,-50%) scale(1); box-shadow:0 0 10px rgba(59,130,246,0.5); }
+    50%     { transform: translate(-50%,-50%) scale(1.1); box-shadow:0 0 20px rgba(59,130,246,0.8); }
+  }
+  @keyframes gradientShift {
+    0%,100% { background-position: 0% 50%; }
+    50%     { background-position: 100% 50%; }
+  }
+  @keyframes float {
+    0%,100% { transform: translateY(0); }
+    50%     { transform: translateY(-2px); }
+  } 
+  
+  :root { --grad-bg: linear-gradient(135deg,#667eea 0,#764ba2 100%); }
+    body { margin:0; font-family:'Inter',sans-serif; background:var(--grad-bg); overflow:hidden; }
+    .physics-bg { position:relative; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:1rem; }
+    .login-card {
+      position:relative; max-width:448px; width:100%; padding:2rem; border-radius:1rem;
+      background:rgba(255,255,255,0.1); backdrop-filter:blur(20px);
+      box-shadow:0 25px 45px rgba(0,0,0,0.1);
+      transform:perspective(1000px) rotateX(5deg);
+      transition:all .3s ease; z-index:10;
+    }
+    .login-card:hover {
+      transform:perspective(1000px) rotateX(0) translateY(-5px);
+      box-shadow:0 35px 55px rgba(0,0,0,0.15);
+    }
+
+    /* === Error Tooltip === */
+    .error-tooltip {
+      position:absolute; top:100%; left:0;
+      background:rgba(255,69,58,0.9); color:#fff;
+      padding:.25rem .5rem; border-radius:.25rem;
+      font-size:.875rem; display:flex; align-items:center;
+      pointer-events:none; opacity:0;
+      transform:translateY(-.5rem) scale(.8);
+      transition:opacity .2s, transform .2s;
+      white-space:nowrap; z-index:50;
+    }
+    .error-tooltip.show {
+      opacity:1; transform:translateY(-1.25rem) scale(1);
+    }
+    .error-tooltip i {
+      margin-right:.25rem;
+      animation: electronMove 1.5s ease-in-out infinite alternate;
+    }
+    @keyframes electronMove {
+      0% { transform:translateX(-4px) scale(0.8); }
+      100% { transform:translateX(4px) scale(1.2); }
+    }
+
+    /* === Toast Notification === */
+    .toast {
+      position:fixed; bottom:2rem; left:50%;
+      transform:translateX(-50%) translateY(100%);
+      background:rgba(0,0,0,0.7); color:#fff;
+      padding:.75rem 1.5rem; border-radius:.5rem;
+      display:flex; align-items:center; gap:.5rem;
+      box-shadow:0 8px 24px rgba(0,0,0,0.2);
+      backdrop-filter:blur(6px);
+      transition:transform .4s ease, opacity .4s ease;
+      opacity:0; z-index:999;
+    }
+    .toast.show {
+      transform:translateX(-50%) translateY(0);
+      opacity:1;
+    }
+    .toast i {
+      color:#34d399;
+      animation: toastBounce 1s ease-in-out infinite;
+    }
+    @keyframes toastBounce {
+      0%,100% { transform:translateY(0); }
+      50%     { transform:translateY(-4px); }
+    }
+
+    /* === Physics 3D Effects === */
+    .atom-orbit {
+    animation: orbit 4s linear infinite;
+    transform-origin: center;
+  }
+  .atom-orbit:nth-child(2) { animation-delay: -1.3s; transform: rotateY(60deg); }
+  .atom-orbit:nth-child(3) { animation-delay: -2.6s; transform: rotateY(120deg); }
+
+  .electron {
+    position: absolute;
+    width: 0.5rem; height: 0.5rem;
+    border-radius: 9999px;
+    animation: electronMove 2s ease-in-out infinite alternate;
+  }
+
+  .nucleus {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 1rem; height: 1rem;
+    background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+    border-radius: 9999px;
+    transform: translate(-50%, -50%);
+    animation: pulse 3s ease-in-out infinite;
+  }
+    @keyframes rotate { to{transform:rotate(360deg);} }
+    .e1 { top:-4px; left:50%; transform:translateX(-50%); }
+    .e2 { bottom:-4px; right:50%; transform:translateX(50%); }
+    .e3 { top:50%; right:-4px; transform:translateY(-50%); }
+
+    @keyframes pulse {
+      0%,100% { transform:translate(-50%,-50%) scale(1); box-shadow:0 0 10px rgba(59,130,246,0.5); }
+      50%     { transform:translate(-50%,-50%) scale(1.1); box-shadow:0 0 20px rgba(59,130,246,0.8); }
+    }
+
+    .physics-formula {
+      position:absolute; color:rgba(255,255,255,0.1);
+      font-size:1.2rem; font-weight:300;
+      animation: drift 8s ease-in-out infinite;
+    }
+    @keyframes drift {
+      0%,100% { transform:translate(0,0); opacity:.1; }
+      50%     { transform:translate(10px,-15px); opacity:.3; }
+    }
+    .f1 { top:15%; left:5%;  animation-delay:0s; }
+    .f2 { top:70%; right:8%; animation-delay:2s; }
+    .f3 { bottom:25%; left:10%; animation-delay:4s; }
+    .f4 { top:40%; right:25%;animation-delay:1s; }
+    .f5 { bottom:40%; right:15%;animation-delay:3s; }
+
+    .wave-container {
+      position:absolute; bottom:0; left:0; width:100%; height:100px; overflow:hidden; opacity:.1;
+    }
+    .wave {
+      position:absolute; bottom:0; left:0; width:200%; height:100px;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent);
+      animation: waveMotion 8s ease-in-out infinite;
+    }
+    .w1 { animation-delay:0s;    opacity:1; }
+    .w2 { animation-delay:-2s;   opacity:.5; }
+    .w3 { animation-delay:-4s;   opacity:.3; }
+    @keyframes waveMotion {
+      0%,100% { transform:translate(-50%,0); }
+      50%     { transform:translate(-50%,-20px); }
+    }
+
+    .pendulum {
+      position:absolute; top:5%; left:5%; width:2px; height:80px;
+      background:rgba(255,255,255,0.3); transform-origin:top center;
+      animation: pendulumSwing 4s ease-in-out infinite;
+    }
+    .pendulum::after {
+      content:''; position:absolute; bottom:-10px; left:-7px;
+      width:16px;height:16px; background:#fff; border-radius:50%;
+      box-shadow:0 0 15px rgba(255,255,255,0.8);
+    }
+    @keyframes pendulumSwing {
+      0%,100% { transform:rotate(-30deg); }
+      50%     { transform:rotate(30deg); }
+    }
+
+    .magnetic-field {
+      position:absolute; top:30%; right:5%; width:150px; height:150px;
+      border:2px solid rgba(255,255,255,0.1); border-radius:50%;
+      animation: magnetPulse 6s ease-in-out infinite;
+    }
+    .magnetic-field::before,.magnetic-field::after {
+      content:''; position:absolute; top:0;left:0;right:0;bottom:0;
+      border:2px solid rgba(255,255,255,0.05); border-radius:50%;
+    }
+    .magnetic-field::before { transform:scale(1.3); animation-delay:1s; }
+    .magnetic-field::after  { transform:scale(1.6); animation-delay:2s; }
+    @keyframes magnetPulse {
+      0%,100% { opacity:.1; transform:scale(1); }
+      50%     { opacity:.3; transform:scale(1.1); }
+    }
+
+    .dna-helix {
+      position:absolute; top:20%; right:15%; width:4px; height:200px;
+      background:linear-gradient(to bottom,rgba(255,255,255,0.3),transparent 25%,rgba(255,255,255,0.3) 50%,transparent 75%,rgba(255,255,255,0.3));
+      transform-origin:center; animation: dnaRotate 8s linear infinite;
+    }
+    @keyframes dnaRotate { to{transform:rotateY(360deg);} }
+
+    .electric-spark {
+      position:absolute; width:2px; height:40px;
+      background:linear-gradient(to bottom,#fff,transparent);
+      animation: electricFlash 2s ease-in-out infinite;
+    }
+    .s1 { top:25%; left:20%; animation-delay:.5s; }
+    .s2 { bottom:30%; right:30%; animation-delay:1.5s; }
+    .s3 { top:60%; left:8%;  animation-delay:2.5s; }
+    @keyframes electricFlash {
+      0%,90%,100% { opacity:0; }
+      5%,85%      { opacity:1; }
+    }
+
+    .gravity-particle {
+      position:absolute; width:6px; height:6px; background:rgba(255,255,255,0.7);
+      border-radius:50%; animation: gravityFall 3s linear forwards;
+    }
+    @keyframes gravityFall {
+      0%   { transform:translateY(-20px); opacity:0; }
+      50%  { opacity:1; }
+      100% { transform:translateY(100vh); opacity:0; }
+    }
+
+    @keyframes floatUp {
+      to { transform:translateY(-100vh) rotate(360deg); opacity:0; }
+    }
+
+    @keyframes energyBurst {
+      0% { transform:translate(-50%,-50%) scale(0); opacity:1; }
+      100% { transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(3); opacity:0; }
+    }

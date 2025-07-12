@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="vi" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhysicsLab - Home</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#8B5CF6',
+                        secondary: '#06B6D4',
+                        accent: '#F472B6',
+                        warning: '#FBBF24',
+                        danger: '#F87171',
+                        dark: '#374151',
+                        'glass': 'rgba(255, 255, 255, 0.1)'
+                    },
+                    fontFamily: {
+                        'display': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    backdropBlur: {
+                        'xs': '2px',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- THREE.JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link rel="shortcut icon" href="https://cdn-icons-png.flaticon.com/512/8270/8270064.png" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/homecourse.css">
+</head>
+<body class="h-full bg-gradient-to-br from-gray-50 via-white to-gray-100 text-gray-800 font-display overflow-x-hidden">
+    <!-- Animated Background Particles -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-20 left-20 w-2 h-2 bg-violet-400 rounded-full floating-particle opacity-60"></div>
+        <div class="absolute top-40 right-32 w-3 h-3 bg-pink-400 rounded-full floating-particle opacity-40" style="animation-delay: -2s;"></div>
+        <div class="absolute bottom-32 left-1/4 w-1 h-1 bg-cyan-400 rounded-full floating-particle opacity-80" style="animation-delay: -4s;"></div>
+        <div class="absolute top-1/2 right-20 w-2 h-2 bg-purple-400 rounded-full floating-particle opacity-50" style="animation-delay: -1s;"></div>
+        <div class="absolute bottom-20 right-1/3 w-3 h-3 bg-rose-400 rounded-full floating-particle opacity-70" style="animation-delay: -3s;"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="fixed w-full top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-200/50 shadow-sm">
+        <div class="flex items-center justify-between px-6 py-4">
+            <!-- Mobile menu button -->
+            <button id="mobile-menu-btn" class="lg:hidden p-2 rounded-xl hover:bg-gray-100 transition-all duration-300">
+                <i class="fas fa-bars text-gray-700"></i>
+            </button>
+            
+            <!-- Logo -->
+            <div class="logo-container flex items-center space-x-4 cursor-pointer select-none">
+                <div class="relative w-12 h-12 sm:w-14 sm:h-14">
+                    <div class="atom-orbit absolute inset-0 border border-blue-400/40 rounded-full"></div>
+                    <div class="atom-orbit absoluteVisualViewport absolute inset-1 border border-purple-400/40 rounded-full"></div>
+                    <div class="atom-orbit absolute inset-2 border border-cyan-400/40 rounded-full"></div>
+                    <div class="electron bg-blue-500" style="top:1rem; left:50%; animation-delay:0s;"></div>
+                    <div class="electron bg-purple-500" style="bottom:1rem; left:50%; animation-delay:-0.7s;"></div>
+                    <div class="electron bg-cyan-500" style="left:1rem; top:50%; animation-delay:-1.4s;"></div>
+                    <div class="nucleus"></div>
+                </div>
+                <div class="hidden sm:block">
+                    <h1 class="text-xl font-bold gradient-text">PhysicsLab</h1>
+                    <p class="text-xs text-gray-500">Nền tảng học tập tương lai</p>
+                </div>
+            </div>
+            
+            <!-- Search bar (center) -->
+            <div class="flex-1 max-w-md mx-auto px-4">
+                <div class="relative">
+                    <input type="text" placeholder="Tìm kiếm bài học, thí nghiệm..." 
+                           class="w-full pl-12 pr-4 py-3 bg-gray-100/80 rounded-2xl focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all duration-300 text-gray-800 placeholder-gray-500 border border-gray-200/50">
+                    <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-300"></i>
+                    <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                        <kbd class="px-2 py-1 text-xs bg-white/10 rounded-lg text-gray-300">⌘K</kbd>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right side -->
+            <div class="flex items-center space-x-4">
+                <!-- Study Timer -->
+                <div class="hidden md:flex items-center space-x-2 px-3 py-2 bg-gray-100 rounded-xl">
+                    <i class="fas fa-clock text-violet-600"></i>
+                    <span class="text-sm font-medium text-gray-700" id="study-timer">00:00</span>
+                </div>
+                
+                <!-- Notification -->
+                <div class="relative">
+                    <button class="p-3 rounded-xl hover:bg-gray-100 transition-all duration-300 relative">
+                        <i class="fas fa-bell text-gray-700"></i>
+                        <span class="absolute -top-1 -right-1 bg-gradient-to-r from-pink-500 to-violet-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">2</span>
+                    </button>
+                </div>
+                
+                <!-- User dropdown -->
+                <div class="relative">
+                    <button id="user-menu-btn" class="flex items-center space-x-3 p-2 rounded-xl hover:bg-gray-100 transition-all duration-300">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center font-bold text-white">
+                            MB
+                        </div>
+                        <div class="hidden sm:block text-left">
+                            <p class="text-gray-800 font-medium">Minh Bùi</p>
+                            <p class="text-xs text-gray-500">Lớp 12A1</p>
+                        </div>
+                        <i class="fas fa-chevron-down text-gray-500 text-sm"></i>
+                    </button>
+                    <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-2xl border border-gray-200 py-2 shadow-2xl">
+                        <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 transition-colors">
+                            <i class="fas fa-user mr-3"></i>Hồ sơ học tập
+                        </a>
+                        <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 transition-colors">
+                            <i class="fas fa-trophy mr-3"></i>Thành tích
+                        </a>
+                        <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 transition-colors">
+                            <i class="fas fa-cog mr-3"></i>Cài đặt
+                        </a>
+                        <hr class="my-2 border-gray-200">
+                        <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 transition-colors">
+                            <i class="fas fa-sign-out-alt mr-3"></i>Đăng xuất
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex pt-20">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-40 w-80 bg-white/90 backdrop-blur-xl border-r border-gray-200/50 shadow-lg transform -translate-x-full lg:translate-x-0 transition-transform duration-500 ease-out pt-20 lg:pt-0">
+            <div class="p-6 h-full overflow-y-auto">
+                <!-- Current Progress -->
+                <div class="mb-6 p-4 bg-gray-50/80 rounded-2xl border border-gray-200/50 shadow-sm">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-gray-800 font-semibold">Tiến độ hôm nay</h3>
+                        <span class="text-violet-600 text-sm font-medium">75%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2 mb-3">
+                        <div class="bg-gradient-to-r from-violet-500 to-pink-500 h-2 rounded-full progress-bar" style="--progress: 75%;"></div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3 text-center">
+                        <div>
+                            <div class="text-lg font-bold text-violet-600">3</div>
+                            <div class="text-xs text-gray-500">Bài học</div>
+                        </div>
+                        <div>
+                            <div class="text-lg font-bold text-pink-600">45m</div>
+                            <div class="text-xs text-gray-500">Thời gian</div>
+                        </div>
+                        <div>
+                            <div class="text-lg font-bold text-cyan-600">8.5</div>
+                            <div class="text-xs text-gray-500">Điểm TB</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Menu -->
+                <nav class="space-y-2 mb-6">
+                    <a href="#dashboard" class="nav-link flex items-center space-x-4 px-4 py-3 rounded-2xl bg-gradient-to-r from-violet-500 to-pink-500 text-white shadow-lg">
+                        <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+                            <i class="fas fa-home"></i>
+                        </div>
+                        <span class="font-medium">Tổng quan</span>
+                    </a>
+                    <a href="#lessons" class="nav-link flex items-center space-x-4 px-4 py-3 rounded-2xl text-gray-600 hover:bg-gray-100 hover:text-gray-800 transition-all duration-300">
+                        <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                        <span class="font-medium">Bài học</span>
+                    </a>
+                    <a href="#experiments" class="nav-link flex items-center space-x-4 px-4 py-3 rounded-2xl text-gray-600 hover:bg-gray-100 hover:text-gray-800 transition-all duration-300">
+                        <div class="w-8 h-8 rounded-lg bg-gray-200/50 flex items-center justify-center">
+                            <i class="fas fa-flask"></i>
+                        </div>
+                        <span class="font-medium">Thí nghiệm</span>
+                    </a>
+                </nav>
+
+                <!-- Quick Access -->
+                <div class="p-4 bg-gray-50/80 rounded-2xl border border-gray-200/50 shadow-sm">
+                    <h3 class="text-gray-800 font-semibold mb-4">Truy cập nhanh</h3>
+                    <div class="space-y-3">
+                        <button class="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-left">
+                            <div class="w-8 h-8 bg-violet-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-play text-violet-600 text-sm"></i>
+                            </div>
+                            <div>
+                                <div class="text-gray-800 text-sm font-medium">Tiếp tục học</div>
+                                <div class="text-gray-500 text-xs">Chương 3: Dao động</div>
+                            </div>
+                        </button>
+                        <button class="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-left">
+                            <div class="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-redo text-pink-600 text-sm"></i>
+                            </div>
+                            <div>
+                                <div class="text-gray-800 text-sm font-medium">Ôn tập</div>
+                                <div class="text-gray-500 text-xs">Cơ học chất điểm</div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Overlay for mobile -->
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 lg:hidden hidden backdrop-blur-sm"></div>
+
+        <!-- Main Content -->
+        <main class="flex-1 lg:ml-0 min-h-screen">
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="content-section p-6">
+                <!-- Welcome Header -->
+                <div class="mb-8">
+                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                        <div>
+                            <h1 class="text-3xl lg:text-4xl font-bold mb-2">
+                                Chào mừng trở lại, <span class="gradient-text">Minh</span>! 👋
+                            </h1>
+                            <p class="text-gray-600 text-lg">Hôm nay là ngày tuyệt vời để học vật lý</p>
+                        </div>
+                        <div class="mt-4 lg:mt-0">
+                            <button class="px-6 py-3 bg-gradient-to-r from-violet-500 to-pink-500 text-white rounded-2xl font-medium hover:shadow-lg transition-all duration-300 hover-lift">
+                                <i class="fas fa-play mr-2"></i>Tiếp tục học
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Current Learning Path -->
+                <div class="mb-8 p-6 bg-white/80 rounded-3xl border border-gray-200/50 shadow-lg reveal">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-xl font-bold text-gray-800">Lộ trình học tập hiện tại</h2>
+                        <span class="px-3 py-1 bg-violet-100 text-violet-700 rounded-full text-sm font-medium">Lớp 12</span>
+                    </div>
+                    <div class="grid lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2">Chương 3: Dao động cơ</h3>
+                            <p class="text-gray-600 mb-4">Tìm hiểu về dao động điều hòa, con lắc đơn và các hiện tượng cộng hưởng</p>
+                            <div class="flex items-center space-x-4 mb-4">
+                                <div class="flex items-center space-x-2">
+                                    <i class="fas fa-book-open text-violet-600"></i>
+                                    <span class="text-sm text-gray-600">8/12 bài học</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <i class="fas fa-flask text-pink-600"></i>
+                                    <span class="text-sm text-gray-600">3/5 thí nghiệm</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <i class="fas fa-clock text-cyan-600"></i>
+                                    <span class="text-sm text-gray-600">2.5 giờ</span>
+                                </div>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-3">
+                                <div class="bg-gradient-to-r from-violet-500 to-pink-500 h-3 rounded-full progress-bar" style="--progress: 67%;"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-center">
+                            <div class="atom-container relative">
+                                <div class="w-20 h-20 bg-gradient-to-br from-violet-500 to-pink-500 rounded-full nucleus flex items-center justify-center">
+                                    <i class="fas fa-wave-square text-white text-2xl"></i>
+                                </div>
+                                <div class="absolute inset-0 electron" style="animation-delay: 0s;">
+                                    <div class="w-3 h-3 bg-cyan-400 rounded-full"></div>
+                                </div>
+                                <div class="absolute inset-0 electron" style="animation-delay: -1s;">
+                                    <div class="w-2 h-2 bg-teal-400 rounded-full"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Today's Tasks -->
+                <div class="grid lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Lessons Today -->
+                    <div class="bg-white rounded-3xl p-6 border border-gray-200 shadow-lg hover-lift reveal">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800">Bài học hôm nay</h3>
+                            <div class="w-10 h-10 bg-violet-100 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-book-open text-violet-600"></i>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-center space-x-3 p-3 bg-emerald-50 rounded-xl border border-emerald-200">
+                                <div class="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                                <div class="flex-1">
+                                    <div class="text-gray-800 text-sm font-medium">Dao động tắt dần</div>
+                                    <div class="text-emerald-600 text-xs">Hoàn thành</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-3 p-3 bg-blue-50 rounded-xl border border-blue-200">
+                                <div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                                <div class="flex-1">
+                                    <div class="text-gray-800 text-sm font-medium">Dao động cưỡng bức</div>
+                                    <div class="text-blue-600 text-xs">Đang học</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-xl border border-gray-200">
+                                <div class="w-2 h-2 bg-gray-400 rounded-full"></div>
+                                <div class="flex-1">
+                                    <div class="text-gray-600 text-sm font-medium">Hiện tượng cộng hưởng</div>
+                                    <div class="text-gray-500 text-xs">Chưa học</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Experiments -->
+                    <div class="bg-white rounded-3xl p-6 border border-gray-200 shadow-lg hover-lift reveal" style="animation-delay: 0.1s;">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800">Thí nghiệm</h3>
+                            <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-flask text-emerald-600"></i>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="relative h-32 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-2xl flex items-center justify-center overflow-hidden border border-emerald-200">
+                                <div class="relative">
+                                    <div class="w-1 h-20 bg-gray-400 origin-top" style="animation: pendulumSwing 2s ease-in-out infinite;"></div>
+                                    <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full shadow-lg"></div>
+                                </div>
+                                <div class="absolute top-3 left-3">
+                                    <span class="px-2 py-1 bg-emerald-500 text-white rounded-lg text-xs font-medium">
+                                        Mới
+                                    </span>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="text-gray-800 font-medium mb-1">Con lắc đơn</h4>
+                                <p class="text-gray-600 text-sm mb-3">Khám phá chu kỳ dao động</p>
+                                <button class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white py-2 px-4 rounded-xl"
+                                        onclick="showSection('experiment-detail')">
+                                    Bắt đầu thí nghiệm
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Assignments -->
+                    <div class="bg-white rounded-3xl p-6 border border-gray-200 shadow-lg hover-lift reveal" style="animation-delay: 0.2s;">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800">Bài tập</h3>
+                            <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-pencil-alt text-amber-600"></i>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="p-3 bg-red-50 border border-red-200 rounded-xl">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-red-600 text-sm font-medium">Hạn nộp hôm nay</span>
+                                    <i class="fas fa-exclamation-triangle text-red-500"></i>
+                                </div>
+                                <div class="text-gray-800 text-sm font-medium mb-1">Bài tập chương 2</div>
+                                <div class="text-gray-600 text-xs">15 câu hỏi trắc nghiệm</div>
+                            </div>
+                            <div class="p-3 bg-gray-50 rounded-xl border border-gray-200">
+                                <div class="text-gray-800 text-sm font-medium mb-1">Bài tập chương 3</div>
+                                <div class="text-gray-600 text-xs mb-2">20 câu hỏi - Hạn: 3 ngày nữa</div>
+                                <div class="w-full bg-gray-200 rounded-full h-1">
+                                    <div class="bg-gradient-to-r from-blue-500 to-cyan-500 h-1 rounded-full" style="width: 30%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="grid lg:grid-cols-2 gap-6">
+                    <!-- Study Statistics -->
+                    <div class="bg-white rounded-3xl p-6 border border-gray-200 shadow-lg reveal">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-6">Thống kê học tập</h3>
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div class="text-center p-4 bg-gray-50 rounded-2xl border border-gray-200">
+                                <div class="text-2xl font-bold gradient-text mb-1">24</div>
+                                <div class="text-gray-600 text-sm">Bài học hoàn thành</div>
+                            </div>
+                            <div class="text-center p-4 bg-gray-50 rounded-2xl border border-gray-200">
+                                <div class="text-2xl font-bold gradient-text mb-1">8.7</div>
+                                <div class="text-gray-600 text-sm">Điểm trung bình</div>
+                            </div>
+                            <div class="text-center p-4 bg-gray-50 rounded-2xl border border-gray-200">
+                                <div class="text-2xl font-bold gradient-text mb-1">15h</div>
+                                <div class="text-gray-600 text-sm">Thời gian học</div>
+                            </div>
+                            <div class="text-center p-4 bg-gray-50 rounded-2xl border border-gray-200">
+                                <div class="text-2xl font-bold gradient-text mb-1">12</div>
+                                <div class="text-gray-600 text-sm">Thí nghiệm</div>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-700">Cơ học</span>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-24 bg-gray-200 rounded-full h-2">
+                                        <div class="bg-gradient-to-r from-blue-500 to-cyan-500 h-2 rounded-full" style="width: 90%;"></div>
+                                    </div>
+                                    <span class="text-blue-600 text-sm font-medium">90%</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-700">Dao động</span>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-24 bg-gray-200 rounded-full h-2">
+                                        <div class="bg-gradient-to-r from-emerald-500 to-teal-500 h-2 rounded-full" style="width: 67%;"></div>
+                                    </div>
+                                    <span class="text-emerald-600 text-sm font-medium">67%</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-700">Sóng học</span>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-24 bg-gray-200 rounded-full h-2">
+                                        <div class="bg-gradient-to-r from-green-500 to-emerald-500 h-2 rounded-full" style="width: 25%;"></div>
+                                    </div>
+                                    <span class="text-green-600 text-sm font-medium">25%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Achievements -->
+                    <div class="bg-white rounded-3xl p-6 border border-gray-200 shadow-lg reveal" style="animation-delay: 0.1s;">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-6">Thành tích gần đây</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center space-x-4 p-4 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-2xl">
+                                <div class="w-12 h-12 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-xl flex items-center justify-center">
+                                    <i class="fas fa-trophy text-white"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="text-gray-800 font-medium">Hoàn thành chương Cơ học</div>
+                                    <div class="text-gray-600 text-sm">Đạt điểm 9.2/10</div>
+                                </div>
+                                <div class="text-amber-600 text-sm font-medium">Mới</div>
+                            </div>
+                            <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-2xl border border-gray-200">
+                                <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-xl flex items-center justify-center">
+                                    <i class="fas fa-flask text-white"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="text-gray-800 font-medium">Thí nghiệm xuất sắc</div>
+                                    <div class="text-gray-600 text-sm">Hoàn thành 10 thí nghiệm</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-2xl border border-gray-200">
+                                <div class="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center">
+                                    <i class="fas fa-fire text-white"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="text-gray-800 font-medium">Streak 7 ngày</div>
+                                    <div class="text-gray-600 text-sm">Học liên tục 7 ngày</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Lessons Section -->
+            <section id="lessons" class="content-section hidden p-6">
+                <div class="mb-8">
+                    <h1 class="text-3xl font-bold mb-4 text-gray-800">Bài học</h1>
+                    <div class="flex flex-wrap gap-4">
+                        <button class="chapter-tab px-6 py-3 bg-gradient-to-r from-violet-500 to-pink-500 text-white rounded-2xl font-medium active">
+                            Chương 3: Dao động cơ
+                        </button>
+                        <button class="chapter-tab px-6 py-3 bg-gray-100 text-gray-600 rounded-2xl font-medium hover:text-gray-800 hover:bg-gray-200 transition-colors">
+                            Chương 4: Sóng cơ
+                        </button>
+                        <button class="chapter-tab px-6 py-3 bg-gray-100 text-gray-600 rounded-2xl font-medium hover:text-gray-800 hover:bg-gray-200 transition-colors">
+                            Chương 5: Điện học
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid lg:grid-cols-3 gap-6">
+                    <!-- Lesson 1 -->
+                    <div class="card-3d bg-white rounded-3xl overflow-hidden hover-lift border border-gray-200 shadow-lg">
+                        <div class="relative h-48 bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center">
+                            <div class="atom-container relative">
+                                <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full nucleus flex items-center justify-center">
+                                    <i class="fas fa-wave-square text-white text-xl"></i>
+                                </div>
+                            </div>
+                            <div class="absolute top-4 left-4 flex space-x-2">
+                                <span class="px-3 py-1 bg-emerald-500 text-white rounded-full text-xs font-medium">
+                                    Hoàn thành
+                                </span>
+                            </div>
+                            <div class="absolute top-4 right-4">
+                                <button class="w-10 h-10 bg-white/80 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-sm">
+                                    <i class="fas fa-play text-gray-700"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">Dao động điều hòa</h3>
+                            <p class="text-gray-600 text-sm mb-4">Tìm hiểu về chuyển động dao động điều hòa và các đặc trưng cơ bản</p>
+                            <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                                <span><i class="fas fa-clock mr-1"></i>45 phút</span>
+                                <span><i class="fas fa-star mr-1 text-amber-500"></i>9.2/10</span>
+                            </div>
+                            <button onclick="window.location.href='BaiHocGDDH.html'" 
+                            class="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-3 px-4 rounded-xl font-medium hover:shadow-lg transition-all duration-300">
+                                Ôn tập lại
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Lesson 2 -->
+                    <div class="card-3d bg-white rounded-3xl overflow-hidden hover-lift border border-gray-200 shadow-lg">
+                        <div class="relative h-48 bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center">
+                            <div class="relative">
+                                <div class="w-1 h-24 bg-gray-400 origin-top" style="animation: pendulumSwing 2.5s ease-in-out infinite;"></div>
+                                <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-5 h-5 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full shadow-lg"></div>
+                            </div>
+                            <div class="absolute top-4 left-4">
+                                <span class="px-3 py-1 bg-blue-500 text-white rounded-full text-xs font-medium">
+                                    Đang học
+                                </span>
+                            </div>
+                            <div class="absolute top-4 right-4">
+                                <button class="w-10 h-10 bg-white/80 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-sm">
+                                    <i class="fas fa-play text-gray-700"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">Con lắc đơn</h3>
+                            <p class="text-gray-600 text-sm mb-4">Nghiên cứu dao động của con lắc đơn và các yếu tố ảnh hưởng</p>
+                            <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                                <span><i class="fas fa-clock mr-1"></i>50 phút</span>
+                                <div class="flex items-center">
+                                    <div class="w-16 bg-gray-200 rounded-full h-1 mr-2">
+                                        <div class="bg-gradient-to-r from-blue-500 to-emerald-500 h-1 rounded-full" style="width: 60%;"></div>
+                                    </div>
+                                    <span>60%</span>
+                                </div>
+                            </div>
+                            <button onclick="window.location.href='BaiHocCLD.html'" 
+                            class="w-full bg-gradient-to-r from-violet-500 to-pink-500 text-white py-3 px-4 rounded-xl font-medium hover:shadow-lg transition-all duration-300">
+                                Tiếp tục học
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Lesson 3 -->
+                    <div class="card-3d bg-gray-100 rounded-3xl overflow-hidden hover-lift border border-gray-300 opacity-75">
+                        <div class="relative h-48 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                            <div class="w-16 h-16 bg-gradient-to-br from-gray-400 to-gray-500 rounded-full flex items-center justify-center">
+                                <i class="fas fa-lock text-white text-xl"></i>
+                            </div>
+                            <div class="absolute top-4 left-4">
+                                <span class="px-3 py-1 bg-gray-500 text-white rounded-full text-xs font-medium">
+                                    Chưa mở
+                                </span>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold text-gray-500 mb-2">Dao động tắt dần</h3>
+                            <p class="text-gray-500 text-sm mb-4">Tìm hiểu về dao động có ma sát và năng lượng dao động</p>
+                            <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                                <span><i class="fas fa-clock mr-1"></i>40 phút</span>
+                                <span>Hoàn thành bài trước</span>
+                            </div>
+                            <button class="w-full bg-gray-400 text-gray-600 py-3 px-4 rounded-xl font-medium cursor-not-allowed" disabled>
+                                Chưa thể học
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Experiments Section -->
+            <section id="experiments" class="content-section hidden p-6">
+                <div class="mb-8">
+                    <h1 class="text-3xl font-bold mb-4 text-gray-800">Thí nghiệm ảo</h1>
+                    <p class="text-gray-600">Khám phá các hiện tượng vật lý qua mô phỏng 3D tương tác</p>
+                </div>
+
+                <div class="grid lg:grid-cols-2 gap-8">
+                    <!-- Experiment 1 -->
+                    <div class="card-3d bg-white rounded-3xl overflow-hidden hover-lift border border-gray-200 shadow-lg">
+                        <div class="relative h-64 bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center overflow-hidden">
+                            <div class="relative">
+                                <div class="w-1 h-32 bg-gray-400 origin-top" style="animation: pendulumSwing 3s ease-in-out infinite;"></div>
+                                <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-6 h-6 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full shadow-lg"></div>
+                            </div>
+                            <div class="absolute top-4 left-4">
+                                <span class="px-3 py-1 bg-blue-500 text-white rounded-full text-sm font-medium">
+                                    Cơ học
+                                </span>
+                            </div>
+                            <div class="absolute top-4 right-4">
+                                <button class="w-10 h-10 bg-white/80 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-sm">
+                                    <i class="fas fa-expand text-gray-700"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold text-gray-800 mb-3">Mô phỏng Con lắc Đơn</h3>
+                            <p class="text-gray-600 mb-4 text-sm leading-relaxed">
+                                Thay đổi chiều dài dây, khối lượng quả nặng và quan sát sự thay đổi chu kỳ dao động
+                            </p>
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center space-x-4 text-sm text-gray-500">
+                                    <span><i class="fas fa-users mr-1"></i>1,234 lượt thực hiện</span>
+                                    <span><i class="fas fa-star mr-1 text-amber-500"></i>4.8</span>
+                                </div>
+                                <span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-xs font-medium">Miễn phí</span>
+                            </div>
+                            <button onclick="showSection('experiment-detail')" 
+                                    class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white py-3 px-4 rounded-xl font-medium hover:shadow-lg transition-all duration-300">
+                                <i class="fas fa-play mr-2"></i>Bắt đầu thí nghiệm
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Experiment 2 -->
+                    <div class="card-3d bg-white rounded-3xl overflow-hidden hover-lift border border-gray-200 shadow-lg">
+                        <div class="relative h-64 bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center overflow-hidden">
+                            <div class="relative">
+                                <div class="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full magnetic-field flex items-center justify-center">
+                                    <i class="fas fa-magnet text-white text-xl"></i>
+                                </div>
+                                <div class="absolute inset-0 border-2 border-emerald-400/50 rounded-full magnetic-field" style="animation-delay: -1s;"></div>
+                                <div class="absolute inset-0 border border-teal-400/30 rounded-full magnetic-field" style="animation-delay: -2s; transform: scale(1.5);"></div>
+                            </div>
+                            <div class="absolute top-4 left-4">
+                                <span class="px-3 py-1 bg-emerald-500 text-white rounded-full text-sm font-medium">
+                                    Điện từ
+                                </span>
+                            </div>
+                            <div class="absolute top-4 right-4">
+                                <button class="w-10 h-10 bg-white/80 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-sm">
+                                    <i class="fas fa-expand text-gray-700"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold text-gray-800 mb-3">Điện trường và Từ trường</h3>
+                            <p class="text-gray-600 mb-4 text-sm leading-relaxed">
+                                Trực quan hóa đường sức điện trường, từ trường và tương tác với các hạt tích điện
+                            </p>
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center space-x-4 text-sm text-gray-500">
+                                    <span><i class="fas fa-users mr-1"></i>856 lượt thực hiện</span>
+                                    <span><i class="fas fa-star mr-1 text-amber-500"></i>4.6</span>
+                                </div>
+                                <span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-xs font-medium">Miễn phí</span>
+                            </div>
+                            <button onclick="window.location.href='MoPhongDTTT.html'" 
+                                class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white py-3 px-4 rounded-xl font-medium hover:shadow-lg transition-all duration-300">
+                                    <i class="fas fa-play mr-2"></i>Bắt đầu thí nghiệm
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Experiment 3: Quang học - Phản xạ và Khúc xạ -->
+        <div class="card-3d bg-white rounded-3xl overflow-hidden hover-lift border border-gray-200 shadow-lg">
+    <div class="relative h-64 bg-gradient-to-br from-yellow-100 to-orange-100 flex items-center justify-center overflow-hidden">
+        <div class="relative light-container glow-container">
+            <i class="fas fa-lightbulb text-6xl text-yellow-500 animate-lightPulse animate-lightRotate"></i>
+            <div class="light-ring absolute inset-0 border-2 border-yellow-400/70 rounded-full animate-lightSpread" style="animation-delay: 0s;"></div>
+            <div class="light-ring absolute inset-0 border border-yellow-300/50 rounded-full animate-lightSpread" style="animation-delay: -0.4s; transform: scale(1.5);"></div>
+            <div class="light-ring absolute inset-0 border border-yellow-200/40 rounded-full animate-lightSpread" style="animation-delay: -0.8s; transform: scale(2);"></div>
+        </div>
+        <div class="absolute top-4 left-4">
+            <span class="px-3 py-1 bg-yellow-500 text-white rounded-full text-sm font-medium">
+                Quang học
+            </span>
+        </div>
+        <div class="absolute top-4 right-4">
+            <button class="w-10 h-10 bg-white/80 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-sm">
+                <i class="fas fa-expand text-gray-700"></i>
+            </button>
+        </div>
+    </div>
+    <div class="p-6">
+        <h3 class="text-xl font-bold text-gray-800 mb-3">Mô phỏng Quang học: Phản xạ và Khúc xạ</h3>
+        <p class="text-gray-600 mb-4 text-sm leading-relaxed">
+            Quan sát hiện tượng phản xạ và khúc xạ của ánh sáng qua các môi trường khác nhau
+        </p>
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center space-x-4 text-sm text-gray-500">
+                <span><i class="fas fa-users mr-1"></i>500 lượt thực hiện</span>
+                <span><i class="fas fa-star mr-1 text-amber-500"></i>4.5</span>
+            </div>
+            <span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-xs font-medium">Miễn phí</span>
+        </div>
+        <button onclick="window.location.href='MoPhongPXKX.html'" 
+                class="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white py-3 px-4 rounded-xl font-medium hover:shadow-lg transition-all duration-300">
+            <i class="fas fa-play mr-2"></i>Bắt đầu thí nghiệm
+        </button>
+    </div>
+</div>
+
+        <!-- Experiment 4: Nhiệt học - Truyền nhiệt -->
+        <div class="card-3d bg-white rounded-3xl overflow-hidden hover-lift border border-gray-200 shadow-lg">
+    <div class="relative h-64 bg-gradient-to-br from-red-100 to-pink-100 flex items-center justify-center overflow-hidden">
+        <div class="relative heat-container glow-container">
+            <i class="fas fa-temperature-high text-6xl text-red-500 animate-heatVibrate animate-heatRotate"></i>
+            <div class="heat-wave absolute inset-0 border-2 border-red-400/70 rounded-full animate-heatWave" style="animation-delay: 0s;"></div>
+            <div class="heat-wave absolute inset-0 border border-red-300/50 rounded-full animate-heatWave" style="animation-delay: -0.4s; transform: scale(1.5);"></div>
+            <div class="heat-wave absolute inset-0 border border-red-200/40 rounded-full animate-heatWave" style="animation-delay: -0.8s; transform: scale(2);"></div>
+        </div>
+        <div class="absolute top-4 left-4">
+            <span class="px-3 py-1 bg-red-500 text-white rounded-full text-sm font-medium">
+                Nhiệt học
+            </span>
+        </div>
+        <div class="absolute top-4 right-4">
+            <button class="w-10 h-10 bg-white/80 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-sm">
+                <i class="fas fa-expand text-gray-700"></i>
+            </button>
+        </div>
+    </div>
+    <div class="p-6">
+        <h3 class="text-xl font-bold text-gray-800 mb-3">Mô phỏng Truyền nhiệt</h3>
+        <p class="text-gray-600 mb-4 text-sm leading-relaxed">
+            Quan sát quá trình truyền nhiệt giữa các vật thể có nhiệt độ khác nhau
+        </p>
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center space-x-4 text-sm text-gray-500">
+                <span><i class="fas fa-users mr-1"></i>300 lượt thực hiện</span>
+                <span><i class="fas fa-star mr-1 text-amber-500"></i>4.7</span>
+            </div>
+            <span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-xs font-medium">Miễn phí</span>
+        </div>
+        <button onclick="window.location.href='MoPhongTN.html'" 
+                class="w-full bg-gradient-to-r from-red-500 to-pink-500 text-white py-3 px-4 rounded-xl font-medium hover:shadow-lg transition-all duration-300">
+            <i class="fas fa-play mr-2"></i>Bắt đầu thí nghiệm
+        </button>
+    </div>
+</div>
+
+        <!-- Experiment 5: Cơ học - Chuyển động ném -->
+<div class="card-3d bg-white rounded-3xl overflow-hidden hover-lift border border-gray-200 shadow-lg">
+    <div class="relative h-64 bg-gradient-to-br from-purple-100 to-indigo-100 flex items-center justify-center overflow-hidden">
+        <div class="relative projectile-container glow-container">
+            <i class="fas fa-rocket text-6xl text-purple-500 animate-projectileMotion animate-projectileRotate"></i>
+            <div class="projectile-trail absolute inset-0 border-2 border-purple-400/70 rounded-full animate-projectileTrail" style="animation-delay: 0s;"></div>
+            <div class="projectile-trail absolute inset-0 border border-purple-300/50 rounded-full animate-projectileTrail" style="animation-delay: -0.4s; transform: scale(1.5);"></div>
+        </div>
+        <div class="absolute top-4 left-4">
+            <span class="px-3 py-1 bg-purple-500 text-white rounded-full text-sm font-medium">
+                Cơ học
+            </span>
+        </div>
+        <div class="absolute top-4 right-4">
+            <button class="w-10 h-10 bg-white/80 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-sm">
+                <i class="fas fa-expand text-gray-700"></i>
+            </button>
+        </div>
+    </div>
+    <div class="p-6">
+        <h3 class="text-xl font-bold text-gray-800 mb-3">Mô phỏng Chuyển động ném</h3>
+        <p class="text-gray-600 mb-4 text-sm leading-relaxed">
+            Quan sát quỹ đạo của vật thể dưới tác dụng của trọng lực và lực cản
+        </p>
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center space-x-4 text-sm text-gray-500">
+                <span><i class="fas fa-users mr-1"></i>700 lượt thực hiện</span>
+                <span><i class="fas fa-star mr-1 text-amber-500"></i>4.8</span>
+            </div>
+            <span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-xs font-medium">Miễn phí</span>
+        </div>
+        <button onclick="window.location.href='MoPhongCDN.html'" 
+                class="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-3 px-4 rounded-xl font-medium hover:shadow-lg transition-all duration-300">
+            <i class="fas fa-play mr-2"></i>Bắt đầu thí nghiệm
+        </button>
+    </div>
+</div>
+
+<!-- Experiment 6: Điện học - Mạch điện -->
+<div class="card-3d bg-white rounded-3xl overflow-hidden hover-lift border border-gray-200 shadow-lg">
+    <div class="relative h-64 bg-gradient-to-br from-cyan-100 to-blue-100 flex items-center justify-center overflow-hidden">
+        <div class="relative electric-container glow-container">
+            <i class="fas fa-bolt text-6xl text-cyan-500 animate-sparkle animate-electricRotate"></i>
+            <div class="electric-spark absolute inset-0 border-2 border-cyan-400/70 rounded-full animate-electricSpark" style="animation-delay: 0s;"></div>
+            <div class="electric-spark absolute inset-0 border border-cyan-300/50 rounded-full animate-electricSpark" style="animation-delay: -0.3s; transform: scale(1.5);"></div>
+        </div>
+        <div class="absolute top-4 left-4">
+            <span class="px-3 py-1 bg-cyan-500 text-white rounded-full text-sm font-medium">
+                Điện học
+            </span>
+        </div>
+        <div class="absolute top-4 right-4">
+            <button class="w-10 h-10 bg-white/80 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-sm">
+                <i class="fas fa-expand text-gray-700"></i>
+            </button>
+        </div>
+    </div>
+    <div class="p-6">
+        <h3 class="text-xl font-bold text-gray-800 mb-3">Mô phỏng Mạch điện</h3>
+        <p class="text-gray-600 mb-4 text-sm leading-relaxed">
+            Xây dựng và kiểm tra các mạch điện đơn giản với điện trở, tụ điện
+        </p>
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center space-x-4 text-sm text-gray-500">
+                <span><i class="fas fa-users mr-1"></i>600 lượt thực hiện</span>
+                <span><i class="fas fa-star mr-1 text-amber-500"></i>4.6</span>
+            </div>
+            <span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-xs font-medium">Miễn phí</span>
+        </div>
+        <button onclick="window.location.href='MoPhongMD.html'" 
+                class="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-medium py-3 px-4 rounded-xl hover:shadow-lg transition-all duration-300">
+            <i class="fas fa-play mr-2"></i>Bắt đầu thí nghiệm
+        </button>
+    </div>
+</div>
+
+<!-- Experiment 7: Sóng học - Giao thoa sóng -->
+<div class="card-3d bg-white rounded-3xl overflow-hidden hover-lift border border-gray-200 shadow-lg">
+    <div class="relative h-64 bg-gradient-to-br from-teal-100 to-green-100 flex items-center justify-center overflow-hidden">
+        <div class="relative wave-container glow-container">
+            <i class="fas fa-wave-square text-6xl text-teal-500 animate-waveRipple animate-waveRotate"></i>
+            <div class="wave-ripple absolute inset-0 border-2 border-teal-400/70 rounded-full animate-waveSpread" style="animation-delay: 0s;"></div>
+            <div class="wave-ripple absolute inset-0 border border-teal-300/50 rounded-full animate-waveSpread" style="animation-delay: -0.4s; transform: scale(1.5);"></div>
+            <div class="wave-ripple absolute inset-0 border border-teal-200/40 rounded-full animate-waveSpread" style="animation-delay: -0.8s; transform: scale(2);"></div>
+        </div>
+        <div class="absolute top-4 left-4">
+            <span class="px-3 py-1 bg-teal-500 text-white rounded-full text-sm font-medium">
+                Sóng học
+            </span>
+        </div>
+        <div class="absolute top-4 right-4">
+            <button class="w-10 h-10 bg-white/80 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-sm">
+                <i class="fas fa-expand text-gray-700"></i>
+            </button>
+        </div>
+    </div>
+    <div class="p-6">
+        <h3 class="text-xl font-bold text-gray-800 mb-3">Mô phỏng Giao thoa sóng</h3>
+        <p class="text-gray-600 mb-4 text-sm leading-relaxed">
+            Trực quan hóa các mẫu giao thoa của sóng khi gặp nhau
+        </p>
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center space-x-4 text-sm text-gray-500">
+                <span><i class="fas fa-users mr-1"></i>450 lượt thực hiện</span>
+                <span><i class="fas fa-star mr-1 text-amber-500"></i>4.7</span>
+            </div>
+            <span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-xs font-medium">Miễn phí</span>
+        </div>
+        <button onclick="window.location.href='MoPhongGTS.html'"
+                class="w-full bg-gradient-to-r from-teal-500 to-green-500 text-white font-medium py-3 px-4 rounded-xl hover:shadow-lg transition-all duration-300">
+            <i class="fas fa-play mr-2"></i>Bắt đầu thí nghiệm
+        </button>
+    </div>
+</div>
+
+<!-- Experiment 8: Lượng tử - Thí nghiệm hai khe -->
+<div class="card-3d bg-white rounded-3xl overflow-hidden hover-lift border border-gray-200 shadow-lg">
+    <div class="relative h-64 bg-gradient-to-br from-gray-100 to-purple-100 flex items-center justify-center overflow-hidden">
+        <div class="relative quantum-container glow-container">
+            <i class="fas fa-atom text-6xl text-gray-500 animate-quantumSpin animate-quantumRotate"></i>
+            <div class="quantum-orbit absolute inset-0 border-2 border-gray-400/70 rounded-full animate-quantumOrbit" style="animation-delay: 0s;"></div>
+            <div class="quantum-orbit absolute inset-0 border border-gray-300/50 rounded-full animate-quantumOrbit" style="animation-delay: -0.4s; transform: scale(1.5);"></div>
+        </div>
+        <div class="absolute top-4 left-4">
+            <span class="px-3 py-1 bg-gray-500 text-white rounded-full text-sm font-medium">
+                Lượng tử
+            </span>
+        </div>
+        <div class="absolute top-4 right-4">
+            <button class="w-10 h-10 bg-white/80 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-sm">
+                <i class="fas fa-expand text-gray-700"></i>
+            </button>
+        </div>
+    </div>
+    <div class="p-6">
+        <h3 class="text-xl font-bold text-gray-800 mb-3">Mô phỏng Thí nghiệm hai khe</h3>
+        <p class="text-gray-600 mb-4 text-sm leading-relaxed">
+            Khám phá tính lưỡng tính sóng-hạt qua thí nghiệm hai khe
+        </p>
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center space-x-4 text-sm text-gray-500">
+                <span><i class="fas fa-users mr-1"></i>350 lượt thực hiện</span>
+                <span><i class="fas fa-star mr-1 text-amber-500"></i>4.9</span>
+            </div>
+            <span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-xs font-medium">Miễn phí</span>
+        </div>
+        <button onclick="window.location.href='MoPhongHK.html'"
+                class="w-full bg-gradient-to-r from-gray-500 to-purple-500 text-white font-medium py-3 px-4 rounded-xl hover:shadow-lg transition-all duration-300">
+            <i class="fas fa-play mr-2"></i>Bắt đầu thí nghiệm
+        </button>
+    </div>
+</div>
+
+<!-- Experiment 9: Thiên văn - Chuyển động quỹ đạo -->
+<div class="card-3d bg-white rounded-3xl overflow-hidden hover-lift border border-gray-200 shadow-lg">
+    <div class="relative h-64 bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center overflow-hidden">
+        <div class="relative orbit-container glow-container">
+            <i class="fas fa-globe text-6xl text-blue-500 animate-orbitSpin animate-orbitRotate"></i>
+            <div class="orbit-path absolute inset-0 border-2 border-blue-400/70 rounded-full animate-orbitPath" style="animation-delay: 0s;"></div>
+            <div class="orbit-path absolute inset-0 border border-blue-300/50 rounded-full animate-orbitPath" style="animation-delay: -0.4s; transform: scale(1.5);"></div>
+        </div>
+        <div class="absolute top-4 left-4">
+            <span class="px-3 py-1 bg-blue-500 text-white rounded-full text-sm font-medium">
+                Thiên văn
+            </span>
+        </div>
+        <div class="absolute top-4 right-4">
+            <button class="w-10 h-10 bg-white/80 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-sm">
+                <i class="fas fa-expand text-gray-700"></i>
+            </button>
+        </div>
+    </div>
+    <div class="p-6">
+        <h3 class="text-xl font-bold text-gray-800 mb-3">Mô phỏng Chuyển động quỹ đạo</h3>
+        <p class="text-gray-600 mb-4 text-sm leading-relaxed">
+            Quan sát quỹ đạo của các hành tinh quanh mặt trời
+        </p>
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center space-x-4 text-sm text-gray-500">
+                <span><i class="fas fa-users mr-1"></i>800 lượt thực hiện</span>
+                <span><i class="fas fa-star mr-1 text-amber-500"></i>4.8</span>
+            </div>
+            <span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-xs font-medium">Miễn phí</span>
+        </div>
+        <button onclick="window.location.href='MoPhongQD.html'"
+                class="w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-medium py-3 px-4 rounded-xl hover:shadow-lg transition-all duration-300">
+            <i class="fas fa-play mr-2"></i>Bắt đầu thí nghiệm
+        </button>
+    </div>
+</div>
+
+<!-- Experiment 10: Chất lưu - Nguyên lý Bernoulli -->
+<div class="card-3d bg-white rounded-3xl overflow-hidden hover-lift border border-gray-200 shadow-lg">
+    <div class="relative h-64 bg-gradient-to-br from-green-100 to-cyan-100 flex items-center justify-center overflow-hidden">
+        <div class="relative fluid-container glow-container">
+            <i class="fas fa-water text-6xl text-green-500 animate-fluidFlow animate-fluidRotate"></i>
+            <div class="fluid-wave absolute inset-0 border-2 border-green-400/70 rounded-full animate-fluidWave" style="animation-delay: 0s;"></div>
+            <div class="fluid-wave absolute inset-0 border border-green-300/50 rounded-full animate-fluidWave" style="animation-delay: -0.4s; transform: scale(1.5);"></div>
+        </div>
+        <div class="absolute top-4 left-4">
+            <span class="px-3 py-1 bg-green-500 text-white rounded-full text-sm font-medium">
+                Chất lưu
+            </span>
+        </div>
+        <div class="absolute top-4 right-4">
+            <button class="w-10 h-10 bg-white/80 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-sm">
+                <i class="fas fa-expand text-gray-700"></i>
+            </button>
+        </div>
+    </div>
+    <div class="p-6">
+        <h3 class="text-xl font-bold text-gray-800 mb-3">Mô phỏng Nguyên lý Bernoulli</h3>
+        <p class="text-gray-600 mb-4 text-sm leading-relaxed">
+            Hiểu mối quan hệ giữa tốc độ dòng chảy và áp suất chất lỏng
+        </p>
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center space-x-4 text-sm text-gray-500">
+                <span><i class="fas fa-users mr-1"></i>400 lượt thực hiện</span>
+                <span><i class="fas fa-star mr-1 text-amber-500"></i>4.6</span>
+            </div>
+            <span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-xs font-medium">Miễn phí</span>
+        </div>
+        <button onclick="window.location.href='MoPhongBernoulli.html'"
+                class="w-full bg-gradient-to-r from-green-500 to-cyan-500 text-white font-medium py-3 px-4 rounded-xl hover:shadow-lg transition-all duration-300">
+            <i class="fas fa-play mr-2"></i>Bắt đầu thí nghiệm
+        </button>
+    </div>
+</div>
+                </div>
+            </section>
+
+            <!-- Chi tiết Thí nghiệm con lắc đơn -->
+<section id="experiment-detail" class="content-section hidden p-6">
+    <div class="flex items-center justify-between mb-8">
+        <button onclick="showSection('experiments')" 
+                class="px-6 py-3 bg-gradient-to-r from-violet-500 to-pink-500 text-white rounded-2xl font-medium hover:shadow-lg transition-all duration-300 hover-lift">
+            <i class="fas fa-arrow-left mr-2"></i>Quay lại
+        </button>
+        <div class="flex justify-center space-x-4">
+            <button class="tab-btn px-6 py-3 rounded-lg font-semibold transition-all bg-gradient-to-r from-violet-500 to-pink-500 text-white shadow-lg" data-tab="simulation">Mô phỏng</button>
+            <button class="tab-btn px-6 py-3 rounded-lg font-semibold transition-all text-gray-600 hover:text-gray-800 hover:bg-gray-100" data-tab="theory">Lý thuyết</button>
+            <button class="tab-btn px-6 py-3 rounded-lg font-semibold transition-all text-gray-600 hover:text-gray-800 hover:bg-gray-100" data-tab="exercises">Bài tập</button>
+            <button class="tab-btn px-6 py-3 rounded-lg font-semibold transition-all text-gray-600 hover:text-gray-800 hover:bg-gray-100" data-tab="quiz">Quiz</button>
+        </div>
+    </div>
+
+    <!-- TAB CONTENT -->
+    <div id="simulation-tab" class="tab-content active">
+        <div class="grid lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2 relative">
+                <div class="h-96 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl border-2 border-blue-200" style="background-image: linear-gradient(to right, #e5e7eb 1px, transparent 1px), linear-gradient(to bottom, #e5e7eb 1px, transparent 1px); background-size: 50px 50px;">
+                    <div class="pendulum-container absolute top-0 left-1/2 -translate-x-1/2">
+                        <div id="pendulum-string" class="pendulum-string w-0.5 bg-gray-700" style="height: 200px;">
+                            <div id="pendulum-bob" class="pendulum-bob w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-500 absolute bottom-0 left-1/2 -translate-x-1/2 rounded-full"></div>
+                        </div>
+                    </div>
+                    <div class="absolute top-4 left-4 bg-white p-2 rounded shadow">
+                        <p>Period: <span id="period-display">0.00s</span></p>
+                        <p>Frequency: <span id="frequency-display">0.00Hz</span></p>
+                        <p>Angle: <span id="angle-display">0.0°</span></p>
+                        <p>Velocity: <span id="velocity-display">0.0m/s</span></p>
+                    </div>
+                    <div class="absolute bottom-4 left-4 bg-white p-2 rounded shadow">
+                        <p class="formula-box">T = 2π√(L/g)</p>
+                    </div>
+                    <div class="absolute top-4 right-4 bg-white p-2 rounded shadow">
+                        <p>Potential Energy</p>
+                        <div class="w-32 bg-gray-200 h-2 rounded">
+                            <div id="potential-energy" class="bg-blue-500 h-2 rounded" style="width: 0%"></div>
+                        </div>
+                        <p>Kinetic Energy</p>
+                        <div class="w-32 bg-gray-200 h-2 rounded">
+                            <div id="kinetic-energy" class="bg-green-500 h-2 rounded" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block">Length (m): <span id="length-value">1.0m</span></label>
+                        <input type="range" id="length-slider" min="0.1" max="2.0" step="0.1" value="1.0" class="control-slider w-full">
+                    </div>
+                    <div>
+                        <label class="block">Angle (°): <span id="angle-value">15°</span></label>
+                        <input type="range" id="angle-slider" min="5" max="45" step="5" value="15" class="control-slider w-full">
+                    </div>
+                    <div>
+                        <label class="block">Mass (kg): <span id="mass-value">1.0kg</span></label>
+                        <input type="range" id="mass-slider" min="0.1" max="5.0" step="0.1" value="1.0" class="control-slider w-full">
+                    </div>
+                    <div>
+                        <label class="block">Gravity (m/s²): <span id="gravity-value">9.8m/s²</span></label>
+                        <input type="range" id="gravity-slider" min="1.0" max="20.0" step="0.1" value="9.8" class="control-slider w-full">
+                    </div>
+                    <div>
+                        <label class="block">Damping: <span id="damping-value">0.00</span></label>
+                        <input type="range" id="damping-slider" min="0.0" max="1.0" step="0.01" value="0.0" class="control-slider w-full">
+                    </div>
+                </div>
+                <table class="w-full border-collapse mt-6">
+                    <thead>
+                        <tr class="bg-gray-200">
+                            <th class="p-2">Time (s)</th>
+                            <th class="p-2">Angle (°)</th>
+                            <th class="p-2">Velocity (m/s)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="data-table"></tbody>
+                </table>
+                <button id="play-btn" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Play</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="theory-tab" class="tab-content">
+        <div class="theory-card p-6 bg-white rounded-xl shadow-lg hover-lift">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold">1</div>
+                <h3 class="ml-4 text-2xl font-bold gradient-text">Định nghĩa</h3>
+            </div>
+            <div class="grid md:grid-cols-2 gap-6">
+                <p>Con lắc đơn là một hệ vật lý gồm một vật nặng có khối lượng m, treo bởi một sợi dây không giãn, có chiều dài l, và dao động dưới tác dụng của trọng lực.</p>
+                <div class="w-48 h-64 bg-gray-200 rounded-lg shadow-md flex items-center justify-center">Diagram (192x256px)</div>
+            </div>
+        </div>
+        <div class="theory-card p-6 bg-white rounded-xl shadow-lg hover-lift mt-6">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center text-white font-bold">2</div>
+                <h3 class="ml-4 text-2xl font-bold gradient-text">Công thức</h3>
+            </div>
+            <div class="grid md:grid-cols-3 gap-6">
+                <p>Chu kỳ dao động của con lắc đơn được tính bởi:</p>
+                <p class="formula-box">T = 2π√(L/g)</p>
+                <p>Trong đó: T là chu kỳ (s), L là chiều dài dây (m), g là gia tốc trọng trường (m/s²).</p>
+            </div>
+        </div>
+        <div class="theory-card p-6 bg-white rounded-xl shadow-lg hover-lift mt-6">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white font-bold">3</div>
+                <h3 class="ml-4 text-2xl font-bold gradient-text">Yếu tố</h3>
+            </div>
+            <div class="grid md:grid-cols-2 gap-6">
+                <p><strong>Có ảnh hưởng:</strong> Chiều dài dây (L), gia tốc trọng trường (g).</p>
+                <p><strong>Không ảnh hưởng:</strong> Khối lượng (m), biên độ dao động nhỏ.</p>
+            </div>
+        </div>
+        <div class="theory-card p-6 bg-white rounded-xl shadow-lg hover-lift mt-6">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-white font-bold">4</div>
+                <h3 class="ml-4 text-2xl font-bold gradient-text">Năng lượng</h3>
+            </div>
+            <div class="grid md:grid-cols-2 gap-6">
+                <p><strong>Thế năng:</strong> Tăng khi con lắc ở vị trí cao nhất.</p>
+                <p><strong>Động năng:</strong> Tăng khi con lắc ở vị trí thấp nhất.</p>
+            </div>
+        </div>
+        <div class="theory-card p-6 bg-white rounded-xl shadow-lg hover-lift mt-6">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center text-white font-bold">5</div>
+                <h3 class="ml-4 text-2xl font-bold gradient-text">Ứng dụng</h3>
+            </div>
+            <div class="grid md:grid-cols-3 gap-6">
+                <p>Đồng hồ con lắc</p>
+                <p>Đo gia tốc trọng trường</p>
+                <p>Nghiên cứu dao động</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-6 mt-4">
+                <p>Địa chấn học</p>
+                <p>Vật lý giáo dục</p>
+                <p>Thiết bị đo thời gian</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="exercises-tab" class="tab-content">
+        <div class="exercise-card p-6 bg-white rounded-xl shadow-lg hover-lift bg-gradient-to-br from-blue-50 to-cyan-50">
+            <h3 class="text-xl font-bold mb-4 gradient-text">Bài 1</h3>
+            <p>Một con lắc đơn có chiều dài L = 1.6m, gia tốc trọng trường g = 10m/s². Tính chu kỳ dao động T.</p>
+            <button class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" onclick="document.getElementById('solution-1').classList.toggle('show')">Xem giải</button>
+            <div id="solution-1" class="exercise-solution mt-4 p-4 bg-gray-100 rounded">
+                <p>T = 2π√(L/g) = 2π√(1.6/10) ≈ 2π × 0.4 ≈ 2.51s</p>
+            </div>
+        </div>
+        <div class="exercise-card p-6 bg-white rounded-xl shadow-lg hover-lift mt-6 bg-gradient-to-br from-emerald-50 to-teal-50">
+            <h3 class="text-xl font-bold mb-4 gradient-text">Bài 2</h3>
+            <p>Con lắc đơn có chu kỳ T = 2s, g = 9.8m/s². Tính chiều dài dây L.</p>
+            <button class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" onclick="document.getElementById('solution-2').classList.toggle('show')">Xem giải</button>
+            <div id="solution-2" class="exercise-solution mt-4 p-4 bg-gray-100 rounded">
+                <p>T = 2π√(L/g) → 2 = 2π√(L/9.8) → L ≈ 0.99m</p>
+            </div>
+        </div>
+        <div class="exercise-card p-6 bg-white rounded-xl shadow-lg hover-lift mt-6 bg-gradient-to-br from-violet-50 to-purple-50">
+            <h3 class="text-xl font-bold mb-4 gradient-text">Bài 3</h3>
+            <p>So sánh chu kỳ T₂/T₁ của hai con lắc có L₁ = 0.8m, L₂ = 3.2m.</p>
+            <button class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" onclick="document.getElementById('solution-3').classList.toggle('show')">Xem giải</button>
+            <div id="solution-3" class="exercise-solution mt-4 p-4 bg-gray-100 rounded">
+                <p>T₂/T₁ = √(L₂/L₁) = √(3.2/0.8) = √4 = 2</p>
+            </div>
+        </div>
+        <div class="exercise-card p-6 bg-white rounded-xl shadow-lg hover-lift mt-6 bg-gradient-to-br from-pink-50 to-rose-50">
+            <h3 class="text-xl font-bold mb-4 gradient-text">Bài 4</h3>
+            <p>Con lắc có m₁ = 100g và m₂ = 400g. Chu kỳ thay đổi thế nào?</p>
+            <button class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" onclick="document.getElementById('solution-4').classList.toggle('show')">Xem giải</button>
+            <div id="solution-4" class="exercise-solution mt-4 p-4 bg-gray-100 rounded">
+                <p>Chu kỳ không phụ thuộc vào khối lượng, nên không đổi.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div id="quiz-tab" class="tab-content">
+        <div class="flex items-center justify-between mb-6">
+            <svg class="w-24 h-24" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" fill="none" stroke="#e5e7eb" stroke-width="10"/>
+                <circle id="progress-ring" cx="50" cy="50" r="45" fill="none" stroke="#8b5cf6" stroke-width="10" stroke-dasharray="0 283" transform="rotate(-90 50 50)"/>
+            </svg>
+            <p>Score: <span id="score-display">0</span>/10</p>
+        </div>
+        <div id="quiz-content">
+            <p class="text-xl font-bold mb-4" id="question-text"></p>
+            <div class="space-y-2">
+                <button class="option w-full text-left p-4 rounded-lg border-2 border-gray-200 hover:bg-gray-100" onclick="selectAnswer(0)"></button>
+                <button class="option w-full text-left p-4 rounded-lg border-2 border-gray-200 hover:bg-gray-100" onclick="selectAnswer(1)"></button>
+                <button class="option w-full text-left p-4 rounded-lg border-2 border-gray-200 hover:bg-gray-100" onclick="selectAnswer(2)"></button>
+                <button class="option w-full text-left p-4 rounded-lg border-2 border-gray-200 hover:bg-gray-100" onclick="selectAnswer(3)"></button>
+            </div>
+            <button class="mt-6 px-6 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600" id="submit-btn" onclick="submitAnswer()">Submit</button>
+        </div>
+    </div>
+</section>
+        </main>
+    </div>
+
+    <!-- Bottom Navigation for Mobile -->
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-gray-200 px-4 py-2 z-50 shadow-lg">
+        <div class="flex justify-around">
+            <button class="nav-mobile flex flex-col items-center py-2 text-violet-600" data-target="dashboard">
+                <i class="fas fa-home text-lg mb-1"></i>
+                <span class="text-xs">Tổng quan</span>
+            </button>
+            <button class="nav-mobile flex flex-col items-center py-2 text-gray-500 hover:text-gray-800 transition-colors" data-target="lessons">
+                <i class="fas fa-book-open text-lg mb-1"></i>
+                <span class="text-xs">Bài học</span>
+            </button>
+            <button class="nav-mobile flex flex-col items-center py-2 text-gray-500 hover:text-gray-800 transition-colors" data-target="experiments">
+                <i class="fas fa-flask text-lg mb-1"></i>
+                <span class="text-xs">Thí nghiệm</span>
+            </button>
+            <button class="nav-mobile flex flex-col items-center py-2 text-gray-500 hover:text-gray-800 transition-colors" data-target="progress">
+                <i class="fas fa-chart-line text-lg mb-1"></i>
+                <span class="text-xs">Tiến độ</span>
+            </button>
+        </div>
+    </nav>
+
+    <script src="../js/homecourse.js"></script>
+</body>
+</html>

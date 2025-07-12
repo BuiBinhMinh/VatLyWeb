@@ -1,0 +1,1718 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nền Tảng Học Truyền Nhiệt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            --secondary-gradient: linear-gradient(135deg, #feca57 0%, #ff9ff3 100%);
+            --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --shadow-light: 0 8px 32px rgba(31, 38, 135, 0.37);
+            --shadow-heavy: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--dark-gradient);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .glass-morphism {
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-light);
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: var(--shadow-heavy);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 14px 28px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.6);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.9);
+            color: #4a5568;
+            padding: 14px 28px;
+            border-radius: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar {
+            width: 280px;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px);
+            border-right: 1px solid var(--glass-border);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 16px 24px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            margin: 8px 16px;
+            font-weight: 500;
+        }
+
+        .sidebar-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .sidebar-item.active {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .sidebar-item i {
+            width: 24px;
+            margin-right: 16px;
+            font-size: 18px;
+        }
+
+        .main-content {
+            margin-left: 280px;
+            padding: 40px;
+            min-height: 100vh;
+        }
+
+        .simulation-canvas {
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            border: 3px solid #ff6b6b;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            cursor: crosshair;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .control-panel {
+            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--shadow-heavy);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .custom-slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #e2e8f0, #cbd5e1);
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+            transition: all 0.3s ease;
+        }
+
+        .custom-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .custom-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+        }
+
+        .material-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .material-option {
+            padding: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .material-option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 107, 107, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .material-option:hover::before {
+            left: 100%;
+        }
+
+        .material-option:hover {
+            border-color: #ff6b6b;
+            background: #fef2f2;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .material-option.active {
+            border-color: #ff6b6b;
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+        }
+
+        .data-display {
+            background: linear-gradient(145deg, #1a202c, #2d3748);
+            color: white;
+            padding: 24px;
+            border-radius: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .data-row:last-child {
+            border-bottom: none;
+        }
+
+        .section-content {
+            animation: slideIn  prevented0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .section-content.hidden {
+            display: none;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .quiz-card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: var(--shadow-heavy);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .quiz-option {
+            padding: 16px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+            margin-bottom: 12px;
+        }
+
+        .quiz-option:hover {
+            border-color: #ff6b6b;
+            background: #fef2f2;
+            transform: translateX(5px);
+        }
+
+        .quiz-option.selected {
+            border-color: #ff6b6b;
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-gradient);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .timer {
+            background: var(--secondary-gradient);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 18px;
+            box-shadow: 0 4px 15px rgba(254, 202, 87, 0.4);
+        }
+
+        .result-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 800;
+            color: white;
+            margin: 0 auto 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-circle::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(transparent, rgba(255,255,255,0.3), transparent);
+            animation: rotate 2s linear infinite;
+        }
+
+        @keyframes rotate {
+            to { transform: rotate(360deg); }
+        }
+
+        .floating-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .floating-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .heat-particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #ff6b6b, #ee5a24);
+            animation: heatFlow 3s linear infinite;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.8);
+        }
+
+        @keyframes heatFlow {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.2); }
+            100% { opacity: 0; transform: scale(0.8); }
+        }
+
+        .temperature-gradient {
+            background: linear-gradient(90deg, 
+                #0066cc 0%, 
+                #00ccff 20%, 
+                #00ff66 40%, 
+                #ffff00 60%, 
+                #ff6600 80%, 
+                #ff0000 100%);
+            height: 20px;
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .theory-card {
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: var(--shadow-heavy);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .theory-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .formula-box {
+            background: linear-gradient(145deg, #fef2f2, #fee2e2);
+            border: 2px solid #fca5a5;
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 24px;
+            font-weight: 700;
+            color: #dc2626;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .exercise-card {
+            background: white;
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: var(--shadow-heavy);
+            border-left: 6px solid var(--primary-gradient);
+            transition: all 0.3s ease;
+        }
+
+        .exercise-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .exercise-number {
+            width: 60px;
+            height: 60px;
+            background: var(--primary-gradient);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 800;
+            margin-right: 24px;
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .material-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .instruction-banner {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border: 2px solid #fdcb6e;
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 24px;
+        }
+
+        .heat-source {
+            fill: #ff6b6b;
+            stroke: #ee5a24;
+            stroke-width: 3;
+            filter: drop-shadow(0 0 15px #ff6b6b);
+            transition: all 0.3s ease;
+        }
+
+        .heat-source:hover {
+            transform: scale(1.1);
+            filter: drop-shadow(0 0 25px #ff6b6b);
+        }
+
+        .material-block {
+            stroke: #2c3e50;
+            stroke-width: 2;
+            transition: all 0.3s ease;
+        }
+
+        .temperature-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            font-weight: bold;
+            fill: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.05); }
+        }
+
+        .pulsing {
+            animation: pulse 2s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Background Elements -->
+    <div class="floating-elements">
+        <div class="floating-circle" style="width: 100px; height: 100px; top: 10%; left: 10%; animation-delay: 0s;"></div>
+        <div class="floating-circle" style="width: 150px; height: 150px; top: 60%; right: 10%; animation-delay: 2s;"></div>
+        <div class="floating-circle" style="width: 80px; height: 80px; bottom: 20%; left: 20%; animation-delay: 4s;"></div>
+    </div>
+
+    <!-- Mobile Menu Button -->
+    <button class="mobile-menu-btn" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar glass-morphism" id="sidebar">
+        <div class="p-8">
+            <div class="text-center mb-12">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-red-500 to-orange-500 flex items-center justify-center">
+                    <i class="fas fa-fire text-2xl text-white"></i>
+                </div>
+                <h1 class="text-xl font-bold text-white">Phòng Thí Nghiệm Truyền Nhiệt</h1>
+                <p class="text-sm text-gray-300 mt-2">Nền Tảng Học Tập Tương Tác</p>
+            </div>
+            
+            <div class="space-y-2">
+                <a href="#" onclick="showSection('simulation')" class="sidebar-item active" id="nav-simulation">
+                    <i class="fas fa-fire"></i>
+                    <span>Mô Phỏng</span>
+                </a>
+                <a href="#" onclick="showSection('theory')" class="sidebar-item" id="nav-theory">
+                    <i class="fas fa-book-open"></i>
+                    <span>Lý Thuyết</span>
+                </a>
+                <a href="#" onclick="showSection('exercises')" class="sidebar-item" id="nav-exercises">
+                    <i class="fas fa-pencil-alt"></i>
+                    <span>Bài Tập</span>
+                </a>
+                <a href="#" onclick="showSection('quiz')" class="sidebar-item" id="nav-quiz">
+                    <i class="fas fa-brain"></i>
+                    <span>Kiểm Tra</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Simulation Section -->
+        <div id="simulation-section" class="section-content">
+            <div class="mb-8 flex justify-between items-center">
+                <div>
+                    <h1 class="text-4xl font-bold text-white mb-4">
+                        <i class="fas fa-fire mr-4 text-red-400"></i>
+                        Mô Phỏng Truyền Nhiệt Tương Tác
+                    </h1>
+                    <p class="text-xl text-gray-300">Khám phá các phương thức truyền nhiệt: dẫn nhiệt, đối lưu và bức xạ</p>
+                </div>
+                <button onclick="goBack()" class="btn-secondary">
+                    <i class="fas fa-arrow-left mr-2"></i>Quay Lại
+                </button>
+            </div>
+
+            <div class="grid lg:grid-cols-4 gap-8">
+                <!-- Main Simulation Area -->
+                <div class="lg:col-span-3">
+                    <div class="card p-8">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-2xl font-bold text-gray-800">
+                                <i class="fas fa-thermometer-half mr-3 text-red-600"></i>Khu Vực Mô Phỏng
+                            </h2>
+                            <button onclick="resetSimulation()" class="btn-secondary">
+                                <i class="fas fa-redo mr-2"></i>Đặt Lại
+                            </button>
+                        </div>
+                        
+                        <!-- Canvas -->
+                        <div class="simulation-canvas" style="width: 100%; height: 500px;" id="simulationCanvas">
+                            <svg width="100%" height="100%" id="heatSVG">
+                                <defs>
+                                    <linearGradient id="heatGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" style="stop-color:#ff0000;stop-opacity:1" />
+                                        <stop offset="50%" style="stop-color:#ffff00;stop-opacity:0.8" />
+                                        <stop offset="100%" style="stop-color:#0066cc;stop-opacity:0.6" />
+                                    </linearGradient>
+                                    <radialGradient id="heatSourceGradient" cx="50%" cy="50%" r="50%">
+                                        <stop offset="0%" style="stop-color:#ff6b6b;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#ee5a24;stop-opacity:0.8" />
+                                    </radialGradient>
+                                </defs>
+                                
+                                <!-- Material Block -->
+                                <rect x="20%" y="30%" width="60%" height="40%" class="material-block" id="materialBlock" fill="url(#heatGradient)" />
+                                
+                                <!-- Heat Source -->
+                                <circle cx="10%" cy="50%" r="30" class="heat-source pulsing" id="heatSource" />
+                                
+                                <!-- Temperature Labels -->
+                                <text x="12%" y="45%" class="temperature-text" id="sourceTemp">100°C</text>
+                                <text x="25%" y="45%" class="temperature-text" id="leftTemp">80°C</text>
+                                <text x="50%" y="45%" class="temperature-text" id="centerTemp">50°C</text>
+                                <text x="75%" y="45%" class="temperature-text" id="rightTemp">25°C</text>
+                                
+                                <!-- Heat Flow Arrows -->
+                                <g id="heatFlowArrows">
+                                    <!-- Arrows will be dynamically generated -->
+                                </g>
+                            </svg>
+                            
+                            <!-- Heat Particles Container -->
+                            <div id="heatParticles"></div>
+                        </div>
+                        
+                        <!-- Temperature Scale -->
+                        <div class="mt-6">
+                            <h4 class="font-bold text-gray-700 mb-3">Thang Nhiệt Độ</h4>
+                            <div class="temperature-gradient"></div>
+                            <div class="flex justify-between text-sm text-gray-600 mt-2">
+                                <span>0°C</span>
+                                <span>25°C</span>
+                                <span>50°C</span>
+                                <span>75°C</span>
+                                <span>100°C</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Instructions -->
+                        <div class="instruction-banner">
+                            <h4 class="font-bold text-amber-800 mb-3 flex items-center">
+                                <i class="fas fa-info-circle mr-3"></i>Hướng Dẫn Sử Dụng
+                            </h4>
+                            <div class="grid md:grid-cols-2 gap-4 text-amber-700 text-sm">
+                                <div class="flex items-center">
+                                    <i class="fas fa-thermometer-half mr-3 text-amber-600"></i>
+                                    <span><strong>Điều chỉnh</strong> nhiệt độ nguồn nhiệt</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-cube mr-3 text-amber-600"></i>
+                                    <span><strong>Chọn</strong> vật liệu khác nhau</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-eye mr-3 text-amber-600"></i>
+                                    <span><strong>Quan sát</strong> dòng nhiệt truyền</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-chart-line mr-3 text-amber-600"></i>
+                                    <span><strong>Theo dõi</strong> dữ liệu thời gian thực</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Control Panel -->
+                <div class="lg:col-span-1">
+                    <div class="control-panel">
+                        <h3 class="text-xl font-bold text-gray-800 mb-8 flex items-center">
+                            <i class="fas fa-cogs mr-3 text-red-600"></i>Điều Khiển
+                        </h3>
+                        
+                        <!-- Heat Source Temperature -->
+                        <div class="mb-8">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="font-semibold text-gray-700">Nhiệt Độ Nguồn</span>
+                                <span class="text-red-500 font-bold text-lg" id="heatTempValue">100°C</span>
+                            </div>
+                            <input type="range" min="20" max="200" value="100" class="custom-slider" id="heatTempSlider" oninput="updateHeatTemperature(this.value)">
+                            <div class="flex justify-between text-xs text-gray-500 mt-2">
+                                <span>20°C</span>
+                                <span>200°C</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Material Selection -->
+                        <div class="mb-8">
+                            <label class="font-semibold text-gray-700 block mb-4">Vật Liệu</label>
+                            <div class="material-grid">
+                                <div class="material-option active" onclick="selectMaterial('copper')" data-material="copper">
+                                    <div class="text-orange-600 mb-1">🔶</div>
+                                    <div>Đồng</div>
+                                    <small class="text-gray-500">k = 401 W/m·K</small>
+                                </div>
+                                <div class="material-option" onclick="selectMaterial('aluminum')" data-material="aluminum">
+                                    <div class="text-gray-500 mb-1">⚪</div>
+                                    <div>Nhôm</div>
+                                    <small class="text-gray-500">k = 237 W/m·K</small>
+                                </div>
+                                <div class="material-option" onclick="selectMaterial('steel')" data-material="steel">
+                                    <div class="text-gray-700 mb-1">⚫</div>
+                                    <div>Thép</div>
+                                    <small class="text-gray-500">k = 50 W/m·K</small>
+                                </div>
+                                <div class="material-option" onclick="selectMaterial('wood')" data-material="wood">
+                                    <div class="text-yellow-700 mb-1">🟫</div>
+                                    <div>Gỗ</div>
+                                    <small class="text-gray-500">k = 0.12 W/m·K</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Heat Transfer Mode -->
+                        <div class="mb-8">
+                            <label class="font-semibold text-gray-700 block mb-4">Phương Thức Truyền Nhiệt</label>
+                            <div class="space-y-3">
+                                <label class="flex items-center">
+                                    <input type="radio" name="heatMode" value="conduction" checked class="mr-3" onchange="updateHeatMode(this.value)">
+                                    <span>Dẫn nhiệt (Conduction)</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="heatMode" value="convection" class="mr-3" onchange="updateHeatMode(this.value)">
+                                    <span>Đối lưu (Convection)</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="heatMode" value="radiation" class="mr-3" onchange="updateHeatMode(this.value)">
+                                    <span>Bức xạ (Radiation)</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Data Display -->
+                        <div class="data-display">
+                            <h4 class="text-white font-bold mb-4 flex items-center">
+                                <i class="fas fa-chart-line mr-2"></i>Dữ Liệu Trực Tiếp
+                            </h4>
+                            <div class="space-y-3">
+                                <div class="data-row">
+                                    <span class="text-gray-300">Nhiệt độ nguồn:</span>
+                                    <span class="text-red-400 font-bold" id="dataSourceTemp">100°C</span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="text-gray-300">Độ dẫn nhiệt:</span>
+                                    <span class="text-yellow-400 font-bold" id="dataConductivity">401 W/m·K</span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="text-gray-300">Dòng nhiệt:</span>
+                                    <span class="text-green-400 font-bold" id="dataHeatFlow">2.5 kW</span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="text-gray-300">Gradient nhiệt:</span>
+                                    <span class="text-blue-400 font-bold" id="dataGradient">50°C/m</span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="text-gray-300">Phương thức:</span>
+                                    <span class="text-purple-400 font-bold" id="dataMode">Dẫn nhiệt</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Theory Section -->
+        <div id="theory-section" class="section-content hidden">
+            <div class="mb-8 flex justify-between items-center">
+                <div>
+                    <h1 class="text-4xl font-bold text-white mb-4">
+                        <i class="fas fa-book-open mr-4 text-blue-400"></i>
+                        Lý Thuyết Truyền Nhiệt
+                    </h1>
+                    <p class="text-xl text-gray-300">Các nguyên lý cơ bản về truyền nhiệt và ứng dụng thực tế</p>
+                </div>
+                <button onclick="goBack()" class="btn-secondary">
+                    <i class="fas fa-arrow-left mr-2"></i>Quay Lại
+                </button>
+            </div>
+            
+            <div class="grid md:grid-cols-1 gap-8 mb-8">
+                <!-- Conduction Theory -->
+                <div class="theory-card">
+                    <div class="flex items-center mb-6">
+                        <div class="w-16 h-16 bg-gradient-to-r from-red-500 to-orange-500 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-arrow-right text-2xl text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-800">Dẫn Nhiệt (Conduction)</h3>
+                            <p class="text-gray-600">Truyền nhiệt qua tiếp xúc trực tiếp</p>
+                        </div>
+                    </div>
+                    
+                    <h4 class="font-semibold text-gray-700 mb-4">Định Luật Fourier:</h4>
+                    <ul class="space-y-3 text-gray-600 mb-6">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-red-500 mr-3 mt-1"></i>
+                            <span>Dòng nhiệt tỉ lệ thuận với gradient nhiệt độ</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-red-500 mr-3 mt-1"></i>
+                            <span>Phụ thuộc vào độ dẫn nhiệt của vật liệu</span>
+                        </li>
+                    </ul>
+                    
+                    <div class="formula-box">
+                        q = -k × A × (dT/dx)
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Convection Theory -->
+                <div class="theory-card">
+                    <div class="flex items-center mb-6">
+                        <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-wind text-2xl text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-800">Đối Lưu</h3>
+                            <p class="text-gray-600">Truyền nhiệt qua chuyển động chất lưu</p>
+                        </div>
+                    </div>
+                    
+                    <h4 class="font-semibold text-gray-700 mb-4">Định Luật Newton:</h4>
+                    <ul class="space-y-3 text-gray-600 mb-6">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-blue-500 mr-3 mt-1"></i>
+                            <span>Dòng nhiệt tỉ lệ với hiệu nhiệt độ</span>
+                        </li>
+                    </ul>
+                    
+                    <div class="formula-box">
+                        q = h × A × (T₁ - T₂)
+                    </div>
+                </div>
+                
+                <!-- Radiation Theory -->
+                <div class="theory-card">
+                    <div class="flex items-center mb-6">
+                        <div class="w-16 h-16 bg-gradient-to-r from-yellow-500 to-red-500 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-sun text-2xl text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-800">Bức Xạ</h3>
+                            <p class="text-gray-600">Truyền nhiệt qua sóng điện từ</p>
+                        </div>
+                    </div>
+                    
+                    <h4 class="font-semibold text-gray-700 mb-4">Định Luật Stefan-Boltzmann:</h4>
+                    <ul class="space-y-3 text-gray-600 mb-6">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-yellow-500 mr-3 mt-1"></i>
+                            <span>Công suất bức xạ tỉ lệ với T⁴</span>
+                        </li>
+                    </ul>
+                    
+                    <div class="formula-box">
+                        q = ε × σ × A × T⁴
+                    </div>
+                </div>
+            </div>
+
+            <!-- Applications -->
+            <div class="theory-card mt-8">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-cogs mr-3 text-green-600"></i>Ứng Dụng Thực Tế
+                </h3>
+                
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-200 rounded-2xl p-6">
+                        <i class="fas fa-home text-red-600 text-3xl mb-4"></i>
+                        <h4 class="font-bold text-red-800 text-lg mb-2">Cách Nhiệt Nhà</h4>
+                        <p class="text-red-600 text-sm">Sử dụng vật liệu cách nhiệt để giảm dẫn nhiệt</p>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-2xl p-6">
+                        <i class="fas fa-car text-blue-600 text-3xl mb-4"></i>
+                        <h4 class="font-bold text-blue-800 text-lg mb-2">Làm Mát Động Cơ</h4>
+                        <p class="text-blue-600 text-sm">Đối lưu cưỡng bức với quạt và nước làm mát</p>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-200 rounded-2xl p-6">
+                        <i class="fas fa-solar-panel text-yellow-600 text-3xl mb-4"></i>
+                        <h4 class="font-bold text-yellow-800 text-lg mb-2">Pin Mặt Trời</h4>
+                        <p class="text-yellow-600 text-sm">Hấp thụ bức xạ nhiệt từ mặt trời</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Exercises Section -->
+        <div id="exercises-section" class="section-content hidden">
+            <div class="mb-8 flex justify-between items-center">
+                <div>
+                    <h1 class="text-4xl font-bold text-white mb-4">
+                        <i class="fas fa-pencil-alt mr-4 text-green-400"></i>
+                        Bài Tập Thực Hành
+                    </h1>
+                    <p class="text-xl text-gray-300">Giải quyết các bài toán truyền nhiệt từ cơ bản đến nâng cao</p>
+                </div>
+                <button onclick="goBack()" class="btn-secondary">
+                    <i class="fas fa-arrow-left mr-2"></i>Quay Lại
+                </button>
+            </div>
+            
+            <div class="space-y-8">
+                <!-- Exercise 1 -->
+                <div class="exercise-card">
+                    <div class="flex items-center mb-6">
+                        <div class="exercise-number">1</div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-800">Dẫn Nhiệt Qua Thanh Kim Loại</h3>
+                            <p class="text-gray-600">Cơ bản - Định luật Fourier</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-red-50 border-l-4 border-red-500 p-6 mb-6 rounded-r-lg">
+                        <p class="text-gray-700 text-lg leading-relaxed">
+                            Một thanh đồng dài 1m, tiết diện 0.01 m², có độ dẫn nhiệt k = 401 W/m·K. 
+                            Hai đầu thanh có nhiệt độ 100°C và 20°C. Tính dòng nhiệt truyền qua thanh.
+                        </p>
+                    </div>
+                    
+                    <div class="flex gap-4">
+                        <button onclick="showSolution(1)" class="btn-secondary">
+                            <i class="fas fa-lightbulb mr-2"></i>Xem Lời Giải
+                        </button>
+                        <button onclick="simulateExercise(1)" class="btn-primary">
+                            <i class="fas fa-fire mr-2"></i>Mô Phỏng
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Exercise 2 -->
+                <div class="exercise-card">
+                    <div class="flex items-center mb-6">
+                        <div class="exercise-number">2</div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-800">Đối Lưu Tự Nhiên</h3>
+                            <p class="text-gray-600">Trung bình - Định luật Newton</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-red-50 border-l-4 border-red-500 p-6 mb-6 rounded-r-lg">
+                        <p class="text-gray-700 text-lg leading-relaxed">
+                            Một tấm kim loại nóng 80°C tiếp xúc với không khí 25°C. 
+                            Hệ số đối lưu h = 25 W/m²·K, diện tích 2 m². Tính công suất tỏa nhiệt.
+                        </p>
+                    </div>
+                    
+                    <div class="flex gap-4">
+                        <button onclick="showSolution(2)" class="btn-secondary">
+                            <i class="fas fa-lightbulb mr-2"></i>Xem Lời Giải
+                        </button>
+                        <button onclick="simulateExercise(2)" class="btn-primary">
+                            <i class="fas fa-fire mr-2"></i>Mô Phỏng
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Exercise 3 -->
+                <div class="exercise-card">
+                    <div class="flex items-center mb-6">
+                        <div class="exercise-number">3</div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-800">Bức Xạ Nhiệt</h3>
+                            <p class="text-gray-600">Nâng cao - Định luật Stefan-Boltzmann</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-red-50 border-l-4 border-red-500 p-6 mb-6 rounded-r-lg">
+                        <p class="text-gray-700 text-lg leading-relaxed">
+                            Một vật đen tuyệt đối có diện tích 0.5 m² ở nhiệt độ 500K. 
+                            Tính công suất bức xạ. (σ = 5.67×10⁻⁸ W/m²·K⁴)
+                        </p>
+                    </div>
+                    
+                    <div class="flex gap-4">
+                        <button onclick="showSolution(3)" class="btn-secondary">
+                            <i class="fas fa-lightbulb mr-2"></i>Xem Lời Giải
+                        </button>
+                        <button onclick="simulateExercise(3)" class="btn-primary">
+                            <i class="fas fa-fire mr-2"></i>Mô Phỏng
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Exercise 4 -->
+                <div class="exercise-card">
+                    <div class="flex items-center mb-6">
+                        <div class="exercise-number">4</div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-800">Truyền Nhiệt Tổng Hợp</h3>
+                            <p class="text-gray-600">Nâng cao - Kết hợp các phương thức</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-red-50 border-l-4 border-red-500 p-6 mb-6 rounded-r-lg">
+                        <p class="text-gray-700 text-lg leading-relaxed">
+                            Tường nhà gồm 3 lớp: gạch (k₁=0.7), cách nhiệt (k₂=0.04), thạch cao (k₃=0.5). 
+                            Tính nhiệt trở tổng và dòng nhiệt khi ΔT = 30°C.
+                        </p>
+                    </div>
+                    
+                    <div class="flex gap-4">
+                        <button onclick="showSolution(4)" class="btn-secondary">
+                            <i class="fas fa-lightbulb mr-2"></i>Xem Lời Giải
+                        </button>
+                        <button onclick="simulateExercise(4)" class="btn-primary">
+                            <i class="fas fa-fire mr-2"></i>Mô Phỏng
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Exercise 5 -->
+                <div class="exercise-card">
+                    <div class="flex items-center mb-6">
+                        <div class="exercise-number">5</div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-800">Ứng Dụng Thực Tế</h3>
+                            <p class="text-gray-600">Nâng cao - Tản nhiệt CPU</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-red-50 border-l-4 border-red-500 p-6 mb-6 rounded-r-lg">
+                        <p class="text-gray-700 text-lg leading-relaxed">
+                            CPU tỏa nhiệt 65W, tản nhiệt nhôm có 20 cánh, mỗi cánh 5×3 cm. 
+                            Hệ số đối lưu h = 50 W/m²·K. Tính nhiệt độ CPU khi T_air = 25°C.
+                        </p>
+                    </div>
+                    
+                    <div class="flex gap-4">
+                        <button onclick="showSolution(5)" class="btn-secondary">
+                            <i class="fas fa-lightbulb mr-2"></i>Xem Lời Giải
+                        </button>
+                        <button onclick="simulateExercise(5)" class="btn-primary">
+                            <i class="fas fa-fire mr-2"></i>Mô Phỏng
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz Section -->
+        <div id="quiz-section" class="section-content hidden">
+            <div class="mb-8 flex justify-between items-center">
+                <div>
+                    <h1 class="text-4xl font-bold text-white mb-4">
+                        <i class="fas fa-brain mr-4 text-purple-400"></i>
+                        Kiểm Tra Truyền Nhiệt
+                    </h1>
+                    <p class="text-xl text-gray-300">Kiểm tra kiến thức của bạn với các câu hỏi tương tác</p>
+                </div>
+                <button onclick="goBack()" class="btn-secondary">
+                    <i class="fas fa-arrow-left mr-2"></i>Quay Lại
+                </button>
+            </div>
+            
+            <div class="quiz-card">
+                <div id="quiz-container">
+                    <!-- Quiz Start Screen -->
+                    <div id="quiz-start" class="text-center">
+                        <div class="mb-12">
+                            <div class="w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-r from-red-500 to-orange-500 flex items-center justify-center">
+                                <i class="fas fa-fire text-4xl text-white"></i>
+                            </div>
+                            <h3 class="text-3xl font-bold text-gray-800 mb-4">Sẵn Sàng Kiểm Tra Kiến Thức?</h3>
+                            <p class="text-gray-600 text-lg mb-8">Bài kiểm tra gồm 10 câu hỏi về truyền nhiệt</p>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-3 gap-6 mb-12">
+                            <div class="bg-gradient-to-r from-blue-50 to-blue-100 border-2 border-blue-300 rounded-2xl p-6">
+                                <i class="fas fa-clock text-blue-600 text-3xl mb-4"></i>
+                                <h4 class="font-bold text-blue-800 text-lg">Thời Gian</h4>
+                                <p class="text-blue-600 text-xl font-semibold">10 phút</p>
+                            </div>
+                            <div class="bg-gradient-to-r from-green-50 to-green-100 border-2 border-green-300 rounded-2xl p-6">
+                                <i class="fas fa-list-ol text-green-600 text-3xl mb-4"></i>
+                                <h4 class="font-bold text-green-800 text-lg">Số Câu</h4>
+                                <p class="text-green-600 text-xl font-semibold">10 câu hỏi</p>
+                            </div>
+                            <div class="bg-gradient-to-r from-purple-50 to-purple-100 border-2 border-purple-300 rounded-2xl p-6">
+                                <i class="fas fa-trophy text-purple-600 text-3xl mb-4"></i>
+                                <h4 class="font-bold text-purple-800 text-lg">Điểm Đạt</h4>
+                                <p class="text-purple-600 text-xl font-semibold">≥ 7/10</p>
+                            </div>
+                        </div>
+                        
+                        <button onclick="startQuiz()" class="btn-primary text-xl px-12 py-4">
+                            <i class="fas fa-play mr-3"></i>Bắt Đầu Kiểm Tra
+                        </button>
+                    </div>
+                    
+                    <!-- Quiz Questions -->
+                    <div id="quiz-questions" class="hidden">
+                        <div class="flex justify-between items-center mb-8">
+                            <div class="flex items-center space-x-6">
+                                <span class="text-xl font-semibold text-gray-700">Câu <span id="current-question">1</span>/10</span>
+                                <div class="progress-bar w-80">
+                                    <div class="progress-fill" id="progress-bar" style="width: 10%"></div>
+                                </div>
+                            </div>
+                            <div class="timer flex items-center space-x-3">
+                                <i class="fas fa-clock"></i>
+                                <span id="timer" class="font-bold">10:00</span>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gradient-to-r from-gray-50 to-white rounded-2xl p-8 border-2 border-gray-200 mb-8">
+                            <h3 class="text-2xl font-bold text-gray-800 mb-6" id="question-text">
+                                Câu hỏi sẽ hiển thị ở đây
+                            </h3>
+                            
+                            <div class="space-y-4" id="answer-options">
+                                <!-- Answer options will be inserted here -->
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between">
+                            <button onclick="previousQuestion()" class="btn-secondary" id="prev-btn" disabled>
+                                <i class="fas fa-arrow-left mr-2"></i>Câu Trước
+                            </button>
+                            <button onclick="nextQuestion()" class="btn-primary" id="next-btn">
+                                Câu Tiếp <i class="fas fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Quiz Results -->
+                    <div id="quiz-results" class="hidden text-center">
+                        <div class="mb-12">
+                            <div class="result-circle" id="result-circle">
+                                <span id="score-display">0/10</span>
+                            </div>
+                            <h3 class="text-3xl font-bold text-gray-800 mb-4" id="result-title">Kết Quả</h3>
+                            <p class="text-gray-600 text-lg mb-8" id="result-message">Thông điệp kết quả</p>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-3 gap-6 mb-12">
+                            <div class="bg-gradient-to-r from-green-50 to-green-100 border-2 border-green-300 rounded-2xl p-6">
+                                <i class="fas fa-check-circle text-green-600 text-3xl mb-4"></i>
+                                <h4 class="font-bold text-green-800 text-lg">Đúng</h4>
+                                <p class="text-green-600 text-2xl font-bold" id="correct-count">0</p>
+                            </div>
+                            <div class="bg-gradient-to-r from-red-50 to-red-100 border-2 border-red-300 rounded-2xl p-6">
+                                <i class="fas fa-times-circle text-red-600 text-3xl mb-4"></i>
+                                <h4 class="font-bold text-red-800 text-lg">Sai</h4>
+                                <p class="text-red-600 text-2xl font-bold" id="wrong-count">0</p>
+                            </div>
+                            <div class="bg-gradient-to-r from-blue-50 to-blue-100 border-2 border-blue-300 rounded-2xl p-6">
+                                <i class="fas fa-percentage text-blue-600 text-3xl mb-4"></i>
+                                <h4 class="font-bold text-blue-800 text-lg">Tỷ Lệ</h4>
+                                <p class="text-blue-600 text-2xl font-bold" id="percentage">0%</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-center space-x-6">
+                            <button onclick="reviewAnswers()" class="btn-secondary">
+                                <i class="fas fa-eye mr-2"></i>Xem Đáp Án
+                            </button>
+                            <button onclick="restartQuiz()" class="btn-primary">
+                                <i class="fas fa-redo mr-2"></i>Thử Lại
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Simulation state
+        let heatSimulation = {
+            sourceTemperature: 100,
+            material: { name: 'copper', k: 401, color: '#ff6b6b' },
+            heatMode: 'conduction',
+            animationId: null
+        };
+        
+        // Material properties
+        const heatMaterials = {
+            copper: { name: 'Đồng', k: 401, color: '#ff6b6b' },
+            aluminum: { name: 'Nhôm', k: 237, color: '#feca57' },
+            steel: { name: 'Thép', k: 50, color: '#a4b0be' },
+            wood: { name: 'Gỗ', k: 0.12, color: '#8b4513' }
+        };
+        
+        // Quiz data
+        const heatQuizQuestions = [
+            {
+                question: "Phương thức truyền nhiệt nào xảy ra qua tiếp xúc trực tiếp giữa các phân tử?",
+                options: [
+                    "Dẫn nhiệt",
+                    "Đối lưu",
+                    "Bức xạ",
+                    "Tất cả đều đúng"
+                ],
+                correct: 0,
+                explanation: "Dẫn nhiệt xảy ra khi các phân tử tiếp xúc trực tiếp và truyền năng lượng"
+            },
+            {
+                question: "Định luật Fourier về dẫn nhiệt được biểu diễn bằng công thức nào?",
+                options: [
+                    "q = h × A × ΔT",
+                    "q = -k × A × (dT/dx)",
+                    "q = ε × σ × A × T⁴",
+                    "q = m × c × ΔT"
+                ],
+                correct: 1,
+                explanation: "Định luật Fourier: q = -k × A × (dT/dx)"
+            },
+            {
+                question: "Vật liệu nào có độ dẫn nhiệt cao nhất?",
+                options: [
+                    "Gỗ",
+                    "Thép",
+                    "Nhôm",
+                    "Đồng"
+                ],
+                correct: 3,
+                explanation: "Đồng có độ dẫn nhiệt cao nhất (401 W/m·K)"
+            },
+            {
+                question: "Đối lưu tự nhiên xảy ra do:",
+                options: [
+                    "Sự chênh lệch mật độ do nhiệt độ",
+                    "Quạt thổi",
+                    "Bơm tuần hoàn",
+                    "Áp suất cao"
+                ],
+                correct: 0,
+                explanation: "Đối lưu tự nhiên do sự chênh lệch mật độ khi nhiệt độ thay đổi"
+            },
+            {
+                question: "Bức xạ nhiệt tuân theo định luật nào?",
+                options: [
+                    "Định luật Fourier",
+                    "Định luật Newton",
+                    "Định luật Stefan-Boltzmann",
+                    "Định luật Ohm"
+                ],
+                correct: 2,
+                explanation: "Bức xạ nhiệt tuân theo định luật Stefan-Boltzmann: q = ε × σ × A × T⁴"
+            },
+            {
+                question: "Đơn vị của độ dẫn nhiệt là:",
+                options: [
+                    "W/m·K",
+                    "J/kg·K",
+                    "W/m²·K",
+                    "K/m"
+                ],
+                correct: 0,
+                explanation: "Độ dẫn nhiệt có đơn vị W/m·K"
+            },
+            {
+                question: "Hệ số đối lưu h có đơn vị:",
+                options: [
+                    "W/m·K",
+                    "W/m²·K",
+                    "J/kg·K",
+                    "m²/s"
+                ],
+                correct: 1,
+                explanation: "Hệ số đối lưu h có đơn vị W/m²·K"
+            },
+            {
+                question: "Nhiệt trở của một lớp vật liệu được tính bằng:",
+                options: [
+                    "R = L/(k×A)",
+                    "R = k×A/L",
+                    "R = 1/(h×A)",
+                    "R = L×k×A"
+                ],
+                correct: 0,
+                explanation: "Nhiệt trở: R = L/(k×A) với L là chiều dày, k là độ dẫn nhiệt, A là diện tích"
+            },
+            {
+                question: "Trong truyền nhiệt ổn định, nhiệt độ tại mỗi điểm:",
+                options: [
+                    "Tăng theo thời gian",
+                    "Giảm theo thời gian",
+                    "Không đổi theo thời gian",
+                    "Dao động theo thời gian"
+                ],
+                correct: 2,
+                explanation: "Trong truyền nhiệt ổn định, nhiệt độ không đổi theo thời gian"
+            },
+            {
+                question: "Vật liệu cách nhiệt tốt có đặc điểm:",
+                options: [
+                    "Độ dẫn nhiệt cao",
+                    "Độ dẫn nhiệt thấp",
+                    "Mật độ cao",
+                    "Nhiệt dung riêng cao"
+                ],
+                correct: 1,
+                explanation: "Vật liệu cách nhiệt tốt có độ dẫn nhiệt thấp"
+            }
+        ];
+        
+        // Quiz state
+        let quizState = {
+            currentQuestion: 0,
+            answers: [],
+            timeLeft: 600,
+            timer: null,
+            started: false
+        };
+        
+        // Initialize simulation
+        document.addEventListener('DOMContentLoaded', function() {
+            updateHeatSimulation();
+            startHeatAnimation();
+        });
+        
+        // Mobile sidebar toggle
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+        }
+        
+        // Section Navigation
+        function showSection(sectionName) {
+            document.querySelectorAll('.section-content').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            document.getElementById(sectionName + '-section').classList.remove('hidden');
+            document.getElementById('nav-' + sectionName).classList.add('active');
+            document.getElementById('sidebar').classList.remove('open');
+        }
+        
+        // Heat Simulation Functions
+        function updateHeatTemperature(temp) {
+            heatSimulation.sourceTemperature = parseFloat(temp);
+            document.getElementById('heatTempValue').textContent = temp + '°C';
+            updateHeatSimulation();
+        }
+        
+        function selectMaterial(material) {
+            document.querySelectorAll('.material-option').forEach(opt => {
+                opt.classList.remove('active');
+            });
+            document.querySelector(`[onclick="selectMaterial('${material}')"]`).classList.add('active');
+            
+            heatSimulation.material = heatMaterials[material];
+            updateHeatSimulation();
+        }
+        
+        function updateHeatMode(mode) {
+            heatSimulation.heatMode = mode;
+            updateHeatSimulation();
+        }
+        
+        function updateHeatSimulation() {
+            // Update data display
+            document.getElementById('dataSourceTemp').textContent = heatSimulation.sourceTemperature + '°C';
+            document.getElementById('dataConductivity').textContent = heatSimulation.material.k + ' W/m·K';
+            
+            // Calculate heat flow (simplified)
+            const deltaT = heatSimulation.sourceTemperature - 20; // Assuming ambient 20°C
+            const area = 0.01; // 0.01 m²
+            const length = 1; // 1 m
+            const heatFlow = (heatSimulation.material.k * area * deltaT / length) / 1000; // kW
+            
+            document.getElementById('dataHeatFlow').textContent = heatFlow.toFixed(2) + ' kW';
+            document.getElementById('dataGradient').textContent = (deltaT/length).toFixed(1) + '°C/m';
+            
+            const modeNames = {
+                'conduction': 'Dẫn nhiệt',
+                'convection': 'Đối lưu',
+                'radiation': 'Bức xạ'
+            };
+            document.getElementById('dataMode').textContent = modeNames[heatSimulation.heatMode];
+            
+            // Update temperature distribution
+            updateTemperatureDisplay();
+        }
+        
+        function updateTemperatureDisplay() {
+            const sourceTemp = heatSimulation.sourceTemperature;
+            const ambientTemp = 20;
+            
+            // Calculate temperature at different positions (simplified linear distribution)
+            const leftTemp = sourceTemp - (sourceTemp - ambientTemp) * 0.2;
+            const centerTemp = sourceTemp - (sourceTemp - ambientTemp) * 0.5;
+            const rightTemp = sourceTemp - (sourceTemp - ambientTemp) * 0.8;
+            
+            document.getElementById('sourceTemp').textContent = sourceTemp + '°C';
+            document.getElementById('leftTemp').textContent = Math.round(leftTemp) + '°C';
+            document.getElementById('centerTemp').textContent = Math.round(centerTemp) + '°C';
+            document.getElementById('rightTemp').textContent = Math.round(rightTemp) + '°C';
+            
+            // Update material block color based on temperature
+            const materialBlock = document.getElementById('materialBlock');
+            const heatRatio = (sourceTemp - 20) / 180; // Normalize to 0-1
+            const color = `hsl(${240 - heatRatio * 240}, 70%, ${50 + heatRatio * 30}%)`;
+            materialBlock.setAttribute('fill', color);
+        }
+        
+        function startHeatAnimation() {
+            const particlesContainer = document.getElementById('heatParticles');
+            
+            function createHeatParticle() {
+                const particle = document.createElement('div');
+                particle.className = 'heat-particle';
+                particle.style.left = '10%';
+                particle.style.top = Math.random() * 40 + 30 + '%';
+                
+                particlesContainer.appendChild(particle);
+                
+                // Animate particle
+                let position = 10;
+                const animateParticle = () => {
+                    position += 0.5;
+                    particle.style.left = position + '%';
+                    
+                    if (position > 90) {
+                        particle.remove();
+                    } else {
+                        requestAnimationFrame(animateParticle);
+                    }
+                };
+                
+                requestAnimationFrame(animateParticle);
+            }
+            
+            // Create particles periodically
+            setInterval(createHeatParticle, 500);
+        }
+        
+        function resetSimulation() {
+            heatSimulation.sourceTemperature = 100;
+            document.getElementById('heatTempSlider').value = 100;
+            document.getElementById('heatTempValue').textContent = '100°C';
+            
+            selectMaterial('copper');
+            document.querySelector('input[name="heatMode"][value="conduction"]').checked = true;
+            heatSimulation.heatMode = 'conduction';
+            
+            updateHeatSimulation();
+        }
+        
+        function showSolution(exerciseNum) {
+            const solutions = {
+                1: "Lời giải Bài 1:\n\nCho: L = 1m, A = 0.01 m², k = 401 W/m·K, T₁ = 100°C, T₂ = 20°C\n\nÁp dụng định luật Fourier:\nq = k × A × (T₁ - T₂) / L\nq = 401 × 0.01 × (100 - 20) / 1\nq = 401 × 0.01 × 80 = 320.8 W",
+                2: "Lời giải Bài 2:\n\nCho: T₁ = 80°C, T₂ = 25°C, h = 25 W/m²·K, A = 2 m²\n\nÁp dụng định luật Newton:\nq = h × A × (T₁ - T₂)\nq = 25 × 2 × (80 - 25)\nq = 25 × 2 × 55 = 2750 W = 2.75 kW",
+                3: "Lời giải Bài 3:\n\nCho: A = 0.5 m², T = 500K, ε = 1, σ = 5.67×10⁻⁸ W/m²·K⁴\n\nÁp dụng định luật Stefan-Boltzmann:\nq = ε × σ × A × T⁴\nq = 1 × 5.67×10⁻⁸ × 0.5 × 500⁴\nq = 5.67×10⁻⁸ × 0.5 × 6.25×10¹⁰ = 1771 W",
+                4: "Lời giải Bài 4:\n\nTính nhiệt trở từng lớp:\nR₁ = L₁/(k₁×A), R₂ = L₂/(k₂×A), R₃ = L₃/(k₃×A)\nR_total = R₁ + R₂ + R₃\nq = ΔT / R_total\n\n(Cần thêm thông tin về chiều dày các lớp)",
+                5: "Lời giải Bài 5:\n\nDiện tích tản nhiệt:\nA = 20 × (0.05 × 0.03) × 2 = 0.06 m²\n\nÁp dụng định luật Newton:\nq = h × A × (T_CPU - T_air)\n65 = 50 × 0.06 × (T_CPU - 25)\nT_CPU = 25 + 65/(50×0.06) = 46.7°C"
+            };
+            alert(solutions[exerciseNum]);
+        }
+        
+        function simulateExercise(exerciseNum) {
+            showSection('simulation');
+            
+            switch(exerciseNum) {
+                case 1:
+                    heatSimulation.sourceTemperature = 100;
+                    selectMaterial('copper');
+                    break;
+                case 2:
+                    heatSimulation.sourceTemperature = 80;
+                    heatSimulation.heatMode = 'convection';
+                    document.querySelector('input[name="heatMode"][value="convection"]').checked = true;
+                    break;
+                case 3:
+                    heatSimulation.sourceTemperature = 200;
+                    heatSimulation.heatMode = 'radiation';
+                    document.querySelector('input[name="heatMode"][value="radiation"]').checked = true;
+                    break;
+                case 4:
+                    heatSimulation.sourceTemperature = 50;
+                    selectMaterial('wood');
+                    break;
+                case 5:
+                    heatSimulation.sourceTemperature = 70;
+                    selectMaterial('aluminum');
+                    break;
+            }
+            
+            document.getElementById('heatTempSlider').value = heatSimulation.sourceTemperature;
+            document.getElementById('heatTempValue').textContent = heatSimulation.sourceTemperature + '°C';
+            updateHeatSimulation();
+        }
+        
+        // Quiz Functions
+        function startQuiz() {
+            quizState.currentQuestion = 0;
+            quizState.answers = [];
+            quizState.timeLeft = 600;
+            quizState.started = true;
+            
+            document.getElementById('quiz-start').classList.add('hidden');
+            document.getElementById('quiz-questions').classList.remove('hidden');
+            
+            startTimer();
+            displayQuestion();
+        }
+        
+        function startTimer() {
+            quizState.timer = setInterval(() => {
+                quizState.timeLeft--;
+                updateTimerDisplay();
+                
+                if (quizState.timeLeft <= 0) {
+                    endQuiz();
+                }
+            }, 1000);
+        }
+        
+        function updateTimerDisplay() {
+            const minutes = Math.floor(quizState.timeLeft / 60);
+            const seconds = quizState.timeLeft % 60;
+            document.getElementById('timer').textContent = 
+                `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        function displayQuestion() {
+            const question = heatQuizQuestions[quizState.currentQuestion];
+            document.getElementById('question-text').textContent = question.question;
+            document.getElementById('current-question').textContent = quizState.currentQuestion + 1;
+            
+            const progress = ((quizState.currentQuestion + 1) / heatQuizQuestions.length) * 100;
+            document.getElementById('progress-bar').style.width = progress + '%';
+            
+            const optionsContainer = document.getElementById('answer-options');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'quiz-option';
+                optionDiv.onclick = () => selectAnswer(index);
+                
+                optionDiv.innerHTML = `
+                    <div class="flex items-center">
+                        <div class="w-6 h-6 border-2 border-gray-400 rounded-full mr-4 flex items-center justify-center">
+                            <div class="w-3 h-3 bg-red-600 rounded-full hidden" id="radio-${index}"></div>
+                        </div>
+                        <span class="text-gray-700 text-lg">${String.fromCharCode(65 + index)}. ${option}</span>
+                    </div>
+                `;
+                
+                if (quizState.answers[quizState.currentQuestion] === index) {
+                    optionDiv.classList.add('selected');
+                    optionDiv.querySelector(`#radio-${index}`).classList.remove('hidden');
+                }
+                
+                optionsContainer.appendChild(optionDiv);
+            });
+            
+            document.getElementById('prev-btn').disabled = quizState.currentQuestion === 0;
+            const nextBtn = document.getElementById('next-btn');
+            if (quizState.currentQuestion === heatQuizQuestions.length - 1) {
+                nextBtn.innerHTML = 'Hoàn Thành <i class="fas fa-check ml-2"></i>';
+            } else {
+                nextBtn.innerHTML = 'Câu Tiếp <i class="fas fa-arrow-right ml-2"></i>';
+            }
+        }
+        
+        function selectAnswer(answerIndex) {
+            quizState.answers[quizState.currentQuestion] = answerIndex;
+            
+            document.querySelectorAll('.quiz-option').forEach((option, index) => {
+                if (index === answerIndex) {
+                    option.classList.add('selected');
+                    option.querySelector(`#radio-${index}`).classList.remove('hidden');
+                } else {
+                    option.classList.remove('selected');
+                    option.querySelector(`#radio-${index}`).classList.add('hidden');
+                }
+            });
+        }
+        
+        function nextQuestion() {
+            if (quizState.currentQuestion < heatQuizQuestions.length - 1) {
+                quizState.currentQuestion++;
+                displayQuestion();
+            } else {
+                endQuiz();
+            }
+        }
+        
+        function previousQuestion() {
+            if (quizState.currentQuestion > 0) {
+                quizState.currentQuestion--;
+                displayQuestion();
+            }
+        }
+        
+        function endQuiz() {
+            clearInterval(quizState.timer);
+            
+            let correctCount = 0;
+            quizState.answers.forEach((answer, index) => {
+                if (answer === heatQuizQuestions[index].correct) {
+                    correctCount++;
+                }
+            });
+            
+            const wrongCount = heatQuizQuestions.length - correctCount;
+            const percentage = Math.round((correctCount / heatQuizQuestions.length) * 100);
+            
+            document.getElementById('quiz-questions').classList.add('hidden');
+            document.getElementById('quiz-results').classList.remove('hidden');
+            
+            document.getElementById('score-display').textContent = `${correctCount}/${heatQuizQuestions.length}`;
+            document.getElementById('correct-count').textContent = correctCount;
+            document.getElementById('wrong-count').textContent = wrongCount;
+            document.getElementById('percentage').textContent = percentage + '%';
+            
+            const resultCircle = document.getElementById('result-circle');
+            const resultTitle = document.getElementById('result-title');
+            const resultMessage = document.getElementById('result-message');
+            
+            if (percentage >= 70) {
+                resultCircle.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                resultTitle.textContent = 'Xuất Sắc! 🔥';
+                resultMessage.textContent = 'Bạn đã nắm vững các khái niệm về truyền nhiệt!';
+            } else if (percentage >= 50) {
+                resultCircle.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+                resultTitle.textContent = 'Khá Tốt! 👍';
+                resultMessage.textContent = 'Bạn cần luyện tập thêm một chút để hoàn thiện kiến thức.';
+            } else {
+                resultCircle.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+                resultTitle.textContent = 'Cần Cố Gắng Hơn! 💪';
+                resultMessage.textContent = 'Hãy xem lại lý thuyết và thử lại nhé!';
+            }
+        }
+        
+        function reviewAnswers() {
+            alert('Tính năng xem đáp án chi tiết sẽ được cập nhật trong phiên bản tiếp theo!');
+        }
+        
+        function restartQuiz() {
+            quizState = {
+                currentQuestion: 0,
+                answers: [],
+                timeLeft: 600,
+                timer: null,
+                started: false
+            };
+            
+            document.getElementById('quiz-results').classList.add('hidden');
+            document.getElementById('quiz-start').classList.remove('hidden');
+        }
+
+        // Function to go back to homecourse.html
+        function goBack() {
+            window.location.href = 'homecourse.html';
+        }
+    </script>
+</body>
+</html>

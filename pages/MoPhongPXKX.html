@@ -1,0 +1,1848 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mô phỏng - Quang học</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="shortcut icon" href="https://cdn-icons-png.flaticon.com/512/8270/8270064.png" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --dark-gradient: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --shadow-light: 0 8px 32px rgba(31, 38, 135, 0.37);
+            --shadow-heavy: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--dark-gradient);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .glass-morphism {
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-light);
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: var(--shadow-heavy);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 14px 28px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.9);
+            color: #4a5568;
+            padding: 14px 28px;
+            border-radius: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar {
+            width: 280px;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px);
+            border-right: 1px solid var(--glass-border);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 16px 24px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            margin: 8px 16px;
+            font-weight: 500;
+        }
+
+        .sidebar-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .sidebar-item.active {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .sidebar-item i {
+            width: 24px;
+            margin-right: 16px;
+            font-size: 18px;
+        }
+
+        .main-content {
+            margin-left: 280px;
+            padding: 40px;
+            min-height: 100vh;
+        }
+
+        .simulation-canvas {
+            background: linear-gradient(180deg, #e8f4fd 0%, #b8e6ff 50%, #74c0fc 100%);
+            border: 3px solid #339af0;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            cursor: crosshair;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .control-panel {
+            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--shadow-heavy);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .custom-slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #e2e8f0, #cbd5e1);
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+            transition: all 0.3s ease;
+        }
+
+        .custom-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .custom-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .material-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .material-option {
+            padding: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .material-option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .material-option:hover::before {
+            left: 100%;
+        }
+
+        .material-option:hover {
+            border-color: #667eea;
+            background: #f8fafc;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .material-option.active {
+            border-color: #667eea;
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .data-display {
+            background: linear-gradient(145deg, #1a202c, #2d3748);
+            color: white;
+            padding: 24px;
+            border-radius: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .data-row:last-child {
+            border-bottom: none;
+        }
+
+        .section-content {
+            animation: slideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .section-content.hidden {
+            display: none;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .quiz-card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: var(--shadow-heavy);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .quiz-option {
+            padding: 16px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+            margin-bottom: 12px;
+        }
+
+        .quiz-option:hover {
+            border-color: #667eea;
+            background: #f8fafc;
+            transform: translateX(5px);
+        }
+
+        .quiz-option.selected {
+            border-color: #667eea;
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-gradient);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .timer {
+            background: var(--secondary-gradient);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 18px;
+            box-shadow: 0 4px 15px rgba(240, 147, 251, 0.4);
+        }
+
+        .result-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 800;
+            color: white;
+            margin: 0 auto 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-circle::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(transparent, rgba(255,255,255,0.3), transparent);
+            animation: rotate 2s linear infinite;
+        }
+
+        @keyframes rotate {
+            to { transform: rotate(360deg); }
+        }
+
+        .floating-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .floating-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .ray {
+            stroke-width: 4;
+            filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.3));
+            transition: all 0.3s ease;
+        }
+
+        .incident-ray {
+            stroke: #ff6b6b;
+            stroke-dasharray: none;
+        }
+
+        .reflected-ray {
+            stroke: #51cf66;
+            stroke-dasharray: 12,6;
+        }
+
+        .refracted-ray {
+            stroke: #339af0;
+            stroke-dasharray: 6,6;
+        }
+
+        .normal-line {
+            stroke: #868e96;
+            stroke-width: 3;
+            stroke-dasharray: 8,8;
+            opacity: 0.7;
+        }
+
+        .light-source {
+            fill: #ffd43b;
+            stroke: #fab005;
+            stroke-width: 3;
+            filter: drop-shadow(0 0 12px #ffd43b);
+            transition: all 0.3s ease;
+        }
+
+        .light-source:hover {
+            transform: scale(1.1);
+            filter: drop-shadow(0 0 20px #ffd43b);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.05); }
+        }
+
+        .pulsing {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .theory-card {
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: var(--shadow-heavy);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .theory-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .formula-box {
+            background: linear-gradient(145deg, #f8fafc, #e2e8f0);
+            border: 2px solid #cbd5e1;
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 24px;
+            font-weight: 700;
+            color: #2d3748;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .exercise-card {
+            background: white;
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: var(--shadow-heavy);
+            border-left: 6px solid var(--primary-gradient);
+            transition: all 0.3s ease;
+        }
+
+        .exercise-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .exercise-number {
+            width: 60px;
+            height: 60px;
+            background: var(--primary-gradient);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 800;
+            margin-right: 24px;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .material-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .instruction-banner {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border: 2px solid #fdcb6e;
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 24px;
+        }
+
+        .medium-label {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
+            margin: 10% auto;
+            padding: 32px;
+            border-radius: 20px;
+            width: 80%;
+            max-width: 600px;
+            box-shadow: var(--shadow-heavy);
+            position: relative;
+            animation: slideIn 0.3s ease;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: #4a5568;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: #1a202c;
+            transform: rotate(90deg);
+        }
+
+        .solution-content {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #2d3748;
+            white-space: pre-line;
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Background Elements -->
+    <div class="floating-elements">
+        <div class="floating-circle" style="width: 100px; height: 100px; top: 10%; left: 10%; animation-delay: 0s;"></div>
+        <div class="floating-circle" style="width: 150px; height: 150px; top: 60%; right: 10%; animation-delay: 2s;"></div>
+        <div class="floating-circle" style="width: 80px; height: 80px; bottom: 20%; left: 20%; animation-delay: 4s;"></div>
+    </div>
+
+    <!-- Mobile Menu Button -->
+    <button class="mobile-menu-btn" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar glass-morphism" id="sidebar">
+        <div class="p-8">
+            <div class="text-center mb-12">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
+                    <i class="fas fa-atom text-2xl text-white"></i>
+                </div>
+                <h1 class="text-xl font-bold text-white">Phòng Thí Nghiệm Quang Học</h1>
+                <p class="text-sm text-gray-300 mt-2">Nền Tảng Học Tập Tương Tác</p>
+            </div>
+            
+            <div class="space-y-2">
+                <a href="#" onclick="showSection('simulation')" class="sidebar-item active" id="nav-simulation">
+                    <i class="fas fa-flask"></i>
+                    <span>Mô Phỏng</span>
+                </a>
+                <a href="#" onclick="showSection('theory')" class="sidebar-item" id="nav-theory">
+                    <i class="fas fa-book-open"></i>
+                    <span>Lý Thuyết</span>
+                </a>
+                <a href="#" onclick="showSection('exercises')" class="sidebar-item" id="nav-exercises">
+                    <i class="fas fa-pencil-alt"></i>
+                    <span>Bài Tập</span>
+                </a>
+                <a href="#" onclick="showSection('quiz')" class="sidebar-item" id="nav-quiz">
+                    <i class="fas fa-brain"></i>
+                    <span>Kiểm Tra</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Simulation Section -->
+        <div id="simulation-section" class="section-content">
+            <div class="mb-8 flex justify-between items-center">
+                <h1 class="text-4xl font-bold text-white mb-4">
+                    <i class="fas fa-lightbulb mr-4 text-yellow-400"></i>
+                    Mô Phỏng Quang Học Tương Tác
+                </h1>
+                <button onclick="showSection('home')" class="btn-secondary">
+                    <i class="fas fa-arrow-left mr-2"></i>Quay Lại
+                </button>
+            </div>
+            <p class="text-xl text-gray-300 mb-8">Khám phá hiện tượng phản xạ và khúc xạ ánh sáng với trực quan hóa thời gian thực</p>
+
+            <div class="grid lg:grid-cols-4 gap-8">
+                <!-- Main Simulation Area -->
+                <div class="lg:col-span-3">
+                    <div class="card p-8">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-2xl font-bold text-gray-800">
+                                <i class="fas fa-eye mr-3 text-blue-600"></i>Khu Vực Mô Phỏng
+                            </h2>
+                            <button onclick="resetSimulation()" class="btn-secondary">
+                                <i class="fas fa-redo mr-2"></i>Đặt Lại
+                            </button>
+                        </div>
+                        
+                        <!-- Canvas -->
+                        <div class="simulation-canvas" style="width: 100%; height: 500px;" id="simulationCanvas" onclick="handleCanvasClick(event)">
+                            <svg width="100%" height="100%" id="opticsSVG">
+                                <defs>
+                                    <marker id="arrowhead" markerWidth="12" markerHeight="8" refX="10" refY="4" orient="auto">
+                                        <polygon points="0 0, 12 4, 0 8" fill="currentColor" />
+                                    </marker>
+                                    <linearGradient id="airGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#e8f4fd;stop-opacity:0.8" />
+                                        <stop offset="100%" style="stop-color:#e8f4fd;stop-opacity:1" />
+                                    </linearGradient>
+                                    <linearGradient id="waterGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#74c0fc;stop-opacity:0.8" />
+                                        <stop offset="100%" style="stop-color:#74c0fc;stop-opacity:1" />
+                                    </linearGradient>
+                                </defs>
+                                
+                                <!-- Background mediums -->
+                                <rect x="0" y="0" width="100%" height="50%" fill="url(#airGradient)" />
+                                <rect x="0" y="50%" width="100%" height="50%" fill="url(#waterGradient)" />
+                                
+                                <!-- Interface line -->
+                                <line x1="0" y1="50%" x2="100%" y2="50%" stroke="#1971c2" stroke-width="4" />
+                                
+                                <!-- Normal line -->
+                                <line x1="50%" y1="15%" x2="50%" y2="85%" class="normal-line" id="normalLine" />
+                                
+                                <!-- Light source -->
+                                <circle cx="30%" cy="30%" r="10" class="light-source pulsing" id="lightSource" />
+                                
+                                <!-- Rays -->
+                                <line class="ray incident-ray" id="incidentRay" marker-end="url(#arrowhead)" />
+                                <line class="ray reflected-ray" id="reflectedRay" marker-end="url(#arrowhead)" />
+                                <line class="ray refracted-ray" id="refractedRay" marker-end="url(#arrowhead)" />
+                            </svg>
+                            
+                            <!-- Medium labels -->
+                            <div class="absolute top-6 left-6 medium-label" id="medium1Label">
+                                Không khí (n₁ = 1.00)
+                            </div>
+                            <div class="absolute bottom-6 left-6 medium-label" id="medium2Label">
+                                Nước (n₂ = 1.33)
+                            </div>
+                        </div>
+                        
+                        <!-- Instructions -->
+                        <div class="instruction-banner">
+                            <h4 class="font-bold text-amber-800 mb-3 flex items-center">
+                                <i class="fas fa-info-circle mr-3"></i>Hướng Dẫn Sử Dụng
+                            </h4>
+                            <div class="grid md:grid-cols-2 gap-4 text-amber-700 text-sm">
+                                <div class="flex items-center">
+                                    <i class="fas fa-mouse-pointer mr-3 text-amber-600"></i>
+                                    <span><strong>Click</strong> trên canvas để di chuyển nguồn sáng</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-sliders-h mr-3 text-amber-600"></i>
+                                    <span><strong>Điều chỉnh</strong> góc tới bằng thanh trượt</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-cube mr-3 text-amber-600"></i>
+                                    <span><strong>Chọn</strong> các vật liệu khác nhau</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-eye mr-3 text-amber-600"></i>
+                                    <span><strong>Quan sát</strong> phản xạ và khúc xạ</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Control Panel -->
+                <div class="lg:col-span-1">
+                    <div class="control-panel">
+                        <h3 class="text-xl font-bold text-gray-800 mb-8 flex items-center">
+                            <i class="fas fa-cogs mr-3 text-purple-600"></i>Điều Khiển
+                        </h3>
+                        
+                        <!-- Incident Angle Control -->
+                        <div class="mb-8">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="font-semibold text-gray-700">Góc Tới (θ₁)</span>
+                                <span class="text-red-500 font-bold text-lg" id="incidentAngleValue">30°</span>
+                            </div>
+                            <input type="range" min="10" max="80" value="30" class="custom-slider" id="incidentAngleSlider" oninput="updateIncidentAngle(this.value)">
+                            <div class="flex justify-between text-xs text-gray-500 mt-2">
+                                <span>10°</span>
+                                <span>80°</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Medium 1 Selection -->
+                        <div class="mb-8">
+                            <label class="font-semibold text-gray-700 block mb-4">Môi Trường 1 (Trên)</label>
+                            <div class="material-grid">
+                                <div class="material-option active" onclick="selectMedium1('air')" data-medium="air">
+                                    <div class="text-blue-600 mb-1">💨</div>
+                                    <div>Không khí</div>
+                                    <small class="text-gray-500">n = 1.00</small>
+                                </div>
+                                <div class="material-option" onclick="selectMedium1('water')" data-medium="water">
+                                    <div class="text-blue-500 mb-1">💧</div>
+                                    <div>Nước</div>
+                                    <small class="text-gray-500">n = 1.33</small>
+                                </div>
+                                <div class="material-option" onclick="selectMedium1('glass')" data-medium="glass">
+                                    <div class="text-green-500 mb-1">🔷</div>
+                                    <div>Thủy tinh</div>
+                                    <small class="text-gray-500">n = 1.50</small>
+                                </div>
+                                <div class="material-option" onclick="selectMedium1('diamond')" data-medium="diamond">
+                                    <div class="text-yellow-500 mb-1">💎</div>
+                                    <div>Kim cương</div>
+                                    <small class="text-gray-500">n = 2.42</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Medium 2 Selection -->
+                        <div class="mb-8">
+                            <label class="font-semibold text-gray-700 block mb-4">Môi Trường 2 (Dưới)</label>
+                            <div class="material-grid">
+                                <div class="material-option" onclick="selectMedium2('air')" data-medium="air">
+                                    <div class="text-blue-600 mb-1">💨</div>
+                                    <div>Không khí</div>
+                                    <small class="text-gray-500">n = 1.00</small>
+                                </div>
+                                <div class="material-option active" onclick="selectMedium2('water')" data-medium="water">
+                                    <div class="text-blue-500 mb-1">💧</div>
+                                    <div>Nước</div>
+                                    <small class="text-gray-500">n = 1.33</small>
+                                </div>
+                                <div class="material-option" onclick="selectMedium2('glass')" data-medium="glass">
+                                    <div class="text-green-500 mb-1">🔷</div>
+                                    <div>Thủy tinh</div>
+                                    <small class="text-gray-500">n = 1.50</small>
+                                </div>
+                                <div class="material-option" onclick="selectMedium2('diamond')" data-medium="diamond">
+                                    <div class="text-yellow-500 mb-1">💎</div>
+                                    <div>Kim cương</div>
+                                    <small class="text-gray-500">n = 2.42</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Data Display -->
+                        <div class="data-display">
+                            <h4 class="text-white font-bold mb-4 flex items-center">
+                                <i class="fas fa-chart-line mr-2"></i>Dữ Liệu Trực Tiếp
+                            </h4>
+                            <div class="space-y-3">
+                                <div class="data-row">
+                                    <span class="text-gray-300">Góc tới:</span>
+                                    <span class="text-red-400 font-bold" id="dataIncident">30°</span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="text-gray-300">Góc phản xạ:</span>
+                                    <span class="text-green-400 font-bold" id="dataReflected">30°</span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="text-gray-300">Góc khúc xạ:</span>
+                                    <span class="text-blue-400 font-bold" id="dataRefracted">22.1°</span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="text-gray-300">n₁ sin θ₁:</span>
+                                    <span class="text-yellow-400 font-bold" id="dataSnell1">0.500</span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="text-gray-300">n₂ sin θ₂:</span>
+                                    <span class="text-yellow-400 font-bold" id="dataSnell2">0.500</span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="text-gray-300">Định luật Snell:</span>
+                                    <span class="text-green-400 font-bold" id="dataSnellCheck">✓ Hợp lệ</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Theory Section -->
+        <div id="theory-section" class="section-content hidden">
+            <div class="mb-8 flex justify-between items-center">
+                <h1 class="text-4xl font-bold text-white mb-4">
+                    <i class="fas fa-book-open mr-4 text-blue-400"></i>
+                    Lý Thuyết Quang Học
+                </h1>
+                <button onclick="showSection('home')" class="btn-secondary">
+                    <i class="fas fa-arrow-left mr-2"></i>Quay Lại
+                </button>
+            </div>
+            <p class="text-xl text-gray-300 mb-8">Các nguyên lý cơ bản về phản xạ và khúc xạ ánh sáng</p>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Reflection Theory -->
+                <div class="theory-card">
+                    <div class="flex items-center mb-6">
+                        <div class="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-mirror text-2xl text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-800">Phản Xạ Ánh Sáng</h3>
+                            <p class="text-gray-600">Định luật phản xạ</p>
+                        </div>
+                    </div>
+                    
+                    <h4 class="font-semibold text-gray-700 mb-4">Định Luật Phản Xạ:</h4>
+                    <ul class="space-y-3 text-gray-600 mb-6">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
+                            <span>Tia tới, tia phản xạ và pháp tuyến cùng nằm trong một mặt phẳng</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
+                            <span>Góc tới bằng góc phản xạ</span>
+                        </li>
+                    </ul>
+                    
+                    <div class="formula-box">
+                        θᵢ = θᵣ
+                    </div>
+                </div>
+                
+                <!-- Refraction Theory -->
+                <div class="theory-card">
+                    <div class="flex items-center mb-6">
+                        <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-water text-2xl text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-800">Khúc Xạ Ánh Sáng</h3>
+                            <p class="text-gray-600">Định luật Snell</p>
+                        </div>
+                    </div>
+                    
+                    <h4 class="font-semibold text-gray-700 mb-4">Định Luật Snell:</h4>
+                    <ul class="space-y-3 text-gray-600 mb-6">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-blue-500 mr-3 mt-1"></i>
+                            <span>Tia tới, tia khúc xạ và pháp tuyến cùng nằm trong một mặt phẳng</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-blue-500 mr-3 mt-1"></i>
+                            <span>Tỉ số sin của các góc là hằng số đối với các môi trường cho trước</span>
+                        </li>
+                    </ul>
+                    
+                    <div class="formula-box">
+                        n₁ sin θ₁ = n₂ sin θ₂
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Exercises Section -->
+        <div id="exercises-section" class="section-content hidden">
+            <div class="mb-8 flex justify-between items-center">
+                <h1 class="text-4xl font-bold text-white mb-4">
+                    <i class="fas fa-pencil-alt mr-4 text-green-400"></i>
+                    Bài Tập Thực Hành
+                </h1>
+                <button onclick="showSection('home')" class="btn-secondary">
+                    <i class="fas fa-arrow-left mr-2"></i>Quay Lại
+                </button>
+            </div>
+            <p class="text-xl text-gray-300 mb-8">Giải quyết các bài toán từ cơ bản đến nâng cao</p>
+            
+            <div class="space-y-8">
+                <!-- Exercise 1 -->
+                <div class="exercise-card" id="exercise-1">
+                    <div class="flex items-center mb-6">
+                        <div class="exercise-number">1</div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-800">Phản Xạ Trên Gương Phẳng</h3>
+                            <p class="text-gray-600">Cơ bản - Định luật phản xạ</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-6 mb-6 rounded-r-lg">
+                        <p class="text-gray-700 text-lg leading-relaxed">
+                            Một tia sáng chiếu vào gương phẳng với góc tới 35°. 
+                            Tính góc phản xạ và góc hợp bởi tia tới và tia phản xạ.
+                        </p>
+                    </div>
+                    
+                    <div class="flex gap-4">
+                        <button onclick="showSolution(1)" class="btn-secondary">
+                            <i class="fas fa-lightbulb mr-2"></i>Xem Lời Giải
+                        </button>
+                        <button onclick="simulateExercise(1)" class="btn-primary">
+                            <i class="fas fa-flask mr-2"></i>Mô Phỏng
+                        </button>
+                    </div>
+                    <div id="solution-1" class="solution-content hidden mt-6 p-6 bg-gray-50 rounded-lg"></div>
+                </div>
+                
+                <!-- Exercise 2 -->
+                <div class="exercise-card" id="exercise-2">
+                    <div class="flex items-center mb-6">
+                        <div class="exercise-number">2</div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-800">Khúc Xạ Ánh Sáng</h3>
+                            <p class="text-gray-600">Trung bình - Định luật Snell</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-6 mb-6 rounded-r-lg">
+                        <p class="text-gray-700 text-lg leading-relaxed">
+                            Ánh sáng truyền từ không khí vào nước với góc tới 45°. 
+                            Biết chiết suất của nước là 1.33, tính góc khúc xạ.
+                        </p>
+                    </div>
+                    
+                    <div class="flex gap-4">
+                        <button onclick="showSolution(2)" class="btn-secondary">
+                            <i class="fas fa-lightbulb mr-2"></i>Xem Lời Giải
+                        </button>
+                        <button onclick="simulateExercise(2)" class="btn-primary">
+                            <i class="fas fa-flask mr-2"></i>Mô Phỏng
+                        </button>
+                    </div>
+                    <div id="solution-2" class="solution-content hidden mt-6 p-6 bg-gray-50 rounded-lg"></div>
+                </div>
+
+                <!-- Exercise 3 -->
+                <div class="exercise-card" id="exercise-3">
+                    <div class="flex items-center mb-6">
+                        <div class="exercise-number">3</div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-800">Phản Xạ Toàn Phần</h3>
+                            <p class="text-gray-600">Nâng cao - Góc giới hạn</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-6 mb-6 rounded-r-lg">
+                        <p class="text-gray-700 text-lg leading-relaxed">
+                            Ánh sáng truyền từ thủy tinh (n = 1.5) ra không khí. 
+                            Tính góc giới hạn để xảy ra hiện tượng phản xạ toàn phần.
+                        </p>
+                    </div>
+                    
+                    <div class="flex gap-4">
+                        <button onclick="showSolution(3)" class="btn-secondary">
+                            <i class="fas fa-lightbulb mr-2"></i>Xem Lời Giải
+                        </button>
+                        <button onclick="simulateExercise(3)" class="btn-primary">
+                            <i class="fas fa-flask mr-2"></i>Mô Phỏng
+                        </button>
+                    </div>
+                    <div id="solution-3" class="solution-content hidden mt-6 p-6 bg-gray-50 rounded-lg"></div>
+                </div>
+
+                <!-- Exercise 4 -->
+                <div class="exercise-card" id="exercise-4">
+                    <div class="flex items-center mb-6">
+                        <div class="exercise-number">4</div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-800">Chiết Suất Tương Đối</h3>
+                            <p class="text-gray-600">Trung bình - Tính toán chiết suất</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-6 mb-6 rounded-r-lg">
+                        <p class="text-gray-700 text-lg leading-relaxed">
+                            Ánh sáng truyền từ nước vào kim cương với góc tới 30° và góc khúc xạ 11.9°. 
+                            Tính chiết suất tương đối của kim cương so với nước.
+                        </p>
+                    </div>
+                    
+                    <div class="flex gap-4">
+                        <button onclick="showSolution(4)" class="btn-secondary">
+                            <i class="fas fa-lightbulb mr-2"></i>Xem Lời Giải
+                        </button>
+                        <button onclick="simulateExercise(4)" class="btn-primary">
+                            <i class="fas fa-flask mr-2"></i>Mô Phỏng
+                        </button>
+                    </div>
+                    <div id="solution-4" class="solution-content hidden mt-6 p-6 bg-gray-50 rounded-lg"></div>
+                </div>
+
+                <!-- Exercise 5 -->
+                <div class="exercise-card" id="exercise-5">
+                    <div class="flex items-center mb-6">
+                        <div class="exercise-number">5</div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-800">Ứng Dụng Thực Tế</h3>
+                            <p class="text-gray-600">Nâng cao - Lăng kính</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-6 mb-6 rounded-r-lg">
+                        <p class="text-gray-700 text-lg leading-relaxed">
+                            Một tia sáng chiếu vuông góc vào mặt bên của lăng kính thủy tinh có góc chiết quang 60°. 
+                            Tính góc lệch của tia ló so với phương ban đầu. (n = 1.5)
+                        </p>
+                    </div>
+                    
+                    <div class="flex gap-4">
+                        <button onclick="showSolution(5)" class="btn-secondary">
+                            <i class="fas fa-lightbulb mr-2"></i>Xem Lời Giải
+                        </button>
+                        <button onclick="simulateExercise(5)" class="btn-primary">
+                            <i class="fas fa-flask mr-2"></i>Mô Phỏng
+                        </button>
+                    </div>
+                    <div id="solution-5" class="solution-content hidden mt-6 p-6 bg-gray-50 rounded-lg"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz Section -->
+        <div id="quiz-section" class="section-content hidden">
+            <div class="mb-8 flex justify-between items-center">
+                <h1 class="text-4xl font-bold text-white mb-4">
+                    <i class="fas fa-brain mr-4 text-purple-400"></i>
+                    Kiểm Tra Quang Học
+                </h1>
+                <button onclick="showSection('home')" class="btn-secondary">
+                    <i class="fas fa-arrow-left mr-2"></i>Quay Lại
+                </button>
+            </div>
+            <p class="text-xl text-gray-300 mb-8">Kiểm tra kiến thức của bạn với các câu hỏi tương tác</p>
+            
+            <div class="quiz-card">
+                <div id="quiz-container">
+                    <!-- Quiz Start Screen -->
+                    <div id="quiz-start" class="text-center">
+                        <div class="mb-12">
+                            <div class="w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+                                <i class="fas fa-brain text-4xl text-white"></i>
+                            </div>
+                            <h3 class="text-3xl font-bold text-gray-800 mb-4">Sẵn Sàng Kiểm Tra Kiến Thức?</h3>
+                            <p class="text-gray-600 text-lg mb-8">Bài kiểm tra gồm 10 câu hỏi về phản xạ và khúc xạ ánh sáng</p>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-3 gap-6 mb-12">
+                            <div class="bg-gradient-to-r from-blue-50 to-blue-100 border-2 border-blue-300 rounded-2xl p-6">
+                                <i class="fas fa-clock text-blue-600 text-3xl mb-4"></i>
+                                <h4 class="font-bold text-blue-800 text-lg">Thời Gian</h4>
+                                <p class="text-blue-600 text-xl font-semibold">10 phút</p>
+                            </div>
+                            <div class="bg-gradient-to-r from-green-50 to-green-100 border-2 border-green-300 rounded-2xl p-6">
+                                <i class="fas fa-list-ol text-green-600 text-3xl mb-4"></i>
+                                <h4 class="font-bold text-green-800 text-lg">Số Câu</h4>
+                                <p class="text-green-600 text-xl font-semibold">10 câu hỏi</p>
+                            </div>
+                            <div class="bg-gradient-to-r from-purple-50 to-purple-100 border-2 border-purple-300 rounded-2xl p-6">
+                                <i class="fas fa-trophy text-purple-600 text-3xl mb-4"></i>
+                                <h4 class="font-bold text-purple-800 text-lg">Điểm Đạt</h4>
+                                <p class="text-purple-600 text-xl font-semibold">≥ 7/10</p>
+                            </div>
+                        </div>
+                        
+                        <button onclick="startQuiz()" class="btn-primary text-xl px-12 py-4">
+                            <i class="fas fa-play mr-3"></i>Bắt Đầu Kiểm Tra
+                        </button>
+                    </div>
+                    
+                    <!-- Quiz Questions -->
+                    <div id="quiz-questions" class="hidden">
+                        <div class="flex justify-between items-center mb-8">
+                            <div class="flex items-center space-x-6">
+                                <span class="text-xl font-semibold text-gray-700">Câu <span id="current-question">1</span>/10</span>
+                                <div class="progress-bar w-80">
+                                    <div class="progress-fill" id="progress-bar" style="width: 10%"></div>
+                                </div>
+                            </div>
+                            <div class="timer flex items-center space-x-3">
+                                <i class="fas fa-clock"></i>
+                                <span id="timer" class="font-bold">10:00</span>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gradient-to-r from-gray-50 to-white rounded-2xl p-8 border-2 border-gray-200 mb-8">
+                            <h3 class="text-2xl font-bold text-gray-800 mb-6" id="question-text">
+                                Câu hỏi sẽ hiển thị ở đây
+                            </h3>
+                            
+                            <div class="space-y-4" id="answer-options">
+                                <!-- Answer options will be inserted here -->
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between">
+                            <button onclick="previousQuestion()" class="btn-secondary" id="prev-btn" disabled>
+                                <i class="fas fa-arrow-left mr-2"></i>Câu Trước
+                            </button>
+                            <button onclick="nextQuestion()" class="btn-primary" id="next-btn">
+                                Câu Tiếp <i class="fas fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Quiz Results -->
+                    <div id="quiz-results" class="hidden text-center">
+                        <div class="mb-12">
+                            <div class="result-circle" id="result-circle">
+                                <span id="score-display">0/10</span>
+                            </div>
+                            <h3 class="text-3xl font-bold text-gray-800 mb-4" id="result-title">Kết Quả</h3>
+                            <p class="text-gray-600 text-lg mb-8" id="result-message">Thông điệp kết quả</p>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-3 gap-6 mb-12">
+                            <div class="bg-gradient-to-r from-green-50 to-green-100 border-2 border-green-300 rounded-2xl p-6">
+                                <i class="fas fa-check-circle text-green-600 text-3xl mb-4"></i>
+                                <h4 class="font-bold text-green-800 text-lg">Đúng</h4>
+                                <p class="text-green-600 text-2xl font-bold" id="correct-count">0</p>
+                            </div>
+                            <div class="bg-gradient-to-r from-red-50 to-red-100 border-2 border-red-300 rounded-2xl p-6">
+                                <i class="fas fa-times-circle text-red-600 text-3xl mb-4"></i>
+                                <h4 class="font-bold text-red-800 text-lg">Sai</h4>
+                                <p class="text-red-600 text-2xl font-bold" id="wrong-count">0</p>
+                            </div>
+                            <div class="bg-gradient-to-r from-blue-50 to-blue-100 border-2 border-blue-300 rounded-2xl p-6">
+                                <i class="fas fa-percentage text-blue-600 text-3xl mb-4"></i>
+                                <h4 class="font-bold text-blue-800 text-lg">Tỷ Lệ</h4>
+                                <p class="text-blue-600 text-2xl font-bold" id="percentage">0%</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-center space-x-6">
+                            <button onclick="reviewAnswers()" class="btn-secondary">
+                                <i class="fas fa-eye mr-2"></i>Xem Đáp Án
+                            </button>
+                            <button onclick="restartQuiz()" class="btn-primary">
+                                <i class="fas fa-redo mr-2"></i>Thử Lại
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Home Section -->
+        <!-- <div id="home-section" class="section-content">
+            <div class="text-center py-16">
+                <div class="w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
+                    <i class="fas fa-atom text-4xl text-white"></i>
+                </div>
+                <h1 class="text-5xl font-bold text-white mb-6">Chào Mừng Đến Với Phòng Thí Nghiệm Quang Học</h1>
+                <p class="text-xl text-gray-300 mb-12 max-w-2xl mx-auto">Khám phá các hiện tượng quang học thông qua mô phỏng tương tác, lý thuyết chi tiết, bài tập thực hành và kiểm tra kiến thức.</p>
+                
+                <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                    <div class="card p-8 text-left hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100">
+                        <i class="fas fa-flask text-3xl text-blue-600 mb-4"></i>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Mô Phỏng</h3>
+                        <p class="text-gray-600">Trải nghiệm hiện tượng phản xạ và khúc xạ qua mô phỏng tương tác thời gian thực.</p>
+                        <button onclick="showSection('simulation')" class="btn-primary mt-6">Khám Phá</button>
+                    </div>
+                    <div class="card p-8 text-left hover:bg-gradient-to-r hover:from-green-50 hover:to-green-100">
+                        <i class="fas fa-book-open text-3xl text-green-600 mb-4"></i>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Lý Thuyết</h3>
+                        <p class="text-gray-600">Tìm hiểu các định luật cơ bản về phản xạ và khúc xạ ánh sáng.</p>
+                        <button onclick="showSection('theory')" class="btn-primary mt-6">Tìm Hiểu</button>
+                    </div>
+                    <div class="card p-8 text-left hover:bg-gradient-to-r hover:from-yellow-50 hover:to-yellow-100">
+                        <i class="fas fa-pencil-alt text-3xl text-yellow-600 mb-4"></i>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Bài Tập</h3>
+                        <p class="text-gray-600">Luyện tập với các bài toán từ cơ bản đến nâng cao.</p>
+                        <button onclick="showSection('exercises')" class="btn-primary mt-6">Luyện Tập</button>
+                    </div>
+                    <div class="card p-8 text-left hover:bg-gradient-to-r hover:from-purple-50 hover:to-purple-100">
+                        <i class="fas fa-brain text-3xl text-purple-600 mb-4"></i>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Kiểm Tra</h3>
+                        <p class="text-gray-600">Kiểm tra kiến thức của bạn với bài kiểm tra tương tác.</p>
+                        <button onclick="showSection('quiz')" class="btn-primary mt-6">Kiểm Tra</button>
+                    </div>
+                </div>
+            </div>
+        </div> -->
+
+        <!-- Solution Modal -->
+        <div id="solution-modal" class="modal">
+            <div class="modal-content">
+                <span class="modal-close" onclick="closeSolutionModal()">&times;</span>
+                <h3 class="text-2xl font-bold text-gray-800 mb-6">Lời Giải</h3>
+                <div id="modal-solution-content" class="solution-content"></div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Simulation state
+        let simulation = {
+            incidentAngle: 30,
+            medium1: { name: 'air', n: 1.00, color: '#e8f4fd' },
+            medium2: { name: 'water', n: 1.33, color: '#74c0fc' },
+            lightSource: { x: 0.3, y: 0.3 }
+        };
+        
+        // Material properties
+        const materials = {
+            air: { name: 'Không khí', n: 1.00, color: '#e8f4fd' },
+            water: { name: 'Nước', n: 1.33, color: '#74c0fc' },
+            glass: { name: 'Thủy tinh', n: 1.50, color: '#a7f3d0' },
+            diamond: { name: 'Kim cương', n: 2.42, color: '#fde68a' }
+        };
+        
+        // Quiz data
+        const quizQuestions = [
+            {
+                question: "Định luật phản xạ ánh sáng phát biểu như thế nào?",
+                options: [
+                    "Góc tới bằng góc khúc xạ",
+                    "Góc tới bằng góc phản xạ",
+                    "Góc phản xạ bằng 2 lần góc tới",
+                    "Góc tới luôn bằng 45°"
+                ],
+                correct: 1,
+                explanation: "Định luật phản xạ: góc tới bằng góc phản xạ (θᵢ = θᵣ)"
+            },
+            {
+                question: "Định luật Snell về khúc xạ ánh sáng được biểu diễn bằng công thức nào?",
+                options: [
+                    "n₁ + n₂ = sin θ₁ + sin θ₂",
+                    "n₁ sin θ₁ = n₂ sin θ₂",
+                    "n₁ cos θ₁ = n₂ cos θ₂",
+                    "n₁/n₂ = θ₁/θ₂"
+                ],
+                correct: 1,
+                explanation: "Định luật Snell: n₁ sin θ₁ = n₂ sin θ₂"
+            },
+            {
+                question: "Chiết suất của nước là bao nhiêu?",
+                options: [
+                    "1.00",
+                    "1.33",
+                    "1.50",
+                    "2.42"
+                ],
+                correct: 1,
+                explanation: "Chiết suất của nước là 1.33"
+            },
+            {
+                question: "Khi ánh sáng truyền từ môi trường chiết suất nhỏ sang môi trường chiết suất lớn, tia khúc xạ sẽ:",
+                options: [
+                    "Lệch xa pháp tuyến",
+                    "Lệch gần pháp tuyến",
+                    "Không đổi hướng",
+                    "Phản xạ hoàn toàn"
+                ],
+                correct: 1,
+                explanation: "Khi n₂ > n₁, tia khúc xạ lệch gần pháp tuyến hơn"
+            },
+            {
+                question: "Hiện tượng phản xạ toàn phần xảy ra khi:",
+                options: [
+                    "Góc tới bằng 0°",
+                    "Ánh sáng truyền từ môi trường chiết suất lớn sang nhỏ và góc tới lớn hơn góc giới hạn",
+                    "Góc tới bằng 90°",
+                    "Chiết suất hai môi trường bằng nhau"
+                ],
+                correct: 1,
+                explanation: "Phản xạ toàn phần xảy ra khi n₁ > n₂ và θᵢ > θgh"
+            },
+            {
+                question: "Chiết suất của kim cương là:",
+                options: [
+                    "1.33",
+                    "1.50",
+                    "2.42",
+                    "3.00"
+                ],
+                correct: 2,
+                explanation: "Chiết suất của kim cương là 2.42"
+            },
+            {
+                question: "Khi góc tới bằng 0° (tia sáng vuông góc với mặt phân cách), tia khúc xạ sẽ:",
+                options: [
+                    "Lệch 45° so với pháp tuyến",
+                    "Không bị lệch, truyền thẳng",
+                    "Bị phản xạ hoàn toàn",
+                    "Lệch 90° so với pháp tuyến"
+                ],
+                correct: 1,
+                explanation: "Khi θᵢ = 0°, tia sáng truyền thẳng không bị lệch"
+            },
+            {
+                question: "Trong hiện tượng khúc xạ, nếu n₁ = 1.5 và n₂ = 1.0, góc tới θ₁ = 30°, thì góc khúc xạ θ₂ là:",
+                options: [
+                    "20°",
+                    "48.6°",
+                    "60°",
+                    "90°"
+                ],
+                correct: 1,
+                explanation: "Áp dụng định luật Snell: sin θ₂ = (n₁/n₂) × sin θ₁ = 1.5 × sin 30° = 0.75, θ₂ ≈ 48.6°"
+            },
+            {
+                question: "Tia phản xạ và tia tới tạo với nhau góc 60°. Góc tới là:",
+                options: [
+                    "30°",
+                    "60°",
+                    "45°",
+                    "90°"
+                ],
+                correct: 0,
+                explanation: "Góc giữa tia tới và tia phản xạ = 2 × góc tới. Nếu góc này = 60° thì góc tới = 30°"
+            },
+            {
+                question: "Chiết suất tuyệt đối của một môi trường luôn:",
+                options: [
+                    "Nhỏ hơn 1",
+                    "Lớn hơn hoặc bằng 1",
+                    "Bằng 1",
+                    "Có thể âm"
+                ],
+                correct: 1,
+                explanation: "Chiết suất tuyệt đối luôn ≥ 1 (bằng 1 đối với chân không)"
+            }
+        ];
+        
+        // Quiz state
+        let quizState = {
+            currentQuestion: 0,
+            answers: [],
+            timeLeft: 600, // 10 minutes in seconds
+            timer: null,
+            started: false
+        };
+        
+        // Initialize simulation
+        document.addEventListener('DOMContentLoaded', function() {
+            updateSimulation();
+        });
+        
+        // Mobile sidebar toggle
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+        }
+        
+        // Section Navigation
+        function showSection(sectionName) {
+            // Navigate to homecourse.html for 'home' section
+            if (sectionName === 'home') {
+                window.location.href = 'homecourse.html';
+                return;
+            }
+            
+            // Hide all sections
+            document.querySelectorAll('.section-content').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // Remove active class from all nav items
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionName + '-section').classList.remove('hidden');
+            
+            // Add active class to selected nav item
+            document.getElementById('nav-' + sectionName).classList.add('active');
+            
+            // Close mobile sidebar
+            document.getElementById('sidebar').classList.remove('open');
+        }
+        
+        // Simulation Functions
+        function updateIncidentAngle(angle) {
+            simulation.incidentAngle = parseFloat(angle);
+            document.getElementById('incidentAngleValue').textContent = angle + '°';
+            updateSimulation();
+        }
+        
+        function selectMedium1(material) {
+            // Update active state
+            document.querySelectorAll('.material-option').forEach(opt => {
+                if (opt.getAttribute('onclick') && opt.getAttribute('onclick').includes('selectMedium1')) {
+                    opt.classList.remove('active');
+                }
+            });
+            document.querySelector(`[onclick="selectMedium1('${material}')"]`).classList.add('active');
+            
+            simulation.medium1 = materials[material];
+            updateSimulation();
+        }
+        
+        function selectMedium2(material) {
+            // Update active state
+            document.querySelectorAll('.material-option').forEach(opt => {
+                if (opt.getAttribute('onclick') && opt.getAttribute('onclick').includes('selectMedium2')) {
+                    opt.classList.remove('active');
+                }
+            });
+            document.querySelector(`[onclick="selectMedium2('${material}')"]`).classList.add('active');
+            
+            simulation.medium2 = materials[material];
+            updateSimulation();
+        }
+        
+        function handleCanvasClick(event) {
+            const canvas = document.getElementById('simulationCanvas');
+            const rect = canvas.getBoundingClientRect();
+            const x = (event.clientX - rect.left) / rect.width;
+            const y = (event.clientY - rect.top) / rect.height;
+            
+            // Only allow light source in upper medium
+            if (y < 0.5) {
+                simulation.lightSource = { x: x, y: y };
+                updateSimulation();
+            }
+        }
+        
+        function updateSimulation() {
+            const svg = document.getElementById('opticsSVG');
+            const svgRect = svg.getBoundingClientRect();
+            const width = svgRect.width;
+            const height = svgRect.height;
+            
+            // Update medium backgrounds and labels
+            updateMediumDisplay();
+            
+            // Calculate ray paths
+            const sourceX = simulation.lightSource.x * width;
+            const sourceY = simulation.lightSource.y * height;
+            const interfaceY = height * 0.5;
+            
+            // Calculate intersection point with interface
+            const incidentAngleRad = (simulation.incidentAngle * Math.PI) / 180;
+            const intersectionX = sourceX + (interfaceY - sourceY) * Math.tan(incidentAngleRad);
+            
+            // Update light source position
+            document.getElementById('lightSource').setAttribute('cx', sourceX);
+            document.getElementById('lightSource').setAttribute('cy', sourceY);
+            
+            // Update normal line
+            document.getElementById('normalLine').setAttribute('x1', intersectionX);
+            document.getElementById('normalLine').setAttribute('x2', intersectionX);
+            
+            // Update incident ray
+            const incidentRay = document.getElementById('incidentRay');
+            incidentRay.setAttribute('x1', sourceX);
+            incidentRay.setAttribute('y1', sourceY);
+            incidentRay.setAttribute('x2', intersectionX);
+            incidentRay.setAttribute('y2', interfaceY);
+            
+            // Calculate reflected ray
+            const reflectedAngleRad = incidentAngleRad;
+            const reflectedEndX = intersectionX - (height * 0.35) * Math.tan(reflectedAngleRad);
+            const reflectedEndY = interfaceY - (height * 0.35);
+            
+            const reflectedRay = document.getElementById('reflectedRay');
+            reflectedRay.setAttribute('x1', intersectionX);
+            reflectedRay.setAttribute('y1', interfaceY);
+            reflectedRay.setAttribute('x2', reflectedEndX);
+            reflectedRay.setAttribute('y2', reflectedEndY);
+            
+            // Calculate refracted ray using Snell's law
+            const n1 = simulation.medium1.n;
+            const n2 = simulation.medium2.n;
+            const sinTheta1 = Math.sin(incidentAngleRad);
+            const sinTheta2 = (n1 / n2) * sinTheta1;
+            
+            const refractedRay = document.getElementById('refractedRay');
+            
+            // Check for total internal reflection
+            if (sinTheta2 > 1) {
+                // Total internal reflection
+                refractedRay.style.display = 'none';
+                document.getElementById('dataRefracted').textContent = 'N/A (Phản xạ toàn phần)';
+                document.getElementById('dataSnell2').textContent = 'N/A';
+                document.getElementById('dataSnellCheck').textContent = '⚠️ Phản xạ toàn phần';
+            } else {
+                const refractedAngleRad = Math.asin(sinTheta2);
+                const refractedAngle = (refractedAngleRad * 180) / Math.PI;
+                
+                const refractedEndX = intersectionX + (height * 0.35) * Math.tan(refractedAngleRad);
+                const refractedEndY = interfaceY + (height * 0.35);
+                
+                refractedRay.setAttribute('x1', intersectionX);
+                refractedRay.setAttribute('y1', interfaceY);
+                refractedRay.setAttribute('x2', refractedEndX);
+                refractedRay.setAttribute('y2', refractedEndY);
+                refractedRay.style.display = 'block';
+                
+                // Update data display
+                document.getElementById('dataRefracted').textContent = refractedAngle.toFixed(1) + '°';
+                document.getElementById('dataSnell2').textContent = (n2 * sinTheta2).toFixed(3);
+                
+                const snellDiff = Math.abs((n1 * sinTheta1) - (n2 * sinTheta2));
+                document.getElementById('dataSnellCheck').textContent = snellDiff < 0.001 ? '✓ Hợp lệ' : '⚠️ Lỗi';
+            }
+            
+            // Update data display
+            document.getElementById('dataIncident').textContent = simulation.incidentAngle + '°';
+            document.getElementById('dataReflected').textContent = simulation.incidentAngle + '°';
+            document.getElementById('dataSnell1').textContent = (n1 * sinTheta1).toFixed(3);
+        }
+        
+        function updateMediumDisplay() {
+            // Update medium labels
+            document.getElementById('medium1Label').textContent = 
+                `${simulation.medium1.name} (n₁ = ${simulation.medium1.n.toFixed(2)})`;
+            document.getElementById('medium2Label').textContent = 
+                `${simulation.medium2.name} (n₂ = ${simulation.medium2.n.toFixed(2)})`;
+            
+            // Update background colors
+            const svg = document.getElementById('opticsSVG');
+            const airGradient = svg.querySelector('#airGradient');
+            const waterGradient = svg.querySelector('#waterGradient');
+            
+            // Update gradients based on selected materials
+            airGradient.innerHTML = `
+                <stop offset="0%" style="stop-color:${simulation.medium1.color};stop-opacity:0.8" />
+                <stop offset="100%" style="stop-color:${simulation.medium1.color};stop-opacity:1" />
+            `;
+            
+            waterGradient.innerHTML = `
+                <stop offset="0%" style="stop-color:${simulation.medium2.color};stop-opacity:0.8" />
+                <stop offset="100%" style="stop-color:${simulation.medium2.color};stop-opacity:1" />
+            `;
+        }
+        
+        function resetSimulation() {
+            simulation.incidentAngle = 30;
+            simulation.lightSource = { x: 0.3, y: 0.3 };
+            document.getElementById('incidentAngleSlider').value = 30;
+            document.getElementById('incidentAngleValue').textContent = '30°';
+            
+            // Reset to air-water
+            selectMedium1('air');
+            selectMedium2('water');
+            
+            updateSimulation();
+        }
+        
+        function showSolution(exerciseNum) {
+            const solutions = {
+                1: "Lời giải Bài 1:\n\nCho: Góc tới = 35°\n\nTheo định luật phản xạ:\n- Góc phản xạ = Góc tới = 35°\n- Góc giữa tia tới và tia phản xạ = 2 × 35° = 70°",
+                2: "Lời giải Bài 2:\n\nCho: θ₁ = 45°, n₁ = 1.00 (không khí), n₂ = 1.33 (nước)\n\nÁp dụng định luật Snell: n₁ sin θ₁ = n₂ sin θ₂\n1.00 × sin 45° = 1.33 × sin θ₂\n0.707 = 1.33 × sin θ₂\nsin θ₂ = 0.707/1.33 = 0.532\nθ₂ = arcsin(0.532) ≈ 32.1°",
+                3: "Lời giải Bài 3:\n\nCho: n₁ = 1.5 (thủy tinh), n₂ = 1.0 (không khí)\n\nGóc giới hạn: sin θgh = n₂/n₁ = 1.0/1.5 = 0.667\nθgh = arcsin(0.667) ≈ 41.8°\n\nKhi θᵢ > 41.8° sẽ xảy ra phản xạ toàn phần",
+                4: "Lời giải Bài 4:\n\nCho: θ₁ = 30°, θ₂ = 11.9°\n\nÁp dụng định luật Snell:\nn₂₁ = sin θ₁/sin θ₂ = sin 30°/sin 11.9°\nn₂₁ = 0.5/0.206 ≈ 2.43\n\nChiết suất tương đối của kim cương so với nước là 2.43",
+                5: "Lời giải Bài 5:\n\nCho: Góc chiết quang A = 60°, n = 1.5\nTia tới vuông góc mặt bên → θ₁ = 0°\n\nTại mặt thứ hai: θ₂ = A = 60°\nÁp dụng định luật Snell:\nsin θ₃ = n sin θ₂ = 1.5 × sin 60° = 1.5 × 0.866 = 1.299\n\nVì sin θ₃ > 1 → xảy ra phản xạ toàn phần"
+            };
+            
+            document.getElementById('modal-solution-content').textContent = solutions[exerciseNum];
+            document.getElementById('solution-modal').style.display = 'block';
+        }
+        
+        function closeSolutionModal() {
+            document.getElementById('solution-modal').style.display = 'none';
+        }
+        
+        function simulateExercise(exerciseNum) {
+            // Switch to simulation section and set parameters based on exercise
+            showSection('simulation');
+            
+            switch(exerciseNum) {
+                case 1:
+                    simulation.incidentAngle = 35;
+                    selectMedium1('air');
+                    selectMedium2('glass');
+                    break;
+                case 2:
+                    simulation.incidentAngle = 45;
+                    selectMedium1('air');
+                    selectMedium2('water');
+                    break;
+                case 3:
+                    simulation.incidentAngle = 50;
+                    selectMedium1('glass');
+                    selectMedium2('air');
+                    break;
+                case 4:
+                    simulation.incidentAngle = 30;
+                    selectMedium1('water');
+                    selectMedium2('diamond');
+                    break;
+                case 5:
+                    simulation.incidentAngle = 60;
+                    selectMedium1('glass');
+                    selectMedium2('air');
+                    break;
+            }
+            
+            document.getElementById('incidentAngleSlider').value = simulation.incidentAngle;
+            document.getElementById('incidentAngleValue').textContent = simulation.incidentAngle + '°';
+            updateSimulation();
+        }
+        
+        // Quiz Functions
+        function startQuiz() {
+            quizState.currentQuestion = 0;
+            quizState.answers = [];
+            quizState.timeLeft = 600;
+            quizState.started = true;
+            
+            document.getElementById('quiz-start').classList.add('hidden');
+            document.getElementById('quiz-questions').classList.remove('hidden');
+            
+            startTimer();
+            displayQuestion();
+        }
+        
+        function startTimer() {
+            quizState.timer = setInterval(() => {
+                quizState.timeLeft--;
+                updateTimerDisplay();
+                
+                if (quizState.timeLeft <= 0) {
+                    endQuiz();
+                }
+            }, 1000);
+        }
+        
+        function updateTimerDisplay() {
+            const minutes = Math.floor(quizState.timeLeft / 60);
+            const seconds = quizState.timeLeft % 60;
+            document.getElementById('timer').textContent = 
+                `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        function displayQuestion() {
+            const question = quizQuestions[quizState.currentQuestion];
+            document.getElementById('question-text').textContent = question.question;
+            document.getElementById('current-question').textContent = quizState.currentQuestion + 1;
+            
+            // Update progress bar
+            const progress = ((quizState.currentQuestion + 1) / quizQuestions.length) * 100;
+            document.getElementById('progress-bar').style.width = progress + '%';
+            
+            // Display answer options
+            const optionsContainer = document.getElementById('answer-options');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'quiz-option';
+                optionDiv.onclick = () => selectAnswer(index);
+                
+                optionDiv.innerHTML = `
+                    <div class="flex items-center">
+                        <div class="w-6 h-6 border-2 border-gray-400 rounded-full mr-4 flex items-center justify-center">
+                            <div class="w-3 h-3 bg-blue-600 rounded-full hidden" id="radio-${index}"></div>
+                        </div>
+                        <span class="text-gray-700 text-lg">${String.fromCharCode(65 + index)}. ${option}</span>
+                    </div>
+                `;
+                
+                // Check if this option was previously selected
+                if (quizState.answers[quizState.currentQuestion] === index) {
+                    optionDiv.classList.add('selected');
+                    optionDiv.querySelector(`#radio-${index}`).classList.remove('hidden');
+                }
+                
+                optionsContainer.appendChild(optionDiv);
+            });
+            
+            // Update navigation buttons
+            document.getElementById('prev-btn').disabled = quizState.currentQuestion === 0;
+            const nextBtn = document.getElementById('next-btn');
+            if (quizState.currentQuestion === quizQuestions.length - 1) {
+                nextBtn.innerHTML = 'Hoàn Thành <i class="fas fa-check ml-2"></i>';
+            } else {
+                nextBtn.innerHTML = 'Câu Tiếp <i class="fas fa-arrow-right ml-2"></i>';
+            }
+        }
+        
+        function selectAnswer(answerIndex) {
+            quizState.answers[quizState.currentQuestion] = answerIndex;
+            
+            // Update visual selection
+            document.querySelectorAll('.quiz-option').forEach((option, index) => {
+                if (index === answerIndex) {
+                    option.classList.add('selected');
+                    option.querySelector(`#radio-${index}`).classList.remove('hidden');
+                } else {
+                    option.classList.remove('selected');
+                    option.querySelector(`#radio-${index}`).classList.add('hidden');
+                }
+            });
+        }
+        
+        function nextQuestion() {
+            if (quizState.currentQuestion < quizQuestions.length - 1) {
+                quizState.currentQuestion++;
+                displayQuestion();
+            } else {
+                endQuiz();
+            }
+        }
+        
+        function previousQuestion() {
+            if (quizState.currentQuestion > 0) {
+                quizState.currentQuestion--;
+                displayQuestion();
+            }
+        }
+        
+        function endQuiz() {
+            clearInterval(quizState.timer);
+            
+            // Calculate results
+            let correctCount = 0;
+            quizState.answers.forEach((answer, index) => {
+                if (answer === quizQuestions[index].correct) {
+                    correctCount++;
+                }
+            });
+            
+            const wrongCount = quizQuestions.length - correctCount;
+            const percentage = Math.round((correctCount / quizQuestions.length) * 100);
+            
+            // Display results
+            document.getElementById('quiz-questions').classList.add('hidden');
+            document.getElementById('quiz-results').classList.remove('hidden');
+            
+            document.getElementById('score-display').textContent = `${correctCount}/${quizQuestions.length}`;
+            document.getElementById('correct-count').textContent = correctCount;
+            document.getElementById('wrong-count').textContent = wrongCount;
+            document.getElementById('percentage').textContent = percentage + '%';
+            
+            // Set result styling and message
+            const resultCircle = document.getElementById('result-circle');
+            const resultTitle = document.getElementById('result-title');
+            const resultMessage = document.getElementById('result-message');
+            
+            if (percentage >= 70) {
+                resultCircle.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                resultTitle.textContent = 'Xuất Sắc! 🎉';
+                resultMessage.textContent = 'Bạn đã nắm vững các khái niệm về quang học!';
+            } else if (percentage >= 50) {
+                resultCircle.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+                resultTitle.textContent = 'Khá Tốt! 👍';
+                resultMessage.textContent = 'Bạn cần luyện tập thêm một chút để hoàn thiện kiến thức.';
+            } else {
+                resultCircle.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+                resultTitle.textContent = 'Cần Cố Gắng Hơn! 💪';
+                resultMessage.textContent = 'Hãy xem lại lý thuyết và thử lại nhé!';
+            }
+        }
+        
+        function reviewAnswers() {
+            alert('Tính năng xem đáp án chi tiết sẽ được cập nhật trong phiên bản tiếp theo!');
+        }
+        
+        function restartQuiz() {
+            quizState = {
+                currentQuestion: 0,
+                answers: [],
+                timeLeft: 600,
+                timer: null,
+                started: false
+            };
+            
+            document.getElementById('quiz-results').classList.add('hidden');
+            document.getElementById('quiz-start').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

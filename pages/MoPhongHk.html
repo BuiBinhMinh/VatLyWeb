@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Mô phỏng thí nghiệm hai khe Young chứng minh tính chất sóng của ánh sáng thông qua hiện tượng giao thoa.">
+    <title>Mô phỏng Thí nghiệm Hai Khe Young</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#8B5CF6',
+                        secondary: '#06B6D4',
+                        accent: '#F472B6',
+                        warning: '#FBBF24',
+                        danger: '#F87171',
+                        dark: '#1F2937',
+                        glass: 'rgba(255,255,255,0.1)'
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'slide-up': 'slideUp 0.5s ease-out'
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap');
+
+        :root {
+            --primary: #8B5CF6;
+            --primary-light: #A78BFA;
+            --secondary: #06B6D4;
+            --accent: #F472B6;
+            --warning: #FBBF24;
+            --danger: #F87171;
+            --dark: #1F2937;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f9fafb 0%, #ffffff 50%, #f3f4f6 100%);
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .control-panel {
+            background: linear-gradient(145deg, rgba(255,255,255,0.95), rgba(249,250,251,0.85));
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+        }
+
+        .gradient-border {
+            position: relative;
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+
+        .gradient-border::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--primary), var(--accent), var(--secondary));
+            z-index: -1;
+            border-radius: 0.85rem;
+            animation: borderGradient 8s linear infinite;
+        }
+
+        @keyframes borderGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .wave {
+            position: absolute;
+            opacity: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.6) 0%, rgba(139, 92, 246, 0) 70%);
+            transform: scale(1);
+            animation: wave 3s infinite;
+        }
+
+        @keyframes wave {
+            0% { transform: scale(0); opacity: 0.8; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+
+        .interference-pattern {
+            background-size: 100% 100%;
+            transition: background 0.5s ease;
+        }
+
+        .tooltip {
+            visibility: hidden;
+            position: absolute;
+            background-color: rgba(31, 41, 55, 0.95);
+            color: white;
+            text-align: center;
+            padding: 8px 12px;
+            border-radius: 6px;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            width: max-content;
+            max-width: 250px;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .tooltip::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: rgba(31, 41, 55, 0.95) transparent transparent transparent;
+        }
+
+        .has-tooltip:hover .tooltip,
+        .has-tooltip:focus-within .tooltip {
+            visibility: visible;
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: linear-gradient(45deg, var(--accent), var(--primary));
+            color: white;
+            border-radius: 9999px;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            animation: pulse 2s infinite;
+        }
+
+        .slider-container {
+            position: relative;
+            padding: 0.5rem 0;
+        }
+
+        .slider-track {
+            height: 4px;
+            background: #e5e7eb;
+            width: 100%;
+            position: relative;
+            border-radius: 4px;
+        }
+
+        .slider-track-highlight {
+            position: absolute;
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 4px;
+            transition: width 0.2s ease;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 4px;
+            background: transparent;
+            outline: none;
+            position: relative;
+            z-index: 2;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: white;
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover,
+        input[type="range"]:focus::-webkit-slider-thumb {
+            transform: scale(1.2);
+            box-shadow: 0 0 0 6px rgba(139, 92, 246, 0.2);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: white;
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+        }
+
+        input[type="range"]::-moz-range-thumb:hover,
+        input[type="range"]:focus::-moz-range-thumb {
+            transform: scale(1.2);
+            box-shadow: 0 0 0 6px rgba(139, 92, 246, 0.2);
+        }
+
+        .light-source {
+            position: relative;
+            width: 20px;
+            height: 20px;
+            background: var(--warning);
+            border-radius: 50%;
+            box-shadow: 0 0 15px 6px rgba(251, 191, 36, 0.7);
+            transition: all 0.5s ease;
+        }
+
+        .light-ray {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(251, 191, 36, 0.8), rgba(251, 191, 36, 0));
+            transform-origin: left center;
+            transition: opacity 0.3s ease;
+        }
+
+        .slit {
+            position: absolute;
+            width: 3px;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
+            transition: all 0.3s ease;
+        }
+
+        .screen {
+            position: relative;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .btn {
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%, -50%);
+            transform-origin: 50% 50%;
+        }
+
+        .btn:hover::after,
+        .btn:focus::after {
+            animation: ripple 1s ease-out;
+        }
+
+        @keyframes ripple {
+            0% { transform: scale(0, 0); opacity: 0.5; }
+            100% { transform: scale(20, 20); opacity: 0; }
+        }
+
+        .btn:active,
+        .btn:focus {
+            transform: translateY(1px);
+        }
+
+        .slit-number-btn {
+            transition: all 0.2s ease;
+        }
+
+        .slit-number-btn.active {
+            transform: translateY(1px);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .results-card {
+            background: linear-gradient(145deg, #ffffff, #f9fafb);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .results-card:hover {
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .theory-section {
+            background: linear-gradient(145deg, #ffffff, #f9fafb);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .formula-box {
+            background: linear-gradient(145deg, #f9fafb, #f3f4f6);
+            border-left: 4px solid var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        .formula-box:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .header-gradient {
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .simulation-container {
+            position: relative;
+            overflow: hidden;
+            background: radial-gradient(ellipse at center, #1f2937 0%, #111827 100%);
+            border-radius: 0.5rem;
+        }
+
+        .grid-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 20px 20px;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 sm:p-6 md:p-8">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center">
+            <div class="animate-slide-up">
+                <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">
+                    <span class="header-gradient">Thí Nghiệm Hai Khe Young</span>
+                </h1>
+                <p class="text-gray-600 max-w-2xl text-sm sm:text-base">Khám phá hiện tượng giao thoa ánh sáng qua thí nghiệm hai khe Young - minh chứng quan trọng cho tính chất sóng của ánh sáng.</p>
+            </div>
+            <nav aria-label="Navigation" class="animate-slide-up sm:mt-0 mt-4">
+                <a href="homecourse.html" class="btn px-4 py-2 bg-gray-700 hover:bg-gray-800 text-white rounded-lg flex items-center shadow-md transition-all focus:ring-2 focus:ring-primary focus:outline-none" title="Quay lại trang chính">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                    Quay lại
+                </a>
+            </nav>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Simulation Area -->
+            <section class="lg:col-span-2 animate-slide-up">
+                <div class="gradient-border h-[400px] sm:h-[500px] md:h-[600px] relative">
+                    <div class="absolute inset-0 bg-gray-900 p-4 sm:p-6 rounded-lg flex flex-col">
+                        <!-- Simulation Canvas -->
+                        <div class="relative flex-grow simulation-container" id="simulation-container">
+                            <div class="grid-pattern"></div>
+                            <!-- Background particles -->
+                            <div id="particles">
+                                <!-- Particles will be dynamically generated -->
+                            </div>
+                            <!-- Light Source -->
+                            <div class="light-source absolute left-[10%] top-1/2 transform -translate-y-1/2" id="light-source">
+                                <div class="wave"></div>
+                                <div class="wave" style="animation-delay: 0.5s"></div>
+                                <div class="wave" style="animation-delay: 1s"></div>
+                                <div class="wave" style="animation-delay: 1.5s"></div>
+                            </div>
+                            <!-- Barrier with Slits -->
+                            <div class="absolute left-[40%] top-0 bottom-0 w-1 bg-gray-700" id="barrier">
+                                <div class="slit" style="height: 49.2px; top: 172.2px;"></div>
+                                <div class="slit" style="height: 49.2px; top: 270.6px;"></div>
+                            </div>
+                            <!-- Screen -->
+                            <div class="screen absolute right-[10%] top-[10%] bottom-[10%] w-2 bg-gray-200" id="screen">
+                                <div class="interference-pattern absolute inset-0" id="interference-pattern"></div>
+                            </div>
+                        </div>
+                        <!-- Simulation Controls -->
+                        <div class="mt-4 flex flex-wrap gap-3 justify-start">
+                            <button id="start-btn" class="btn px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg flex items-center shadow-md transition-all focus:ring-2 focus:ring-primary focus:outline-none">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                                </svg>
+                                Bắt đầu
+                            </button>
+                            <button id="reset-btn" class="btn px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg flex items-center shadow-md transition-all focus:ring-2 focus:ring-gray-600 focus:outline-none">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+                                </svg>
+                                Đặt lại
+                            </button>
+                            <button id="screenshot-btn" class="btn px-4 py-2 bg-secondary hover:bg-secondary/90 text-white rounded-lg flex items-center shadow-md transition-all focus:ring-2 focus:ring-secondary focus:outline-none">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
+                                </svg>
+                                Chụp ảnh
+                            </button>
+                            <div class="relative has-tooltip ml-auto">
+                                <button class="btn px-4 py-2 bg-accent hover:bg-accent/90 text-white rounded-lg flex items-center shadow-md transition-all focus:ring-2 focus:ring-accent focus:outline-none" aria-describedby="tooltip-explanation">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2h.01a1 1 0 100-2H9z" clip-rule="evenodd" />
+                                    </svg>
+                                    Giải thích
+                                </button>
+                                <span class="tooltip" id="tooltip-explanation">Thí nghiệm hai khe Young chứng minh tính chất sóng của ánh sáng thông qua hiện tượng giao thoa. Khi ánh sáng đi qua hai khe hẹp, các sóng từ mỗi khe sẽ giao thoa tạo ra các vân sáng và vân tối trên màn.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Control Panel -->
+            <aside class="control-panel rounded-xl p-5 sm:p-6 shadow-lg animate-slide-up">
+                <h2 class="text-lg sm:text-xl font-semibold text-dark mb-4 sm:mb-6 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                    </svg>
+                    Điều Chỉnh Thông Số
+                </h2>
+                <div class="space-y-5">
+                    <!-- Wavelength Control -->
+                    <div class="relative has-tooltip">
+                        <div class="badge">Mới</div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2" for="wavelength-slider">Bước sóng (nm)</label>
+                        <div class="flex items-center">
+                            <span class="text-xs text-gray-500 mr-2">380</span>
+                            <div class="relative flex-grow slider-container">
+                                <div class="slider-track">
+                                    <div class="slider-track-highlight" id="wavelength-track" style="width: 50%"></div>
+                                </div>
+                                <input type="range" min="380" max="780" value="580" class="slider" id="wavelength-slider" aria-label="Điều chỉnh bước sóng ánh sáng">
+                            </div>
+                            <span class="text-xs text-gray-500 ml-2">780</span>
+                        </div>
+                        <div class="flex justify-between mt-1">
+                            <span class="text-sm font-medium" id="wavelength-value">580 nm</span>
+                            <span class="text-sm font-medium" id="wavelength-color">
+                                <span class="inline-block w-3 h-3 rounded-full mr-1" style="background-color: rgb(255, 255, 0)"></span>
+                                Vàng
+                            </span>
+                        </div>
+                        <span class="tooltip">Điều chỉnh bước sóng ánh sáng từ 380nm (tím) đến 780nm (đỏ). Bước sóng quyết định màu sắc của ánh sáng và ảnh hưởng đến mẫu giao thoa.</span>
+                    </div>
+                    <!-- Slit Width Control -->
+                    <div class="relative has-tooltip">
+                        <label class="block text-sm font-medium text-gray-700 mb-2" for="slit-width-slider">Độ rộng khe (mm)</label>
+                        <div class="flex items-center">
+                            <span class="text-xs text-gray-500 mr-2">0.1</span>
+                            <div class="relative flex-grow slider-container">
+                                <div class="slider-track">
+                                    <div class="slider-track-highlight" id="slit-width-track" style="width: 22.2222%"></div>
+                                </div>
+                                <input type="range" min="1" max="10" value="3" class="slider" id="slit-width-slider" aria-label="Điều chỉnh độ rộng khe">
+                            </div>
+                            <span class="text-xs text-gray-500 ml-2">1.0</span>
+                        </div>
+                        <div class="mt-1">
+                            <span class="text-sm font-medium" id="slit-width-value">0.3 mm</span>
+                        </div>
+                        <span class="tooltip">Điều chỉnh độ rộng của mỗi khe. Khe hẹp hơn sẽ tạo ra hiệu ứng nhiễu xạ rõ ràng hơn.</span>
+                    </div>
+                    <!-- Slit Distance Control -->
+                    <div class="relative has-tooltip">
+                        <label class="block text-sm font-medium text-gray-700 mb-2" for="slit-distance-slider">Khoảng cách giữa các khe (mm)</label>
+                        <div class="flex items-center">
+                            <span class="text-xs text-gray-500 mr-2">0.5</span>
+                            <div class="relative flex-grow slider-container">
+                                <div class="slider-track">
+                                    <div class="slider-track-highlight" id="slit-distance-track" style="width: 33.3333%"></div>
+                                </div>
+                                <input type="range" min="5" max="20" value="10" class="slider" id="slit-distance-slider" aria-label="Điều chỉnh khoảng cách giữa các khe">
+                            </div>
+                            <span class="text-xs text-gray-500 ml-2">2.0</span>
+                        </div>
+                        <div class="mt-1">
+                            <span class="text-sm font-medium" id="slit-distance-value">1.0 mm</span>
+                        </div>
+                        <span class="tooltip">Điều chỉnh khoảng cách giữa các khe. Khoảng cách lớn hơn sẽ làm giảm khoảng vân trên màn.</span>
+                    </div>
+                    <!-- Screen Distance Control -->
+                    <div class="relative has-tooltip">
+                        <label class="block text-sm font-medium text-gray-700 mb-2" for="screen-distance-slider">Khoảng cách đến màn (m)</label>
+                        <div class="flex items-center">
+                            <span class="text-xs text-gray-500 mr-2">0.5</span>
+                            <div class="relative flex-grow slider-container">
+                                <div class="slider-track">
+                                    <div class="slider-track-highlight" id="screen-distance-track" style="width: 46.6667%"></div>
+                                </div>
+                                <input type="range" min="5" max="20" value="12" class="slider" id="screen-distance-slider" aria-label="Điều chỉnh khoảng cách đến màn">
+                            </div>
+                            <span class="text-xs text-gray-500 ml-2">2.0</span>
+                        </div>
+                        <div class="mt-1">
+                            <span class="text-sm font-medium" id="screen-distance-value">1.2 m</span>
+                        </div>
+                        <span class="tooltip">Điều chỉnh khoảng cách từ khe đến màn. Khoảng cách xa hơn sẽ làm tăng khoảng vân.</span>
+                    </div>
+                    <!-- Number of Slits -->
+                    <div class="relative has-tooltip">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Số lượng khe</label>
+                        <div class="flex space-x-2">
+                            <button class="slit-number-btn px-3 py-1.5 rounded-lg bg-gray-200 hover:bg-gray-300 text-dark font-medium shadow-sm transition-all focus:ring-2 focus:ring-primary focus:outline-none" data-slits="1">1</button>
+                            <button class="slit-number-btn active px-3 py-1.5 rounded-lg bg-primary text-white font-medium shadow-sm transition-all focus:ring-2 focus:ring-primary focus:outline-none" data-slits="2">2</button>
+                            <button class="slit-number-btn px-3 py-1.5 rounded-lg bg-gray-200 hover:bg-gray-300 text-dark font-medium shadow-sm transition-all focus:ring-2 focus:ring-primary focus:outline-none" data-slits="3">3</button>
+                            <button class="slit-number-btn px-3 py-1.5 rounded-lg bg-gray-200 hover:bg-gray-300 text-dark font-medium shadow-sm transition-all focus:ring-2 focus:ring-primary focus:outline-none" data-slits="4">4</button>
+                        </div>
+                        <span class="tooltip">Thay đổi số lượng khe để quan sát sự khác biệt trong mẫu giao thoa. Một khe tạo hiện tượng nhiễu xạ đơn, nhiều khe tạo mẫu giao thoa phức tạp hơn.</span>
+                    </div>
+                    <!-- Intensity Control -->
+                    <div class="relative has-tooltip">
+                        <label class="block text-sm font-medium text-gray-700 mb-2" for="intensity-slider">Cường độ ánh sáng</label>
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859a4 4 0 10-4.954 0c.27.213.462.519.476.859h4.002z" />
+                            </svg>
+                            <div class="relative flex-grow mx-2 slider-container">
+                                <div class="slider-track">
+                                    <div class="slider-track-highlight" id="intensity-track" style="width: 66.6667%"></div>
+                                </div>
+                                <input type="range" min="10" max="100" value="70" class="slider" id="intensity-slider" aria-label="Điều chỉnh cường độ ánh sáng">
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-warning" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859a4 4 0 10-4.954 0c.27.213.462.519.476.859h4.002z" />
+                            </svg>
+                        </div>
+                        <span class="tooltip">Điều chỉnh cường độ của nguồn sáng, ảnh hưởng đến độ sáng của mẫu giao thoa.</span>
+                    </div>
+                </div>
+                <!-- Results Display -->
+                <div class="mt-6 p-4 sm:p-5 results-card">
+                    <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-3 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        Kết quả đo lường
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="p-3 bg-gray-50 rounded-lg">
+                            <p class="text-xs text-gray-500 mb-1">Khoảng vân</p>
+                            <p class="text-base font-medium text-dark" id="fringe-spacing">0.70 mm</p>
+                        </div>
+                        <div class="p-3 bg-gray-50 rounded-lg">
+                            <p class="text-xs text-gray-500 mb-1">Vị trí vân sáng trung tâm</p>
+                            <p class="text-base font-medium text-dark" id="central-fringe">0.00 mm</p>
+                        </div>
+                        <div class="p-3 bg-gray-50 rounded-lg">
+                            <p class="text-xs text-gray-500 mb-1">Số vân quan sát được</p>
+                            <p class="text-base font-medium text-dark" id="fringe-count">285</p>
+                        </div>
+                        <div class="p-3 bg-gray-50 rounded-lg">
+                            <p class="text-xs text-gray-500 mb-1">Góc nhiễu xạ</p>
+                            <p class="text-base font-medium text-dark" id="diffraction-angle">0.03°</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </main>
+
+        <!-- Theory Section -->
+        <article class="mt-8 theory-section p-5 sm:p-6 rounded-xl animate-slide-up">
+            <h2 class="text-lg sm:text-xl font-bold text-dark mb-4 sm:mb-6 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                Lý thuyết thí nghiệm
+            </h2>
+            <div class="prose max-w-none text-sm sm:text-base">
+                <p>Thí nghiệm hai khe Young là minh chứng quan trọng cho tính chất sóng của ánh sáng. Khi ánh sáng đi qua hai khe hẹp, các sóng giao thoa tạo ra các vân sáng và tối trên màn.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                    <div>
+                        <h3 class="text-base sm:text-lg font-semibold mb-3 text-primary">Công thức tính khoảng vân:</h3>
+                        <div class="formula-box p-4 sm:p-5 rounded-lg flex items-center justify-center">
+                            <p class="text-lg sm:text-xl font-medium">i = λD/d</p>
+                        </div>
+                        <p class="mt-3">Trong đó:</p>
+                        <ul class="list-disc pl-6 space-y-1 mt-2">
+                            <li><strong>i</strong>: Khoảng vân (khoảng cách giữa hai vân sáng liên tiếp)</li>
+                            <li><strong>λ</strong>: Bước sóng ánh sáng</li>
+                            <li><strong>D</strong>: Khoảng cách từ khe đến màn</li>
+                            <li><strong>d</strong>: Khoảng cách giữa hai khe</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-base sm:text-lg font-semibold mb-3 text-primary">Vị trí vân sáng:</h3>
+                        <p>Vân sáng bậc k xuất hiện tại vị trí x trên màn thỏa mãn:</p>
+                        <div class="formula-box p-4 sm:p-5 rounded-lg flex items-center justify-center mt-3">
+                            <p class="text-lg sm:text-xl font-medium">d·sin(θ) = k·λ</p>
+                        </div>
+                        <p class="mt-3">Với k = 0, ±1, ±2, ±3, ...</p>
+                        <p class="mt-2">Vị trí của vân sáng trên màn:</p>
+                        <div class="formula-box p-4 sm:p-5 rounded-lg flex items-center justify-center mt-3">
+                            <p class="text-lg sm:text-xl font-medium">x<sub>k</sub> = k·λD/d</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-6 p-4 sm:p-5 bg-gradient-to-r from-primary/5 to-accent/5 rounded-lg border border-primary/20">
+                    <h3 class="text-base sm:text-lg font-semibold mb-2 text-primary">Ý nghĩa của thí nghiệm:</h3>
+                    <p>Thí nghiệm chứng minh tính chất sóng của ánh sáng thông qua hiện tượng giao thoa. Các sóng từ hai khe gặp nhau, tạo ra vân sáng khi cùng pha và vân tối khi ngược pha.</p>
+                </div>
+            </div>
+        </article>
+    </div>
+
+    <script>
+        // JavaScript remains unchanged from the original to preserve functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const wavelengthSlider = document.getElementById('wavelength-slider');
+            const wavelengthValue = document.getElementById('wavelength-value');
+            const wavelengthColor = document.getElementById('wavelength-color');
+            const wavelengthTrack = document.getElementById('wavelength-track');
+            const slitWidthSlider = document.getElementById('slit-width-slider');
+            const slitWidthValue = document.getElementById('slit-width-value');
+            const slitWidthTrack = document.getElementById('slit-width-track');
+            const slitDistanceSlider = document.getElementById('slit-distance-slider');
+            const slitDistanceValue = document.getElementById('slit-distance-value');
+            const slitDistanceTrack = document.getElementById('slit-distance-track');
+            const screenDistanceSlider = document.getElementById('screen-distance-slider');
+            const screenDistanceValue = document.getElementById('screen-distance-value');
+            const screenDistanceTrack = document.getElementById('screen-distance-track');
+            const intensitySlider = document.getElementById('intensity-slider');
+            const intensityTrack = document.getElementById('intensity-track');
+            const slitNumberBtns = document.querySelectorAll('.slit-number-btn');
+            const startBtn = document.getElementById('start-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const screenshotBtn = document.getElementById('screenshot-btn');
+            const fringeSpacing = document.getElementById('fringe-spacing');
+            const centralFringe = document.getElementById('central-fringe');
+            const fringeCount = document.getElementById('fringe-count');
+            const diffractionAngle = document.getElementById('diffraction-angle');
+            const barrier = document.getElementById('barrier');
+            const screen = document.getElementById('screen');
+            const interferencePattern = document.getElementById('interference-pattern');
+            const lightSource = document.getElementById('light-source');
+            const simulationContainer = document.getElementById('simulation-container');
+            const particlesContainer = document.getElementById('particles');
+
+            let simulationRunning = false;
+            let currentSlits = 2;
+            let wavelength = 580;
+            let slitWidth = 0.3;
+            let slitDistance = 1.0;
+            let screenDistance = 1.2;
+            let intensity = 70;
+            let animationFrameId = null;
+            let particles = [];
+
+            function createParticles() {
+                const containerWidth = simulationContainer.clientWidth;
+                const containerHeight = simulationContainer.clientHeight;
+                particlesContainer.innerHTML = '';
+                particles = [];
+                for (let i = 0; i < 50; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    const x = Math.random() * containerWidth;
+                    const y = Math.random() * containerHeight;
+                    const size = Math.random() * 1.5 + 0.5;
+                    const opacity = Math.random() * 0.5 + 0.1;
+                    particle.style.left = `${x}px`;
+                    particle.style.top = `${y}px`;
+                    particle.style.width = `${size}px`;
+                    particle.style.height = `${size}px`;
+                    particle.style.opacity = opacity;
+                    particlesContainer.appendChild(particle);
+                    particles.push({
+                        element: particle,
+                        x: x,
+                        y: y,
+                        speedX: (Math.random() - 0.5) * 0.2,
+                        speedY: (Math.random() - 0.5) * 0.2
+                    });
+                }
+            }
+
+            function animateParticles() {
+                const containerWidth = simulationContainer.clientWidth;
+                const containerHeight = simulationContainer.clientHeight;
+                particles.forEach(particle => {
+                    particle.x += particle.speedX;
+                    particle.y += particle.speedY;
+                    if (particle.x < 0) particle.x = containerWidth;
+                    if (particle.x > containerWidth) particle.x = 0;
+                    if (particle.y < 0) particle.y = containerHeight;
+                    if (particle.y > containerHeight) particle.y = 0;
+                    particle.element.style.left = `${particle.x}px`;
+                    particle.element.style.top = `${particle.y}px`;
+                });
+                animationFrameId = requestAnimationFrame(animateParticles);
+            }
+
+            function wavelengthToColor(wavelength) {
+                let r, g, b;
+                if (wavelength >= 380 && wavelength < 440) {
+                    r = -1 * (wavelength - 440) / (440 - 380);
+                    g = 0;
+                    b = 1;
+                } else if (wavelength >= 440 && wavelength < 490) {
+                    r = 0;
+                    g = (wavelength - 440) / (490 - 440);
+                    b = 1;
+                } else if (wavelength >= 490 && wavelength < 510) {
+                    r = 0;
+                    g = 1;
+                    b = -1 * (wavelength - 510) / (510 - 490);
+                } else if (wavelength >= 510 && wavelength < 580) {
+                    r = (wavelength - 510) / (580 - 510);
+                    g = 1;
+                    b = 0;
+                } else if (wavelength >= 580 && wavelength < 645) {
+                    r = 1;
+                    g = -1 * (wavelength - 645) / (645 - 580);
+                    b = 0;
+                } else if (wavelength >= 645 && wavelength <= 780) {
+                    r = 1;
+                    g = 0;
+                    b = 0;
+                } else {
+                    r = 0;
+                    g = 0;
+                    b = 0;
+                }
+                let factor = 1;
+                if (wavelength >= 380 && wavelength < 420) {
+                    factor = 0.3 + 0.7 * (wavelength - 380) / (420 - 380);
+                } else if (wavelength >= 420 && wavelength < 700) {
+                    factor = 1;
+                } else if (wavelength >= 700 && wavelength <= 780) {
+                    factor = 0.3 + 0.7 * (780 - wavelength) / (780 - 700);
+                }
+                r = Math.floor(255 * Math.pow(r * factor, 0.8));
+                g = Math.floor(255 * Math.pow(g * factor, 0.8));
+                b = Math.floor(255 * Math.pow(b * factor, 0.8));
+                return `rgb(${r}, ${g}, ${b})`;
+            }
+
+            function getWavelengthName(wavelength) {
+                if (wavelength < 450) return 'Tím';
+                if (wavelength < 495) return 'Xanh lam';
+                if (wavelength < 570) return 'Xanh lục';
+                if (wavelength < 590) return 'Vàng';
+                if (wavelength < 620) return 'Cam';
+                return 'Đỏ';
+            }
+
+            function updateSliderTrack(slider, track) {
+                const percent = ((slider.value - slider.min) / (slider.max - slider.min)) * 100;
+                track.style.width = `${percent}%`;
+            }
+
+            function calculateInterferencePattern() {
+                const lambda = wavelength * 1e-9;
+                const d = slitDistance * 1e-3;
+                const D = screenDistance;
+                const i = (lambda * D) / d * 1000;
+                const screenHeight = screen.clientHeight;
+                const screenHeightMm = 100;
+                const numFringes = Math.floor(screenHeightMm / i);
+                const theta = Math.asin(lambda / d) * (180 / Math.PI);
+                animateValue(fringeSpacing, parseFloat(fringeSpacing.textContent), i.toFixed(2), 500, ' mm');
+                centralFringe.textContent = '0.00 mm';
+                animateValue(fringeCount, parseInt(fringeCount.textContent), (numFringes * 2 - 1), 500, '');
+                animateValue(diffractionAngle, parseFloat(diffractionAngle.textContent), theta.toFixed(2), 500, '°');
+                const color = wavelengthToColor(wavelength);
+                const patternHeight = 100;
+                const patternFrequency = 20 / i;
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = 1;
+                canvas.height = patternHeight;
+                const gradient = ctx.createLinearGradient(0, 0, 0, patternHeight);
+                for (let y = 0; y < patternHeight; y++) {
+                    const normalizedY = y / patternHeight - 0.5;
+                    const angle = normalizedY * Math.PI * patternFrequency * currentSlits;
+                    let intensity = 1;
+                    if (currentSlits === 1) {
+                        const beta = Math.PI * slitWidth * normalizedY * 5;
+                        intensity = beta === 0 ? 1 : Math.pow(Math.sin(beta) / beta, 2);
+                    } else {
+                        const delta = Math.PI * slitDistance * normalizedY * 5;
+                        const beta = Math.PI * slitWidth * normalizedY * 5;
+                        const singleSlitFactor = beta === 0 ? 1 : Math.pow(Math.sin(beta) / beta, 2);
+                        const multipleSlitFactor = delta === 0 ? currentSlits * currentSlits :
+                            Math.pow(Math.sin(currentSlits * delta) / Math.sin(delta), 2);
+                        intensity = singleSlitFactor * multipleSlitFactor / (currentSlits * currentSlits);
+                    }
+                    intensity = intensity * (intensitySlider.value / 100);
+                    intensity = Math.max(0, Math.min(1, intensity));
+                    const rgbMatch = color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+                    const r = parseInt(rgbMatch[1]);
+                    const g = parseInt(rgbMatch[2]);
+                    const b = parseInt(rgbMatch[3]);
+                    const adjustedColor = `rgba(${r}, ${g}, ${b}, ${intensity})`;
+                    gradient.addColorStop(y / patternHeight, adjustedColor);
+                }
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, 1, patternHeight);
+                const patternUrl = canvas.toDataURL();
+                interferencePattern.style.background = `url(${patternUrl}) repeat-x`;
+                interferencePattern.style.backgroundSize = '100% 100%';
+            }
+
+            function animateValue(element, start, end, duration, suffix) {
+                const startTime = performance.now();
+                const endValue = parseFloat(end);
+                function updateValue(timestamp) {
+                    const elapsed = timestamp - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const value = start + progress * (endValue - start);
+                    element.textContent = value.toFixed(2) + suffix;
+                    if (progress < 1) {
+                        requestAnimationFrame(updateValue);
+                    } else {
+                        element.textContent = end + suffix;
+                    }
+                }
+                requestAnimationFrame(updateValue);
+            }
+
+            function updateSlits() {
+                while (barrier.firstChild) {
+                    barrier.removeChild(barrier.firstChild);
+                }
+                const barrierHeight = barrier.clientHeight;
+                const slitHeightPercent = 10;
+                const slitHeight = barrierHeight * slitHeightPercent / 100;
+                const totalSlitsHeight = currentSlits * slitHeight + (currentSlits - 1) * slitHeight;
+                const startY = (barrierHeight - totalSlitsHeight) / 2;
+                for (let i = 0; i < currentSlits; i++) {
+                    const slit = document.createElement('div');
+                    slit.className = 'slit';
+                    slit.style.height = `${slitHeight}px`;
+                    slit.style.top = `${startY + i * (slitHeight * 2)}px`;
+                    slit.style.opacity = '0';
+                    slit.style.transform = 'scaleY(0.5)';
+                    barrier.appendChild(slit);
+                    setTimeout(() => {
+                        slit.style.transition = 'all 0.3s ease';
+                        slit.style.opacity = '1';
+                        slit.style.transform = 'scaleY(1)';
+                    }, i * 100);
+                }
+                updateLightRays();
+            }
+
+            function updateLightRays() {
+                document.querySelectorAll('.light-ray').forEach(ray => ray.remove());
+                if (!simulationRunning) return;
+                const slits = barrier.querySelectorAll('.slit');
+                const sourceX = lightSource.offsetLeft + lightSource.offsetWidth / 2;
+                const sourceY = lightSource.offsetTop + lightSource.offsetHeight / 2;
+                slits.forEach((slit, index) => {
+                    const slitX = slit.offsetLeft;
+                    const slitY = slit.offsetTop + slit.offsetHeight / 2;
+                    const ray = document.createElement('div');
+                    ray.className = 'light-ray';
+                    const dx = slitX - sourceX;
+                    const dy = slitY - sourceY;
+                    const length = Math.sqrt(dx * dx + dy * dy);
+                    const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+                    ray.style.width = `${length}px`;
+                    ray.style.left = `${sourceX}px`;
+                    ray.style.top = `${sourceY}px`;
+                    ray.style.transform = `rotate(${angle}deg)`;
+                    ray.style.opacity = '0';
+                    simulationContainer.appendChild(ray);
+                    setTimeout(() => {
+                        ray.style.transition = 'opacity 0.5s ease';
+                        ray.style.opacity = '0.8';
+                    }, index * 100);
+                    const screenX = screen.offsetLeft;
+                    const screenHeight = screen.offsetHeight;
+                    const numRays = 7;
+                    for (let i = 0; i < numRays; i++) {
+                        const screenY = screen.offsetTop + (i / (numRays - 1)) * screenHeight;
+                        const rayToScreen = document.createElement('div');
+                        rayToScreen.className = 'light-ray';
+                        const dxScreen = screenX - slitX;
+                        const dyScreen = screenY - slitY;
+                        const lengthScreen = Math.sqrt(dxScreen * dxScreen + dyScreen * dyScreen);
+                        const angleScreen = Math.atan2(dyScreen, dxScreen) * (180 / Math.PI);
+                        rayToScreen.style.width = `${lengthScreen}px`;
+                        rayToScreen.style.left = `${slitX}px`;
+                        rayToScreen.style.top = `${slitY}px`;
+                        rayToScreen.style.transform = `rotate(${angleScreen}deg)`;
+                        rayToScreen.style.opacity = '0';
+                        simulationContainer.appendChild(rayToScreen);
+                        setTimeout(() => {
+                            rayToScreen.style.transition = 'opacity 0.5s ease';
+                            rayToScreen.style.opacity = '0.3';
+                        }, index * 100 + i * 50 + 200);
+                    }
+                });
+            }
+
+            function updateColorIndicator() {
+                const color = wavelengthToColor(wavelength);
+                const colorName = getWavelengthName(wavelength);
+                wavelengthColor.innerHTML = `
+                    <span class="inline-block w-3 h-3 rounded-full mr-1" style="background-color: ${color}"></span>
+                    ${colorName}
+                `;
+            }
+
+            function startSimulation() {
+                simulationRunning = true;
+                startBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                    Dừng
+                `;
+                const color = wavelengthToColor(wavelength);
+                lightSource.style.transition = 'all 0.5s ease';
+                lightSource.style.background = color;
+                lightSource.style.boxShadow = `0 0 15px 6px ${color}`;
+                updateSlits();
+                calculateInterferencePattern();
+                if (!animationFrameId) {
+                    animateParticles();
+                }
+            }
+
+            function stopSimulation() {
+                simulationRunning = false;
+                startBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                    </svg>
+                    Bắt đầu
+                `;
+                document.querySelectorAll('.light-ray').forEach(ray => {
+                    ray.style.transition = 'opacity 0.5s ease';
+                    ray.style.opacity = '0';
+                    setTimeout(() => ray.remove(), 500);
+                });
+                interferencePattern.style.transition = 'opacity 0.5s ease';
+                interferencePattern.style.opacity = '0';
+                setTimeout(() => {
+                    interferencePattern.style.background = 'none';
+                    interferencePattern.style.opacity = '1';
+                }, 500);
+                if (animationFrameId) {
+                    cancelAnimationFrame(animationFrameId);
+                    animationFrameId = null;
+                }
+            }
+
+            function resetSimulation() {
+                stopSimulation();
+                wavelengthSlider.value = 580;
+                slitWidthSlider.value = 3;
+                slitDistanceSlider.value = 10;
+                screenDistanceSlider.value = 12;
+                intensitySlider.value = 70;
+                updateWavelength();
+                updateSlitWidth();
+                updateSlitDistance();
+                updateScreenDistance();
+                updateIntensity();
+                currentSlits = 2;
+                slitNumberBtns.forEach(btn => {
+                    if (btn.dataset.slits === '2') {
+                        btn.classList.remove('bg-gray-200', 'hover:bg-gray-300', 'text-dark');
+                        btn.classList.add('bg-primary', 'text-white', 'active');
+                    } else {
+                        btn.classList.remove('bg-primary', 'text-white', 'active');
+                        btn.classList.add('bg-gray-200', 'hover:bg-gray-300', 'text-dark');
+                    }
+                });
+                animateValue(fringeSpacing, parseFloat(fringeSpacing.textContent), 0.58, 500, ' mm');
+                centralFringe.textContent = '0.00 mm';
+                animateValue(fringeCount, parseInt(fringeCount.textContent), 9, 500, '');
+                animateValue(diffractionAngle, parseFloat(diffractionAngle.textContent), 0.03, 500, '°');
+                const resetAnimation = document.createElement('div');
+                resetAnimation.style.position = 'absolute';
+                resetAnimation.style.inset = '0';
+                resetAnimation.style.background = 'rgba(255, 255, 255, 0.1)';
+                resetAnimation.style.borderRadius = '0.5rem';
+                resetAnimation.style.zIndex = '10';
+                resetAnimation.style.opacity = '0.7';
+                simulationContainer.appendChild(resetAnimation);
+                setTimeout(() => {
+                    resetAnimation.style.transition = 'opacity 0.5s ease';
+                    resetAnimation.style.opacity = '0';
+                    setTimeout(() => resetAnimation.remove(), 500);
+                }, 100);
+            }
+
+            function takeScreenshot() {
+                const flash = document.createElement('div');
+                flash.style.position = 'absolute';
+                flash.style.inset = '0';
+                flash.style.background = 'white';
+                flash.style.borderRadius = '0.5rem';
+                flash.style.zIndex = '10';
+                flash.style.opacity = '0.7';
+                simulationContainer.appendChild(flash);
+                setTimeout(() => {
+                    flash.style.transition = 'opacity 0.5s ease';
+                    flash.style.opacity = '0';
+                    setTimeout(() => flash.remove(), 500);
+                }, 100);
+                const message = document.createElement('div');
+                message.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center';
+                message.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                    Đã chụp ảnh mô phỏng thành công!
+                `;
+                document.body.appendChild(message);
+                setTimeout(() => {
+                    message.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    message.style.opacity = '0';
+                    message.style.transform = 'translateY(-20px)';
+                    setTimeout(() => message.remove(), 500);
+                }, 2000);
+            }
+
+            function updateWavelength() {
+                wavelength = parseInt(wavelengthSlider.value);
+                wavelengthValue.textContent = `${wavelength} nm`;
+                updateColorIndicator();
+                updateSliderTrack(wavelengthSlider, wavelengthTrack);
+                if (simulationRunning) {
+                    const color = wavelengthToColor(wavelength);
+                    lightSource.style.background = color;
+                    lightSource.style.boxShadow = `0 0 15px 6px ${color}`;
+                    calculateInterferencePattern();
+                }
+            }
+
+            function updateSlitWidth() {
+                slitWidth = parseInt(slitWidthSlider.value) / 10;
+                slitWidthValue.textContent = `${slitWidth.toFixed(1)} mm`;
+                updateSliderTrack(slitWidthSlider, slitWidthTrack);
+                if (simulationRunning) {
+                    calculateInterferencePattern();
+                }
+            }
+
+            function updateSlitDistance() {
+                slitDistance = parseInt(slitDistanceSlider.value) / 10;
+                slitDistanceValue.textContent = `${slitDistance.toFixed(1)} mm`;
+                updateSliderTrack(slitDistanceSlider, slitDistanceTrack);
+                if (simulationRunning) {
+                    calculateInterferencePattern();
+                }
+            }
+
+            function updateScreenDistance() {
+                screenDistance = parseInt(screenDistanceSlider.value) / 10;
+                screenDistanceValue.textContent = `${screenDistance.toFixed(1)} m`;
+                updateSliderTrack(screenDistanceSlider, screenDistanceTrack);
+                if (simulationRunning) {
+                    calculateInterferencePattern();
+                }
+            }
+
+            function updateIntensity() {
+                intensity = parseInt(intensitySlider.value);
+                updateSliderTrack(intensitySlider, intensityTrack);
+                if (simulationRunning) {
+                    calculateInterferencePattern();
+                }
+            }
+
+            wavelengthSlider.addEventListener('input', updateWavelength);
+            slitWidthSlider.addEventListener('input', updateSlitWidth);
+            slitDistanceSlider.addEventListener('input', updateSlitDistance);
+            screenDistanceSlider.addEventListener('input', updateScreenDistance);
+            intensitySlider.addEventListener('input', updateIntensity);
+
+            slitNumberBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const slits = parseInt(this.dataset.slits);
+                    currentSlits = slits;
+                    slitNumberBtns.forEach(b => {
+                        b.classList.remove('bg-primary', 'text-white', 'active');
+                        b.classList.add('bg-gray-200', 'hover:bg-gray-300', 'text-dark');
+                    });
+                    this.classList.remove('bg-gray-200', 'hover:bg-gray-300', 'text-dark');
+                    this.classList.add('bg-primary', 'text-white', 'active');
+                    if (simulationRunning) {
+                        updateSlits();
+                        calculateInterferencePattern();
+                    }
+                });
+            });
+
+            startBtn.addEventListener('click', function() {
+                if (simulationRunning) {
+                    stopSimulation();
+                } else {
+                    startSimulation();
+                }
+            });
+
+            resetBtn.addEventListener('click', resetSimulation);
+            screenshotBtn.addEventListener('click', takeScreenshot);
+
+            updateWavelength();
+            updateSlitWidth();
+            updateSlitDistance();
+            updateScreenDistance();
+            updateIntensity();
+            updateSlits();
+            createParticles();
+
+            window.addEventListener('resize', function() {
+                if (simulationRunning) {
+                    updateSlits();
+                    updateLightRays();
+                }
+                createParticles();
+            });
+        });
+    </script>
+</body>
+</html>
