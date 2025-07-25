@@ -425,9 +425,9 @@
 // }
 
 /* ===================== 0. CONFIG ===================== */
-const API_BASE = window.location.hostname.includes('github.io')
-  ? 'https://my-quiz-api.example.com/api'   // <— production URL của bạn
-  : 'http://localhost:4000/api';  
+const API_BASE = window.location.hostname.includes('localhost')
+  ? 'http://localhost:4000/api'
+  : '/api'; 
 
 /* ===================== 1. HELPERS ===================== */
 const $  = sel => document.querySelector(sel);
