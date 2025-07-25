@@ -425,7 +425,9 @@
 // }
 
 /* ===================== 0. CONFIG ===================== */
-const API_BASE = 'http://localhost:4000/api'; // đổi khi deploy
+const API_BASE = window.location.hostname.includes('github.io')
+  ? 'https://my-quiz-api.example.com/api'   // <— production URL của bạn
+  : 'http://localhost:4000/api';  
 
 /* ===================== 1. HELPERS ===================== */
 const $  = sel => document.querySelector(sel);
