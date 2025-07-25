@@ -73,7 +73,7 @@
             <!-- Search bar (center) -->
             <div class="flex-1 max-w-md mx-auto px-4">
                 <div class="relative">
-                    <input type="text" placeholder="Tìm kiếm bài học, thí nghiệm..." 
+                    <input id="global-search" type="text" placeholder="Tìm kiếm bài học, thí nghiệm..." 
                            class="w-full pl-12 pr-4 py-3 bg-gray-100/80 rounded-2xl focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all duration-300 text-gray-800 placeholder-gray-500 border border-gray-200/50">
                     <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-300"></i>
                     <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
@@ -99,33 +99,38 @@
                 </div>
                 
                 <!-- User dropdown -->
-                <div class="relative">
-                    <button id="user-menu-btn" class="flex items-center space-x-3 p-2 rounded-xl hover:bg-gray-100 transition-all duration-300">
-                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center font-bold text-white">
-                            MB
-                        </div>
-                        <div class="hidden sm:block text-left">
-                            <p class="text-gray-800 font-medium">Minh Bùi</p>
-                            <p class="text-xs text-gray-500">Lớp 12A1</p>
-                        </div>
-                        <i class="fas fa-chevron-down text-gray-500 text-sm"></i>
-                    </button>
-                    <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-2xl border border-gray-200 py-2 shadow-2xl">
-                        <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 transition-colors">
-                            <i class="fas fa-user mr-3"></i>Hồ sơ học tập
-                        </a>
-                        <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 transition-colors">
-                            <i class="fas fa-trophy mr-3"></i>Thành tích
-                        </a>
-                        <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 transition-colors">
-                            <i class="fas fa-cog mr-3"></i>Cài đặt
-                        </a>
-                        <hr class="my-2 border-gray-200">
-                        <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 transition-colors">
-                            <i class="fas fa-sign-out-alt mr-3"></i>Đăng xuất
-                        </a>
-                    </div>
-                </div>
+<div class="relative mt-4">
+  <button type="button" id="user-menu-btn"
+          class="cursor-pointer flex items-center space-x-3 p-2 rounded-xl hover:bg-gray-100 transition-all duration-300">
+    <!-- Avatar: JS sẽ ghi initials vào đây -->
+    <div id="user-avatar"
+         class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-pink-500
+                flex items-center justify-center font-bold text-white"></div>
+    <!-- Tên & lớp: JS sẽ ghi fullname và userClass vào đây -->
+    <div class="hidden sm:block text-left">
+      <p id="user-name" class="text-gray-800 font-medium"></p>
+      <p id="user-class" class="text-xs text-gray-500"></p>
+    </div>
+    <i class="fas fa-chevron-down text-gray-500 text-sm"></i>
+  </button>
+
+  <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-2xl border border-gray-200 py-2 shadow-2xl z-50">
+    <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 transition-colors">
+      <i class="fas fa-user mr-3"></i>Hồ sơ học tập
+    </a>
+    <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 transition-colors">
+      <i class="fas fa-trophy mr-3"></i>Thành tích
+    </a>
+    <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 transition-colors">
+      <i class="fas fa-cog mr-3"></i>Cài đặt
+    </a>
+    <hr class="my-2 border-gray-200" />
+    <a id="logout-link" href="/index.html" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 transition-colors">
+  <i class="fas fa-sign-out-alt mr-3"></i>Đăng xuất
+</a>
+  </div>
+</div>
+
             </div>
         </div>
     </header>
@@ -179,13 +184,21 @@
                         </div>
                         <span class="font-medium">Thí nghiệm</span>
                     </a>
+                    <a href="#quiz"
+     class="nav-link flex items-center space-x-4 px-4 py-3 rounded-2xl text-gray-600 hover:bg-gray-100 hover:text-gray-800 transition-all duration-300">
+    <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+      <i class="fas fa-question-circle"></i>
+    </div>
+    <span class="font-medium">Quiz</span>
+  </a>
                 </nav>
 
                 <!-- Quick Access -->
                 <div class="p-4 bg-gray-50/80 rounded-2xl border border-gray-200/50 shadow-sm">
                     <h3 class="text-gray-800 font-semibold mb-4">Truy cập nhanh</h3>
                     <div class="space-y-3">
-                        <button class="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-left">
+                        <button onclick="window.location.href='BaiHocGDDH.html'" 
+                        class="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-left">
                             <div class="w-8 h-8 bg-violet-100 rounded-lg flex items-center justify-center">
                                 <i class="fas fa-play text-violet-600 text-sm"></i>
                             </div>
@@ -194,13 +207,14 @@
                                 <div class="text-gray-500 text-xs">Chương 3: Dao động</div>
                             </div>
                         </button>
-                        <button class="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-left">
+                        <button onclick="window.location.href='MoPhongQD.html'" 
+                        class="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-left">
                             <div class="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center">
                                 <i class="fas fa-redo text-pink-600 text-sm"></i>
                             </div>
                             <div>
                                 <div class="text-gray-800 text-sm font-medium">Ôn tập</div>
-                                <div class="text-gray-500 text-xs">Cơ học chất điểm</div>
+                                <div class="text-gray-500 text-xs"> Chuyển động quỹ đạo</div>
                             </div>
                         </button>
                     </div>
@@ -220,12 +234,13 @@
                     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                         <div>
                             <h1 class="text-3xl lg:text-4xl font-bold mb-2">
-                                Chào mừng trở lại, <span class="gradient-text">Minh</span>! 👋
+                                Chào mừng trở lại <span class="gradient-text"></span>! 👋
                             </h1>
-                            <p class="text-gray-600 text-lg">Hôm nay là ngày tuyệt vời để học vật lý</p>
+                            <p class="text-lg gradient-text">Hôm nay là ngày tuyệt vời để học vật lý</p>
                         </div>
                         <div class="mt-4 lg:mt-0">
-                            <button class="px-6 py-3 bg-gradient-to-r from-violet-500 to-pink-500 text-white rounded-2xl font-medium hover:shadow-lg transition-all duration-300 hover-lift">
+                            <button onclick="window.location.href='BaiHocCLD.html'" 
+                            class="px-6 py-3 bg-gradient-to-r from-violet-500 to-pink-500 text-white rounded-2xl font-medium hover:shadow-lg transition-all duration-300 hover-lift">
                                 <i class="fas fa-play mr-2"></i>Tiếp tục học
                             </button>
                         </div>
@@ -970,6 +985,47 @@
                 </div>
             </section>
 
+           <!-- Quiz Section -->
+<section id="quiz" class="content-section hidden p-6">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold mb-4 text-gray-800">Quiz</h1>
+    <p class="text-gray-600 text-sm">Các bài quiz được đồng bộ tự động</p>
+  </div>
+
+  <!-- Loading & error states -->
+  <div id="quiz-loading" class="text-gray-500 text-sm mb-4">Đang tải dữ liệu quiz...</div>
+  <div id="quiz-error" class="hidden text-red-500 text-sm mb-4">Không tải được dữ liệu. Hãy kiểm tra Apps Script URL.</div>
+
+  <!-- Card list -->
+  <div id="quiz-card-wrap" class="grid lg:grid-cols-3 gap-6"></div>
+
+  <!-- Player modal -->
+  <div id="quiz-player" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-50">
+    <div class="max-w-3xl mx-auto mt-16 bg-white rounded-3xl shadow-xl p-6 relative">
+      <button id="close-quiz-player" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600">
+        <i class="fas fa-times text-xl"></i>
+      </button>
+
+      <h2 id="quiz-title" class="text-2xl font-bold mb-4"></h2>
+
+      <div class="flex items-center justify-between mb-6">
+        <svg class="w-20 h-20" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="45" fill="none" stroke="#e5e7eb" stroke-width="10"></circle>
+          <circle id="progress-ring" cx="50" cy="50" r="45" fill="none" stroke="#8b5cf6" stroke-width="10"
+                  stroke-dasharray="0 283" transform="rotate(-90 50 50)"></circle>
+        </svg>
+        <p>Score: <span id="score-display">0</span>/<span id="total-display">0</span></p>
+      </div>
+
+      <div id="quiz-content">
+        <p class="text-xl font-bold mb-4" id="question-text"></p>
+        <div id="options-wrap" class="space-y-2"></div>
+        <button class="mt-6 px-6 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600" id="submit-btn">Submit</button>
+      </div>
+    </div>
+  </div>
+</section>
+
             <!-- Chi tiết Thí nghiệm con lắc đơn -->
 <section id="experiment-detail" class="content-section hidden p-6">
     <div class="flex items-center justify-between mb-8">
@@ -1169,6 +1225,12 @@
         </div>
     </div>
 </section>
+
+<!-- Quiz Section -->
+    <section id="quiz" class="content-section hidden p-6">
+      … your quiz markup …
+    </section>
+    
         </main>
     </div>
 

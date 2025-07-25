@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PhysicsLab – Đăng Ký</title>
+
+  <!-- Favicon -->
+  <link rel="shortcut icon" href="https://cdn-icons-png.flaticon.com/512/8270/8270064.png" type="image/x-icon">
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="../css/login.css">
+</head>
+<body class="physics-bg">
+  <!-- Physics Animations... -->
+  <div class="atom-orbit orbit1"><div class="electron e1"></div></div>
+  <div class="atom-orbit orbit2"><div class="electron e2"></div></div>
+  <div class="atom-orbit orbit3"><div class="electron e3"></div></div>
+  <div class="physics-formula f1">E = mc²</div>
+  <div class="physics-formula f2">F = ma</div>
+  <div class="physics-formula f3">v = u + at</div>
+  <div class="physics-formula f4">ΔE = hf</div>
+  <div class="physics-formula f5">P = IV</div>
+  <div class="wave-container">
+    <div class="wave w1"></div>
+    <div class="wave w2"></div>
+    <div class="wave w3"></div>
+  </div>
+  <div class="pendulum"></div>
+  <div class="magnetic-field"></div>
+  <div class="dna-helix"></div>
+  <div class="electric-spark s1"></div>
+  <div class="electric-spark s2"></div>
+  <div class="electric-spark s3"></div>
+
+  <!-- Registration Card -->
+  <div class="login-card relative">
+    <!-- Header -->
+    <div class="header text-center mb-6 relative w-full h-32 flex flex-col items-center justify-center">
+      <div class="logo-container relative w-12 h-12 sm:w-14 sm:h-14 mb-4">
+        <div class="atom-orbit absolute inset-0 border border-blue-400 rounded-full"></div>
+        <div class="atom-orbit absolute inset-1 border border-purple-400 rounded-full"></div>
+        <div class="atom-orbit absolute inset-2 border border-cyan-400 rounded-full"></div>
+        <div class="electron bg-blue-500" style="top:1rem; left:50%;"></div>
+        <div class="electron bg-purple-500" style="bottom:1rem; left:50%; animation-delay:-0.7s;"></div>
+        <div class="electron bg-cyan-500" style="left:1rem; top:50%; animation-delay:-1.4s;"></div>
+        <div class="nucleus"></div>
+      </div>
+      <h2 class="title text-3xl font-bold text-white">Đăng Ký PhysicsLab</h2>
+      <p class="subtitle text-white/80 mt-1">Tạo tài khoản để khám phá thế giới vật lý</p>
+    </div>
+
+    <!-- Registration Form -->
+    <form id="registerForm" class="form space-y-4 relative">
+      <!-- Full Name -->
+      <div class="field relative">
+        <input
+          type="text"
+          id="fullname"
+          placeholder="Họ và tên"
+          class="input-field w-full px-4 py-3 rounded-lg"
+          autocomplete="name"
+        />
+        <div class="error-tooltip" id="err-fullname">
+          <i class="bx bx-error-circle"></i> Vui lòng nhập họ và tên
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="field relative">
+        <input
+          type="email"
+          id="email"
+          placeholder="Email"
+          class="input-field w-full px-4 py-3 rounded-lg"
+          autocomplete="email"
+        />
+        <div class="error-tooltip" id="err-email">
+          <i class="bx bx-error-circle"></i> Vui lòng nhập email hợp lệ
+        </div>
+      </div>
+
+      <!-- Username -->
+      <div class="field relative">
+        <input
+          type="text"
+          id="username"
+          placeholder="Username"
+          class="input-field w-full px-4 py-3 rounded-lg"
+          autocomplete="username"
+        />
+        <div class="error-tooltip" id="err-user">
+          <i class="bx bx-error-circle"></i> Vui lòng nhập username
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="field relative">
+        <input
+          type="password"
+          id="password"
+          placeholder="Mật khẩu"
+          class="input-field w-full px-4 py-3 pr-10 rounded-lg"
+        />
+        <button
+          type="button"
+          id="togglePassword"
+          class="toggle-btn absolute top-3 right-3 text-white/60 hover:text-white"
+        >👁️</button>
+        <div class="error-tooltip" id="err-pass">
+          <i class="bx bx-error-circle"></i> Vui lòng nhập mật khẩu
+        </div>
+      </div>
+
+      <!-- Confirm Password -->
+      <div class="field relative">
+        <input
+          type="password"
+          id="confirmPassword"
+          placeholder="Xác nhận mật khẩu"
+          class="input-field w-full px-4 py-3 pr-10 rounded-lg"
+        />
+        <button
+          type="button"
+          id="toggleConfirm"
+          class="toggle-btn absolute top-3 right-3 text-white/60 hover:text-white"
+        >👁️</button>
+        <div class="error-tooltip" id="err-confirm">
+          <i class="bx bx-error-circle"></i> Mật khẩu xác nhận không khớp
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <button
+        type="submit"
+        class="btn-login w-full py-3 px-6 rounded-lg text-white font-semibold text-lg"
+      >
+        Đăng ký
+      </button>
+    </form>
+
+    <!-- Link to Login -->
+    <div class="link-login mt-6 text-center text-white/80">
+      <p>
+        Đã có tài khoản?
+        <a href="login.html" class="text-white underline hover:text-white/70">Đăng nhập</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">
+    <i class="bx bx-check-circle text-2xl"></i>
+    <span id="toast-msg" class="ml-2"></span>
+  </div>
+
+  <!-- Registration Script -->
+  <script src="../js/register.js"></script>
+</body>
+</html>

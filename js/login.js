@@ -1,118 +1,72 @@
-document.getElementById('togglePassword').addEventListener('click', function(){
-  const pw = document.getElementById('password');
-  pw.type = pw.type === 'password' ? 'text' : 'password';
-  this.textContent = pw.type === 'password' ? '👁️' : '🙈';
-});
+(() => {
+  const form       = document.getElementById('loginForm');
+  const identifier = document.getElementById('username');
+  const password   = document.getElementById('password');
+  const togglePw   = document.getElementById('togglePassword');
+  const toast      = document.getElementById('toast');
+  const toastMsg   = document.getElementById('toast-msg');
 
-const DEMO_USER = 'demo@physicslab.test';
-const DEMO_PASS = 'Demo1234';
+  // Toggle password visibility
+  togglePw.addEventListener('click', () => {
+    password.type = password.type === 'password' ? 'text' : 'password';
+  });
 
-// === Toast helper ===
-/**
- * Hiện toast notification
- @param {string} message Nội dung
- @param {'success'|'error'} type Loại toast
- @param {number} duration Thời gian (ms) trước khi ẩn
- @param {Function} callback Hàm gọi sau khi toast ẩn xong
- */
-function showToast(message, type = 'success', duration = 2000, callback = null) {
-  let toast = document.getElementById('toast');
-  let icon = toast.querySelector('i');
-  let text = toast.querySelector('#toast-msg');
-
-  toast.className = 'toast';
-  toast.classList.add(type);
-  icon.className = type === 'success'
-    ? 'bx bx-check-circle text-2xl'
-    : 'bx bx-error-circle text-2xl';
-  text.textContent = message;
-
-  toast.classList.add('show');
-
-  setTimeout(() => {
-    toast.classList.remove('show');
-    if (callback) callback();
-  }, duration);
-}
-
-function showError(id) {
-  const tip = document.getElementById(id);
-  tip.classList.add('show');
-  setTimeout(() => tip.classList.remove('show'), 2000);
-}
-
-document.getElementById('loginForm').addEventListener('submit', function(e){
-  e.preventDefault();
-  const u = document.getElementById('username').value.trim();
-  const p = document.getElementById('password').value;
-
-  if (!u) {
-    showError('err-user');
-    return;
-  }
-  if (!p) {
-    showError('err-pass');
-    return;
+  // Show tooltip error for a given element ID
+  function showError(id) {
+    const tip = document.getElementById(id);
+    tip.classList.add('show');
+    setTimeout(() => tip.classList.remove('show'), 2000);
   }
 
-  // demo-login check
-  if (u === DEMO_USER && p === DEMO_PASS) {
-    showToast('Đăng nhập thành công!', 'success', 1500, () => {
-      window.location.href = 'homecourse.html';
-    });
-  } else {
-    showToast('Sai email hoặc mật khẩu.', 'error');
-  }
-});
+  // Handle form submission
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-setInterval(() => {
-  const p = document.createElement('div');
-  p.className = 'gravity-particle';
-  p.style.left = Math.random() * 100 + '%';
-  document.body.appendChild(p);
-  setTimeout(() => p.remove(), 3000);
-}, 1500);
+    // Client-side validation
+    if (!identifier.value.trim())      return showError('err-user');
+    if (!password.value)               return showError('err-pass');
 
-setInterval(() => {
-  const p = document.createElement('div');
-  p.style.cssText =
-    'position:absolute;width:4px;height:4px;background:rgba(255,255,255,0.6);' +
-    'border-radius:50%;left:' + (Math.random() * 100) + '%;top:100%;' +
-    'animation:floatUp 4s linear forwards;';
-  document.body.appendChild(p);
-  setTimeout(() => p.remove(), 4000);
-}, 2000);
+    const payload = {
+      identifier: identifier.value.trim(),
+      password:   password.value
+    };
 
-document.querySelector('.login-card').addEventListener('mouseenter', function(){
-  for (let i = 0; i < 5; i++){
-    setTimeout(() => {
-      const b = document.createElement('div');
-      const dx = (Math.random() * 2 - 1) * 100;
-      const dy = (Math.random() * 2 - 1) * 100;
-      b.style.cssText =
-        `position:absolute;width:8px;height:8px;
-         background:radial-gradient(circle,#fff,#ff6b6b);
-         border-radius:50%;top:50%;left:50%;
-         transform:translate(-50%,-50%);
-         animation: energyBurst 1s ease-out forwards;
-         --dx:${dx}px; --dy:${dy}px; z-index:1000;`;
-      this.appendChild(b);
-      setTimeout(() => b.remove(), 1000);
-    }, i * 100);
-  }
-});
+    try {
+      // Demo with JSONPlaceholder (luôn trả về 201)
+      const res = await fetch('https://jsonplaceholder.typicode.com/posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
 
-const st = document.createElement('style');
-st.textContent = `
-  @keyframes energyBurst {
-    0% { transform:translate(-50%,-50%) scale(0); opacity:1; }
-    100% {
-      transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(3);
-      opacity:0;
+      let errorMsg = 'Đăng nhập thất bại';
+      if (!res.ok) {
+        try {
+          const data = await res.json();
+          if (data.message) errorMsg = data.message;
+        } catch {
+          // Không phải JSON → giữ thông báo chung
+        }
+        throw new Error(errorMsg);
+      }
+
+      // Lấy response JSON (nếu cần)
+      let data = {};
+      try { data = await res.json(); } catch {}
+
+      // Lưu tên người dùng để sử dụng cho dropdown
+      // Demo: dùng chính identifier làm tên
+      localStorage.setItem('userFullname', identifier.value.trim());
+
+      // Thông báo thành công
+      toastMsg.textContent = 'Đăng nhập thành công!';
+      toast.classList.add('show');
+
+      // Redirect đến dashboard sau 1s
+      setTimeout(() => window.location.href = 'homecourse.html', 1000);
+    } catch (error) {
+      toastMsg.textContent = error.message;
+      toast.classList.add('show');
     }
-  }
-  @keyframes floatUp {
-    to { transform:translateY(-100vh) rotate(360deg); opacity:0; }
-  }
-`;
-document.head.appendChild(st);
+  });
+})();
