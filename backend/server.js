@@ -7,7 +7,6 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import 'dotenv/config';
 
-// ====== Config ======
 const PORT = process.env.PORT || 4000;
 const MONGO_URI = process.env.MONGO_URI;
 if (!MONGO_URI) {
@@ -15,18 +14,15 @@ if (!MONGO_URI) {
   process.exit(1);
 }
 
-// ====== Path helpers ======
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
-const ROOT_DIR   = path.join(__dirname, '..'); // gốc dự án
+const ROOT_DIR   = path.join(__dirname, '..'); 
 
-// ====== App init ======
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
 
-// ====== Mongoose Schema/Model ======
 const quizSchema = new mongoose.Schema({
   title: String,
   subject: String,
@@ -36,7 +32,6 @@ const quizSchema = new mongoose.Schema({
 
 const Quiz = mongoose.model('Quiz', quizSchema);
 
-// ====== APIs ======
 app.get('/api/quizzes', async (_req, res) => {
   try {
     const docs = await Quiz.find().sort({ createdAt: 1 }).lean();
@@ -60,7 +55,6 @@ app.get('/api/quizzes/:id', async (req, res) => {
   }
 });
 
-// DEBUG endpoint
 app.get('/api/__debug', async (_req, res) => {
   try {
     const dbName = mongoose.connection.name;
@@ -76,11 +70,9 @@ app.get('/api/__debug', async (_req, res) => {
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
-// ====== Static files ======
-// Serve EVERYTHING from root for simplicity
+
 app.use(express.static(ROOT_DIR));
 
-// Explicit shortcuts
 app.get('/', (_req, res) => {
   res.sendFile(path.join(ROOT_DIR, 'index.html'));
 });
@@ -88,14 +80,7 @@ app.get('/index.html', (_req, res) => {
   res.sendFile(path.join(ROOT_DIR, 'index.html'));
 });
 
-// If you want SPA fallback (optional):
-// put AFTER all API routes & static
-// app.get('*', (req, res, next) => {
-//   if (req.path.startsWith('/api/')) return next(); // don't hijack API
-//   res.sendFile(path.join(ROOT_DIR, 'index.html'));
-// });
 
-// ====== Boot ======
 (async () => {
   try {
     await mongoose.connect(MONGO_URI, { dbName: 'ChuongHoc' });
